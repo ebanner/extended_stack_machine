@@ -3,4 +3,7 @@ from C++ to Java.  I'm none too familiar with porting, so this will most likely
 be an entire rewrite of one Dr. Timothy V. Fossum's code.  This is not to say I
 will not take Dr. Fossum's code as inspiration--quite the contrary in fact.
 
+Along with implementing Dr. Fossum's stack-based machine emulator to Java,
+there will also be a GUI frontend on top of it.
+
 So let's get started!

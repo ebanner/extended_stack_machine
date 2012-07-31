@@ -1,0 +1,6 @@
+This project entails me, Edward Banner, porting a stack-based machine emulator
+from C++ to Java.  I'm none too familiar with porting, so this will most likely
+be an entire rewrite of one Dr. Timothy V. Fossum's code.  This is not to say I
+will not take Dr. Fossum's code as inspiration--quite the contrary in fact.
+
+So let's get started!

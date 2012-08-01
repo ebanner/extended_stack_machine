@@ -1,22 +1,38 @@
+import java.util.EmptyStackException;
+
 public class Stack {
 
-    public int sp = 0;  /* assume stack is full for now and that sp is not
+    public int sp;  /* assume stack is full for now and that sp is not
                            contained on the stack */
     public int pc;  /* program counter */
     public int[] stack;
-    public int size;
+    public int height;
 
-    public Stack(int size) {
-        this.stack = new int[size];  /* create the stack with specified size */
-        this.size = size;
+    public Stack(int height) {
+        this.sp = height;
+        this.stack = new int[height];  /* create the stack with specified height */
+        this.height = height;
     }
 
     public void push(int val) {
-        this.stack[--sp] = val;
+        if (sp <= 2) {  /* full stack */
+            System.err.println("Can't push another value--this would overwrite PC.  Exiting");
+            System.exit(1);
+        } else {
+            this.stack[--sp] = val;
+        }
     }
 
     public int pop() {
-        return this.stack[sp++];
+        if (sp >= height) {  /* empty stack */
+            System.err.println("Can't pop--empty stack.  Exiting");
+            throw new EmptyStackException();  /* need to throw an exception
+                                                 because Java complains that
+                                                 we're not returning anything
+                                                 */
+        } else {
+            return this.stack[sp++];
+        }
     }
 
     public String toString() {
@@ -24,8 +40,11 @@ public class Stack {
         String s = new String();
         String temp;
 
-        while (sp < this.size) {
-            temp = "" + this.pop() + '\n';
+        for (int pointer = height-1; pointer >= sp; pointer--) { /* start from the
+                                                              top of the stack
+                                                              and work your way
+                                                              down to sp */
+            temp = "" + stack[pointer] + '\n';
             s += temp;
         }
 

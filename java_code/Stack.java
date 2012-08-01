@@ -25,11 +25,10 @@ public class Stack {
 
     public int pop() {
         if (sp >= height) {  /* empty stack */
-            System.err.println("Can't pop--empty stack.  Exiting");
             throw new EmptyStackException();  /* need to throw an exception
                                                  because Java complains that
                                                  we're not returning anything
-                                                 */
+                                                 if we just quit */
         } else {
             return this.stack[sp++];
         }

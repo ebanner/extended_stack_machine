@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 
 public class Input {
 
+    /* this variable `stack' can never be assigned to anything else */
+    public static final Stack stack = new Stack(16000);  
+
     public static void main(String[] args) throws IOException {
 
         Scanner sc = null;
@@ -21,13 +24,19 @@ public class Input {
         } finally {
             sc.close();
         }
+
+        System.out.println(stack);
     }
 
     public static void executeInstruction(String instr) {
+
+        instr = instr.trim();  /* remove leading & trailing whitespace from
+                                  current instruction */
         if (instr.equals("BKPT")) {
             pass(instr);
         } else if (Pattern.matches("PUSH (\\d+)", instr)) {
-            pass(instr);
+            /* messy, horrible--but a beautiful line of code */
+            stack.push(stack.getContents(Integer.parseInt(instr.split(" ")[1])));
         } else if (Pattern.matches("PUSHV (\\d+)", instr)) {
             pass(instr);
         } else if (instr.equals("PUSHS")) {

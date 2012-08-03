@@ -40,18 +40,19 @@ public class Stack {
         return stack[addr];
     }
 
+    public void putContents(int val, int addr) {
+        /* insert val at addr on the stack */
+        stack[addr] = val;
+    }
+
     public String toString() { /* prints out the stack much like how our brains
                                   imagine what a stack looks like */
         String s = new String();
         String temp;
 
-        for (int pointer = height-1; pointer >= sp; pointer--) { /* start from
-                                                                    the top of
-                                                                    the stack
-                                                                    and don't
-                                                                    stop until
-                                                                    you get
-                                                                    past sp */
+        for (int pointer = height-1; pointer > 0; pointer--) { 
+            /* start from the top of the stack and don't stop until you get
+             * past sp */
             temp = "" + stack[pointer] + '\n';
             s += temp;
         }

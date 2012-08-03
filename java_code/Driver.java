@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class Input {
+public class Driver {
 
     /* this variable `stack' can never be assigned to anything else */
     public static final Stack stack = new Stack(50);  
@@ -13,8 +13,10 @@ public class Input {
     /* instrCount increments after every instruction is parsed, so we know where to put
      * the opcode--starts at the first instruction */
     public static int instrCount = pc;
-    public static int addr;
-    public static int value;
+    /* values used to help compute the values of instructions */
+    public static int addr, value, temp, t1, t2;
+    public static boolean TRACE;
+    public static Scanner in = null;
 
     public static void main(String[] args) throws IOException {
 
@@ -23,6 +25,7 @@ public class Input {
 
         try {
             sc = new Scanner(new BufferedReader(new FileReader("prog.esm")));
+            in = new Scanner(System.in);
 
             while (sc.hasNextLine()) {
                 /* grab the next instruction */
@@ -55,148 +58,192 @@ public class Input {
             stack.push(value);
         } else if (instr.equals("PUSHS")) {  /* 3 */
             /* PUSHS       --> push(*pop()); */
-            value = stack.pop();
-            stack.push(stack.getContents(value));
+            stack.push(stack.getContents(stack.pop()));
         } else if (instr.equals("INDIR")) {  /* 3 */
             /* INDIR       --> is a synonym for PUSHS */
-            value = stack.pop();
-            stack.push(stack.getContents(value));
         } else if (Pattern.matches("PUSHX (\\d+)", instr)) {  /* 4 */
             /* PUSHX addr  --> push(*(pop()+addr)); */
-            pass(instr);
+            addr = getNum(instr);
+            stack.push(stack.getContents(stack.pop()+addr));
         } else if (Pattern.matches("POP (\\d+)", instr)) {  /* 5 */
             /* POP addr    --> *addr=pop(); */
-            pass(instr);
+            addr = getNum(instr);
+            stack.putContents(addr, stack.pop());
         } else if (instr.equals("POPS")) {  /* 6 */
             /* POPS        --> temp=pop(); *pop()=temp; */
-            pass(instr);
+            temp = stack.pop();
+            stack.putContents(stack.pop(), temp);
         } else if (Pattern.matches("POPX (\\d+)", instr)) {  /* 7 */
             /* POPX addr   --> temp=pop(); *(pop()+addr)=temp; */
-            pass(instr);
+            temp = stack.pop();
+            addr = getNum(instr);
+            stack.putContents(stack.pop()+addr, temp);
         } else if (instr.equals("DUPL")) {  /* 8 */
             /* DUPL        --> push(*SP); */
-            pass(instr);
+            stack.push(stack.getContents(stack.SP));
         } else if (instr.equals("SWAP")) {  /* 9 */
             /* SWAP        --> temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
-            pass(instr);
+            temp = stack.getContents(stack.SP);
+            stack.putContents(stack.SP, stack.getContents(stack.SP+1));
+            stack.putContents(stack.SP+1, temp);
         } else if (instr.equals("OVER")) {  /* 10 */
             /* OVER        --> push(*(SP+1)); */
-            pass(instr);
+            stack.push(stack.getContents(stack.SP+1));
         } else if (instr.equals("DROP")) {  /* 11 */
             /* DROP        --> SP++; */
-            pass(instr);
+            stack.SP++;
         } else if (instr.equals("ROT")) {  /* 12 */
             /* ROT         --> temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1);
                                 *(SP+1)=temp; */
-            pass(instr);
+            temp = stack.getContents(stack.SP);
+            stack.putContents(stack.SP, stack.getContents(stack.SP+2));
+            stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
+            stack.putContents(stack.SP+1, temp);
         } else if (instr.equals("TSTLT")) {  /* 13 */
             /* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (temp < 0) ? 1 : 0 );
         } else if (instr.equals("TSTLE")) {  /* 14 */
             /* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (temp <= 0) ? 1 : 0 );
         } else if (instr.equals("TSTGT")) {  /* 15 */
             /* TSTGT       --> temp=pop(); push((temp>0)?1:0); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (temp > 0) ? 1 : 0 );
         } else if (instr.equals("TSTGE")) {  /* 16 */
             /* TSTGE       --> temp=pop(); push((temp>=0)?1:0); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (temp >= 0) ? 1 : 0 );
         } else if (instr.equals("TSTEQ")) {  /* 17 */
             /* TSTEQ       --> temp=pop(); push((temp==0)?1:0); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (temp == 0) ? 1 : 0);
         } else if (instr.equals("TSTNE")) {  /* 18 */
             /* TSTNE       --> temp=pop(); push((temp!=0)?1:0); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (temp != 0) ? 1 : 0 );
         } else if (Pattern.matches("BNE (\\d+)", instr)) {  /* 19 */
             /* BNE addr    --> if (pop()!=0) PC=addr; */
-            pass(instr);
+            addr = getNum(instr);
+            if (stack.pop() != 0)
+                stack.PC = addr;
         } else if (Pattern.matches("BT (\\d+)", instr)) {  /* 19 */
             /* BT addr     --> is a synonym for BNE */
-            pass(instr);
+            addr = getNum(instr);
+            if (stack.pop() != 0)
+                stack.PC = addr;
         } else if (Pattern.matches("BEQ (\\d+)", instr)) {  /* 20 */
             /* BEQ addr    --> if (pop()==0) PC=addr; */
-            pass(instr);
+            addr = getNum(instr);
+            if (stack.pop() == 0)
+                stack.PC = addr;
         } else if (Pattern.matches("BF (\\d+)", instr)) {  /* 20 */
             /* BR addr     --> is a synonym for BEQ */
-            pass(instr);
+            addr = getNum(instr);
+            if (stack.pop() == 0)
+                stack.PC = addr;
         } else if (Pattern.matches("BR (\\d+)", instr)) {  /* 21 */
             /* BR addr     --> PC=addr; */
-            pass(instr);
+            addr = getNum(instr);
+            stack.PC = addr;
         } else if (Pattern.matches("CALL (\\d+)", instr)) {  /* 22 */
             /* CALL addr   --> push(PC); PC=addr; */
-            pass(instr);
+            stack.push(stack.PC);
+            addr = getNum(instr);
+            stack.PC = addr;
         } else if (instr.equals("CALLS")) {  /* 23 */
             /* CALLS       --> temp=pop(); push(PC); PC=temp; */
-            pass(instr);
+            temp = stack.pop();
+            stack.push(stack.PC);
+            stack.PC = temp;
         } else if (instr.equals("RETURN")) {  /* 24 */
             /* RETURN      --> PC=pop(); */
-            pass(instr);
+            stack.PC = stack.pop();
         } else if (instr.equals("POPPC")) {  /* 24 */
             /* POPPC       --> is a synonym for RETURN */
-            pass(instr);
+            stack.PC = stack.pop();
         } else if (Pattern.matches("RETN (\\d+)", instr)) {  /* 25 */
             /* RETN value  --> temp=pop(); SP += value; PC=temp; */
-            pass(instr);
+            temp = stack.pop();
+            value = getNum(instr);
+            stack.SP += value;
+            stack.PC = temp;
         } else if (instr.equals("HALT")) {  /* 26 */
             /* HALT        --> halt program execution */
-            pass(instr);
+            System.out.println("Halting program execution");
+            System.exit(0);
         } else if (instr.equals("ADD")) {  /* 27 */
             /* ADD         --> temp=pop(); push( pop() + temp ); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push(stack.pop()+temp);
         } else if (instr.equals("SUB")) {  /* 28 */
             /* SUB         --> temp=pop(); push( pop() - temp ); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push(stack.pop()-temp);
         } else if (instr.equals("MUL")) {  /* 29 */
             /* MUL         --> temp=pop(); push( pop() * temp ); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push(stack.pop() * temp);
         } else if (instr.equals("DIV")) {  /* 30 */
             /* DIV         --> temp=pop(); push( pop() / temp ); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push(stack.pop() / temp);
         } else if (instr.equals("MOD")) {  /* 31 */
             /* MOD         --> temp=pop(); push( pop() % temp ); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push(stack.pop() % temp);
         } else if (instr.equals("OR")) {  /* 32 */
             /* OR          --> temp=pop(); push( pop() || temp ); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (stack.pop() != 0 || temp != 0) ? 1 : 0 );
         } else if (instr.equals("AND")) {  /* 33 */
             /* AND         --> temp=pop(); push( pop() && temp ); */
-            pass(instr);
+            temp = stack.pop();
+            stack.push( (stack.pop() != 0 && temp != 0) ? 1 : 0 );
         } else if (instr.equals("XOR")) {  /* 34 */
             /* XOR         --> temp=pop(); push( pop() xor temp ); [see below] */
-            pass(instr);
+            t1 = stack.pop();
+            t2 = stack.pop();
+            stack.push( (!(t1 != 0 && t2 != 0)
+                    && (t1 != 0 || t2 != 0)) ? 1 : 0 );
         } else if (instr.equals("NOT")) {  /* 35 */
             /* NOT         --> push( !pop() ); */
-            pass(instr);
+            stack.push( !(stack.pop() != 0) ? 1 : 0 );
         } else if (instr.equals("NEG")) {  /* 36 */
             /* NEG         --> push( -pop() ); */
-            pass(instr);
+            stack.push( -1*stack.pop());
         } else if (Pattern.matches("ADDX (\\d+)", instr)) {  /* 37 */
             /* ADDX addr   --> push( pop()+addr ); */
-            pass(instr);
+            addr = getNum(instr);
+            stack.push(stack.pop() + addr);
         } else if (Pattern.matches("ADDSP (\\d+)", instr)) {  /* 38 */
             /* ADDSP value --> SP += value; */
-            pass(instr);
+            value = getNum(instr);
+            stack.SP += value;
         } else if (instr.equals("READ")) {  /* 39 */
             /* READ        --> read temp in %d format; push(temp); */
-            pass(instr);
+            temp = in.nextInt();
         } else if (instr.equals("PRINT")) {  /* 40 */
             /* PRINT       --> print pop() in %d format */
-            pass(instr);
+            System.out.println(stack.pop());
         } else if (instr.equals("READC")) {  /* 41 */
             /* READC       --> read temp in %c format; push(temp); */
-            pass(instr);
+            temp = in.nextLine().charAt(0);
+            stack.push(temp);
         } else if (instr.equals("PRINTC")) {  /* 42 */
             /* PRINTC      --> print pop() in %c format */
-            pass(instr);
+            System.out.println((char)stack.pop());
         } else if (instr.equals("TRON")) {  /* 43 */
             /* TRON        --> turn on trace feature */
-            pass(instr);
+            TRACE = true;
         } else if (instr.equals("TROFF")) {  /* 44 */
             /* TROFF       --> turn off trace feature */
-            pass(instr);
+            TRACE = false;
         } else if (instr.equals("DUMP")) {  /* 45 */
             /* DUMP        --> temp=pop(); dump memory from pop() to temp; */
-            pass(instr);
+            temp = stack.pop();
+            dump(stack.pop(), temp);
         }
     }
 
@@ -204,7 +251,12 @@ public class Input {
         System.out.println("/\\/" + instr + "\\/\\");
     }
 
-    public static void getNum(String instr) {
+    public static int getNum(String instr) {
         return Integer.parseInt(instr.split(" ")[1]);
+    }
+
+    public static void dump(int pop, int temp) {
+        for (; pop >= temp; pop--)
+            System.out.println(stack.getContents(pop));
     }
 }

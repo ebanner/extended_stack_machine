@@ -23,14 +23,22 @@ public class Driver {
         Scanner sc = null;
         String instruction = null;
 
+        for (int i = 25; i <= 45; i++)
+            stack.push(i);
+
         try {
-            sc = new Scanner(new BufferedReader(new FileReader("prog.esm")));
+            sc = new Scanner(new BufferedReader(new FileReader("test.esm")));
             in = new Scanner(System.in);
 
             while (sc.hasNextLine()) {
-                /* grab the next instruction */
+                // grab the next instruction
                 instruction = sc.nextLine();
-                /* execute the next instruction */
+                /* esm only supports entire commented lines at this point */
+                if (Pattern.matches("^;.*", instruction)) {
+                    continue;
+                }
+                System.out.println(instruction);
+                // execute the next instruction
                 executeInstruction(instruction);
             }
         } finally {
@@ -38,6 +46,7 @@ public class Driver {
         }
 
         System.out.println(stack);
+        System.out.println("SP: " + stack.SP);
     }
 
     public static void executeInstruction(String instr) {
@@ -61,6 +70,7 @@ public class Driver {
             stack.push(stack.getContents(stack.pop()));
         } else if (instr.equals("INDIR")) {  /* 3 */
             /* INDIR       --> is a synonym for PUSHS */
+            stack.push(stack.getContents(stack.pop()));
         } else if (Pattern.matches("PUSHX (\\d+)", instr)) {  /* 4 */
             /* PUSHX addr  --> push(*(pop()+addr)); */
             addr = getNum(instr);

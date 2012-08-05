@@ -45,8 +45,10 @@ public class Driver {
             sc.close();
         }
 
-        System.out.println(stack);
-        System.out.println("SP: " + stack.SP);
+        //System.out.println(stack);
+        stack.printMe();
+        /*System.out.println();
+        System.out.println("SP: " + stack.SP);*/
     }
 
     public static void executeInstruction(String instr) {

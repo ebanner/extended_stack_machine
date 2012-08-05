@@ -46,18 +46,20 @@ public class Stack {
         stack[addr] = val;
     }
 
-    public String toString() { /* prints out the stack much like how our brains
+    public void printMe() { /* prints out the stack much like how our brains
                                   imagine what a stack looks like */
         String s = new String();
         String temp;
 
-        for (int pointer = height-1; pointer > 0; pointer--) { 
+        for (int pointer = height-1; pointer >= 0; pointer--) { 
             /* start from the top of the stack and don't stop until you get
              * past SP */
-            temp = "" + stack[pointer] + '\n';
-            s += temp;
+            /* print out an arrow w/ SP, so we can see where SP is */
+            System.out.format("%2d| %2s\n", pointer, pointer == SP ? stack[pointer] + " <-- SP" : stack[pointer]);
+            //temp = "" + stack[pointer] + (pointer == SP ? " <-- SP" : "") + '\n';
+            //s += temp;
         }
 
-        return s;
+        //return s;
     }
 }

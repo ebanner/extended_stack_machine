@@ -9,10 +9,10 @@ public class Driver {
     /* this variable `stack' can never be assigned to anything else */
     public static final Stack stack = new Stack(50);  
     /* assume for now that opcodes start at position 16 */
-    public static int pc = 16;
+    public static int PC = 16;
     /* instrCount increments after every instruction is parsed, so we know where to put
      * the opcode--starts at the first instruction */
-    public static int instrCount = pc;
+    public static int instrCount = PC;
     /* values used to help compute the values of instructions */
     public static int addr, value, temp, t1, t2;
     public static boolean TRACE;
@@ -52,6 +52,7 @@ public class Driver {
 
         /* reveal the stack at the end for a great surprise! */
         stack.reveal();
+        System.out.format("%nPC: %d  temp: %d%n", PC, temp);
     }
 
     public static void executeInstruction(String instr) {
@@ -142,48 +143,48 @@ public class Driver {
             /* BNE addr    --> if (pop()!=0) PC=addr; */
             addr = getNum(instr);
             if (stack.pop() != 0)
-                stack.PC = addr;
+                PC = addr;
         } else if (Pattern.matches("BT (\\d+)", instr)) {  /* 19 */
             /* BT addr     --> is a synonym for BNE */
             addr = getNum(instr);
             if (stack.pop() != 0)
-                stack.PC = addr;
+                PC = addr;
         } else if (Pattern.matches("BEQ (\\d+)", instr)) {  /* 20 */
             /* BEQ addr    --> if (pop()==0) PC=addr; */
             addr = getNum(instr);
             if (stack.pop() == 0)
-                stack.PC = addr;
+                PC = addr;
         } else if (Pattern.matches("BF (\\d+)", instr)) {  /* 20 */
             /* BF addr     --> is a synonym for BEQ */
             addr = getNum(instr);
             if (stack.pop() == 0)
-                stack.PC = addr;
+                PC = addr;
         } else if (Pattern.matches("BR (\\d+)", instr)) {  /* 21 */
             /* BR addr     --> PC=addr; */
             addr = getNum(instr);
-            stack.PC = addr;
+            PC = addr;
         } else if (Pattern.matches("CALL (\\d+)", instr)) {  /* 22 */
             /* CALL addr   --> push(PC); PC=addr; */
-            stack.push(stack.PC);
+            stack.push(PC);
             addr = getNum(instr);
-            stack.PC = addr;
+            PC = addr;
         } else if (instr.equals("CALLS")) {  /* 23 */
             /* CALLS       --> temp=pop(); push(PC); PC=temp; */
             temp = stack.pop();
-            stack.push(stack.PC);
-            stack.PC = temp;
+            stack.push(PC);
+            PC = temp;
         } else if (instr.equals("RETURN")) {  /* 24 */
             /* RETURN      --> PC=pop(); */
-            stack.PC = stack.pop();
+            PC = stack.pop();
         } else if (instr.equals("POPPC")) {  /* 24 */
             /* POPPC       --> is a synonym for RETURN */
-            stack.PC = stack.pop();
+            PC = stack.pop();
         } else if (Pattern.matches("RETN (\\d+)", instr)) {  /* 25 */
             /* RETN value  --> temp=pop(); SP += value; PC=temp; */
             temp = stack.pop();
             value = getNum(instr);
             stack.SP += value;
-            stack.PC = temp;
+            PC = temp;
         } else if (instr.equals("HALT")) {  /* 26 */
             /* HALT        --> halt program execution */
             System.out.println("Halting program execution");

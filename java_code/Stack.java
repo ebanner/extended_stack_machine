@@ -1,14 +1,14 @@
 /* This class represents a stack, although stack purists will disagree.  Let me
  * explain:  A true stack is a data structure in which it is only possible to
  * push and pop values.  This stack supports pushing and popping, but also
- * allows the user to access the stack pointer (SP) value, as well providing
- * the user with the ability to insert values wherever they would like
- * (putContents() method), along with allowing the user to grab values from
- * anywhere on the stack (getContents() method).  These methods made
+ * allows the user to access the stack pointer (SP) value, along with providing
+ * the user the ability to insert values wherever they would like
+ * (through the putContents() method).  The user is also free to grab values from
+ * anywhere on the stack (through the getContents() method).  These methods made
  * implementing the Stack Machine Emulator far easier. This stack class also
  * provides a reveal() method, in which each element in the stack is printed
- * along-side its location (the stack grows from the top down--the top value is
- * the `highest' location in the stack */
+ * alongside its location.  The stack grows downward, with the top location
+ * identified as position `height-1' and the bottom position `0'.
 
 import java.util.EmptyStackException;
 

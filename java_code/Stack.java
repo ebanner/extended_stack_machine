@@ -58,9 +58,6 @@ public class Stack {
     public void reveal() { 
         /* prints out the stack much like how our brains imagine what a stack
          * looks like */
-        String s = new String();
-        String temp;
-
         for (int pointer = height-1; pointer >= 0; pointer--) { 
             /* start from the top of the stack and don't stop until you get
              * past SP */

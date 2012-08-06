@@ -25,7 +25,8 @@ public class Driver {
 
         for (int i = 25; i < 45; i++)
             stack.push(i-4);
-        //stack.putContents(30, 0);
+        //stack.putContents(31, 1);
+        //stack.putContents(30, 35);
 
         try {
             sc = new Scanner(new BufferedReader(new FileReader("test.esm")));
@@ -221,8 +222,7 @@ public class Driver {
             /* XOR         --> temp=pop(); push( pop() xor temp ); [see below] */
             t1 = stack.pop();
             t2 = stack.pop();
-            stack.push( (!(t1 != 0 && t2 != 0)
-                    && (t1 != 0 || t2 != 0)) ? 1 : 0 );
+            stack.push( (!(t1 != 0 && t2 != 0) && (t1 != 0 || t2 != 0)) ? 1 : 0 );
         } else if (instr.equals("NOT")) {  /* 35 */
             /* NOT         --> push( !pop() ); */
             stack.push( !(stack.pop() != 0) ? 1 : 0 );
@@ -240,6 +240,7 @@ public class Driver {
         } else if (instr.equals("READ")) {  /* 39 */
             /* READ        --> read temp in %d format; push(temp); */
             temp = in.nextInt();
+            stack.push(temp);
         } else if (instr.equals("PRINT")) {  /* 40 */
             /* PRINT       --> print pop() in %d format */
             System.out.println(stack.pop());

@@ -8,7 +8,7 @@
  * implementing the Stack Machine Emulator far easier. This stack class also
  * provides a reveal() method, in which each element in the stack is printed
  * alongside its location.  The stack grows downward, with the top location
- * identified as position `height-1' and the bottom position `0'.
+ * identified as position `height-1' and the bottom position `0'.*/
 
 import java.util.EmptyStackException;
 
@@ -64,7 +64,7 @@ public class Stack {
         for (int pointer = height-1; pointer >= 0; pointer--) { 
             /* start from the top of the stack and don't stop until you get
              * past SP */
-            System.out.format("%2d| %2s\n", pointer, (pointer == SP) ? stack[pointer] + " <-- SP" : stack[pointer]);
+            System.out.format("%2d| %2s%s\n", pointer, stack[pointer], (pointer == SP) ? " <-- SP" : "");
             /* the turnary part prints out an arrow that points to where SP
              * points */
         }

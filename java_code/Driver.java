@@ -23,8 +23,9 @@ public class Driver {
         Scanner sc = null;
         String instruction = null;
 
-        for (int i = 25; i <= 45; i++)
-            stack.push(i);
+        for (int i = 25; i < 45; i++)
+            stack.push(i-4);
+        //stack.putContents(30, 0);
 
         try {
             sc = new Scanner(new BufferedReader(new FileReader("test.esm")));
@@ -33,22 +34,24 @@ public class Driver {
             while (sc.hasNextLine()) {
                 // grab the next instruction
                 instruction = sc.nextLine();
-                /* esm only supports entire commented lines at this point */
+
                 if (Pattern.matches("^;.*", instruction)) {
+                    /* esm only supports entire commented lines at this point */
                     continue;
                 }
+
                 System.out.println(instruction);
                 // execute the next instruction
                 executeInstruction(instruction);
+                /* update SP on the stack */
+                stack.putContents(0, stack.SP);
             }
         } finally {
             sc.close();
         }
 
-        //System.out.println(stack);
-        stack.printMe();
-        /*System.out.println();
-        System.out.println("SP: " + stack.SP);*/
+        /* reveal the stack at the end for a great surprise! */
+        stack.reveal();
     }
 
     public static void executeInstruction(String instr) {
@@ -151,7 +154,7 @@ public class Driver {
             if (stack.pop() == 0)
                 stack.PC = addr;
         } else if (Pattern.matches("BF (\\d+)", instr)) {  /* 20 */
-            /* BR addr     --> is a synonym for BEQ */
+            /* BF addr     --> is a synonym for BEQ */
             addr = getNum(instr);
             if (stack.pop() == 0)
                 stack.PC = addr;

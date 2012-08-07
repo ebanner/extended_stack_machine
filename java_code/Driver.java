@@ -7,10 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.InputMismatchException;
 
+/* TODO: Support command line arguments:
+ *           - Base address
+ *       Test all opcodes to ensure they still work
+ *       Partial line commenting
+ *       Write some actual programs
+ *       GUI (!!)
+ */
+
 public class Driver {
 
-    /* stack is the master stack in the stack machine emulator */
-    public static final Stack stack = new Stack(100);  
+    /* this is *the* master stack in the stack machine emulator */
+    public static final Stack stack = new Stack(50);  
     /* assume for now that opcodes start at position 16 */
     public static int PC = 16;
     /* values used to help compute the values of instructions */
@@ -19,16 +27,19 @@ public class Driver {
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
     public static Scanner in = null;
-    /* map is used to map instruction address locations to their arguement */
-    public static Map<Integer, Integer> addrToArg = new HashMap<Integer, Integer>();
+    /* map is used to map opcode addresses to their arguement */
+    public static Map<Integer, Integer> opAddrToArg = 
+        new HashMap<Integer, Integer>();
 
     public static void main(String[] args) throws IOException {
 
         /* throw the opcodes onto the stack */
         initializeStack();
-        putTestValuesOnStack();
+
+        putTestValuesOnStack();  /* DEBUGGING */
 
         while (stack.getContents(PC) != HALT)
+            /* keep executing instructions until a HALT command is reached */
             executeInstruction(PC++);
 
         /* reveal the stack at the end for a great surprise! */
@@ -42,7 +53,7 @@ public class Driver {
 
         /* keep track of where the next position an opcode needs to go on the
          * stack */
-        int opAddr = 16;  /* just 16 until we support CLI options */
+        int nextFreeAddr = PC;  /* just 16 until we support CLI options */
         Scanner sc = null;
         String instruction = null;
 
@@ -59,7 +70,7 @@ public class Driver {
 
                 /* put the instruction's opcode on the stack so PC to read it
                  * later */
-                insertOpcode(opAddr, instruction);
+                insertOpcode(nextFreeAddr, instruction);
 
                 /* create a mapping between the location of the instruction and
                  * its possible argument so we can recall it later.
@@ -67,127 +78,128 @@ public class Driver {
                  * to look at is an opcode.  we need some way to remember that
                  * some of these opcodes have arguments we provided as users.
                  * if an opcode doesn't have an arguement, its arg is null */
-                addrToArg.put(opAddr, getArg(instruction));
+                opAddrToArg.put(nextFreeAddr, getArg(instruction));
 
-                /* point opAddr to the next free position on the stack to stick
+                /* point nextFreeAddr to the next free position on the stack to stick
                  * the next opcode */
-                opAddr++;
+                nextFreeAddr++;
             }
         } finally {
-            sc.close();
+            if (sc != null)
+                sc.close();
         }
     }
 
-    public static void insertOpcode(int opAddr, String instr) {
-        /* inserts the next opcode in the user's program into the next
-         * available opcode spot on the stack and returns the opcode of the
-         * instruction */
+    public static void insertOpcode(int nextFreeAddr, String instr) {
+        /* inserts the opcode of the next instruction in the user's program
+         * into the next available free loaction (growing upwards) */
 
         instr = instr.trim();  /* remove leading & trailing whitespace from
                                   current instruction */
         if (instr.equals("BKPT")) {
-            stack.putContents(opAddr, BKPT);
+            stack.putContents(nextFreeAddr, BKPT);
         } else if (Pattern.matches("PUSH (\\d+)", instr)) {
-            stack.putContents(opAddr, PUSH);
+            stack.putContents(nextFreeAddr, PUSH);
         } else if (Pattern.matches("PUSHV (\\d+)", instr)) {
-            stack.putContents(opAddr, PUSHV);
+            stack.putContents(nextFreeAddr, PUSHV);
         } else if (instr.equals("PUSHS")) {
-            stack.putContents(opAddr, PUSHS);
+            stack.putContents(nextFreeAddr, PUSHS);
         } else if (instr.equals("INDIR")) {
-            stack.putContents(opAddr, INDIR);
+            stack.putContents(nextFreeAddr, INDIR);
         } else if (Pattern.matches("PUSHX (\\d+)", instr)) {
-            stack.putContents(opAddr, PUSHX);
+            stack.putContents(nextFreeAddr, PUSHX);
         } else if (Pattern.matches("POP (\\d+)", instr)) {
-            stack.putContents(opAddr, POP);
+            stack.putContents(nextFreeAddr, POP);
         } else if (instr.equals("POPS")) {
-            stack.putContents(opAddr, POPS);
+            stack.putContents(nextFreeAddr, POPS);
         } else if (Pattern.matches("POPX (\\d+)", instr)) {
-            stack.putContents(opAddr, POPX);
+            stack.putContents(nextFreeAddr, POPX);
         } else if (instr.equals("DUPL")) {
-            stack.putContents(opAddr, DUPL);
+            stack.putContents(nextFreeAddr, DUPL);
         } else if (instr.equals("SWAP")) {
-            stack.putContents(opAddr, SWAP);
+            stack.putContents(nextFreeAddr, SWAP);
         } else if (instr.equals("OVER")) {
-            stack.putContents(opAddr, OVER);
+            stack.putContents(nextFreeAddr, OVER);
         } else if (instr.equals("DROP")) {
-            stack.putContents(opAddr, DROP);
+            stack.putContents(nextFreeAddr, DROP);
         } else if (instr.equals("ROT")) {
-            stack.putContents(opAddr, ROT);
+            stack.putContents(nextFreeAddr, ROT);
         } else if (instr.equals("TSTLT")) {
-            stack.putContents(opAddr, TSTLT);
+            stack.putContents(nextFreeAddr, TSTLT);
         } else if (instr.equals("TSTLE")) {
-            stack.putContents(opAddr, TSTLE);
+            stack.putContents(nextFreeAddr, TSTLE);
         } else if (instr.equals("TSTGT")) {
-            stack.putContents(opAddr, TSTGT);
+            stack.putContents(nextFreeAddr, TSTGT);
         } else if (instr.equals("TSTGE")) {
-            stack.putContents(opAddr, TSTGE);
+            stack.putContents(nextFreeAddr, TSTGE);
         } else if (instr.equals("TSTEQ")) {
-            stack.putContents(opAddr, TSTEQ);
+            stack.putContents(nextFreeAddr, TSTEQ);
         } else if (instr.equals("TSTNE")) {
-            stack.putContents(opAddr, TSTNE);
+            stack.putContents(nextFreeAddr, TSTNE);
         } else if (Pattern.matches("BNE (\\d+)", instr)) {
-            stack.putContents(opAddr, BNE);
+            stack.putContents(nextFreeAddr, BNE);
         } else if (Pattern.matches("BT (\\d+)", instr)) {
-            stack.putContents(opAddr, BT);
+            stack.putContents(nextFreeAddr, BT);
         } else if (Pattern.matches("BEQ (\\d+)", instr)) {
-            stack.putContents(opAddr, BEQ);
+            stack.putContents(nextFreeAddr, BEQ);
         } else if (Pattern.matches("BF (\\d+)", instr)) {
-            stack.putContents(opAddr, BF);
+            stack.putContents(nextFreeAddr, BF);
         } else if (Pattern.matches("BR (\\d+)", instr)) {
-            stack.putContents(opAddr, BR);
+            stack.putContents(nextFreeAddr, BR);
         } else if (Pattern.matches("CALL (\\d+)", instr)) {
-            stack.putContents(opAddr, CALL);
+            stack.putContents(nextFreeAddr, CALL);
         } else if (instr.equals("CALLS")) {
-            stack.putContents(opAddr, CALLS);
+            stack.putContents(nextFreeAddr, CALLS);
         } else if (instr.equals("RETURN")) {
-            stack.putContents(opAddr, RETURN);
+            stack.putContents(nextFreeAddr, RETURN);
         } else if (instr.equals("POPPC")) {
-            stack.putContents(opAddr, POPPC);
+            stack.putContents(nextFreeAddr, POPPC);
         } else if (Pattern.matches("RETN (\\d+)", instr)) {
-            stack.putContents(opAddr, RETN);
+            stack.putContents(nextFreeAddr, RETN);
         } else if (instr.equals("HALT")) {
-            stack.putContents(opAddr, HALT);
+            stack.putContents(nextFreeAddr, HALT);
         } else if (instr.equals("ADD")) {
-            stack.putContents(opAddr, ADD);
+            stack.putContents(nextFreeAddr, ADD);
         } else if (instr.equals("SUB")) {
-            stack.putContents(opAddr, SUB);
+            stack.putContents(nextFreeAddr, SUB);
         } else if (instr.equals("MUL")) {
-            stack.putContents(opAddr, MUL);
+            stack.putContents(nextFreeAddr, MUL);
         } else if (instr.equals("DIV")) {
-            stack.putContents(opAddr, DIV);
+            stack.putContents(nextFreeAddr, DIV);
         } else if (instr.equals("MOD")) {
-            stack.putContents(opAddr, MOD);
+            stack.putContents(nextFreeAddr, MOD);
         } else if (instr.equals("OR")) {
-            stack.putContents(opAddr, OR);
+            stack.putContents(nextFreeAddr, OR);
         } else if (instr.equals("AND")) {
-            stack.putContents(opAddr, AND);
+            stack.putContents(nextFreeAddr, AND);
         } else if (instr.equals("XOR")) {
-            stack.putContents(opAddr, XOR);
+            stack.putContents(nextFreeAddr, XOR);
         } else if (instr.equals("NOT")) {
-            stack.putContents(opAddr, NOT);
+            stack.putContents(nextFreeAddr, NOT);
         } else if (instr.equals("NEG")) {
-            stack.putContents(opAddr, NEG);
+            stack.putContents(nextFreeAddr, NEG);
         } else if (Pattern.matches("ADDX (\\d+)", instr)) {
-            stack.putContents(opAddr, ADDX);
+            stack.putContents(nextFreeAddr, ADDX);
         } else if (Pattern.matches("ADDSP (\\d+)", instr)) {
-            stack.putContents(opAddr, ADDSP);
+            stack.putContents(nextFreeAddr, ADDSP);
         } else if (instr.equals("READ")) {
-            stack.putContents(opAddr, READ);
+            stack.putContents(nextFreeAddr, READ);
         } else if (instr.equals("PRINT")) {
-            stack.putContents(opAddr, PRINT);
+            stack.putContents(nextFreeAddr, PRINT);
         } else if (instr.equals("READC")) {
-            stack.putContents(opAddr, READC);
+            stack.putContents(nextFreeAddr, READC);
         } else if (instr.equals("PRINTC")) {
-            stack.putContents(opAddr, PRINTC);
+            stack.putContents(nextFreeAddr, PRINTC);
         } else if (instr.equals("TRON")) {
-            stack.putContents(opAddr, TRON);
+            stack.putContents(nextFreeAddr, TRON);
         } else if (instr.equals("TROFF")) {
-            stack.putContents(opAddr, TROFF);
+            stack.putContents(nextFreeAddr, TROFF);
         } else if (instr.equals("DUMP")) {
-            stack.putContents(opAddr, DUMP);
-        } else
-            throw new InputMismatchException();
-
+            stack.putContents(nextFreeAddr, DUMP);
+        } else {
+            System.err.println("Invalid instruction--exiting.");
+            System.exit(1);
+        }
     }
 
     public static void executeInstruction(int PC) {
@@ -196,18 +208,17 @@ public class Driver {
 
         switch(opcode) {
             case BKPT:   // 0
-                /* BKPT        
-                 * unconditionally enter the sxx debugger */
+                 /* unconditionally enter the sxx debugger */
                 pass(BKPT);
                 break;
             case PUSH:   // 1
-                /* PUSH addr
-                * push(*addr); */
-                addr = addrToArg.get(PC);
+                /* push(*addr); */
+                addr = opAddrToArg.get(PC);
                 stack.push(stack.getContents(addr));
+                break;
             case PUSHV:  // 2
                 /* push(value); */
-                value = addrToArg.get(PC);
+                value = opAddrToArg.get(PC);
                 stack.push(value);
                 break;
             case PUSHS:  // 3
@@ -216,12 +227,12 @@ public class Driver {
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 stack.push(stack.getContents(stack.pop()+addr));
                 break;
             case POP:    // 5
                 /* *addr=pop(); */
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 stack.putContents(addr, stack.pop());
                 break;
             case POPS:   // 6
@@ -232,7 +243,7 @@ public class Driver {
             case POPX:   // 7
                 /* temp=pop(); *(pop()+addr)=temp; */
                 temp = stack.pop();
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 stack.putContents(stack.pop()+addr, temp);
                 break;
             case DUPL:   // 8
@@ -292,25 +303,25 @@ public class Driver {
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 if (stack.pop() != 0)
                     PC = addr;
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 if (stack.pop() == 0)
                     PC = addr;
                 break;
             case BR:     // 21
                 /* PC=addr; */
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 PC = addr;
                 break;
             case CALL:   // 22
                 /* push(PC); PC=addr; */
                 stack.push(PC);
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 PC = addr;
                 break;
             case CALLS:  // 23
@@ -326,7 +337,7 @@ public class Driver {
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
                 temp = stack.pop();
-                value = addrToArg.get(PC);
+                value = opAddrToArg.get(PC);
                 stack.SP += value;
                 PC = temp;
                 break;
@@ -374,7 +385,8 @@ public class Driver {
                 /* temp=pop(); push( pop() xor temp ); [see below] */
                 t1 = stack.pop();
                 t2 = stack.pop();
-                stack.push( (!(t1 != 0 && t2 != 0) && (t1 != 0 || t2 != 0)) ? 1 : 0 );
+                stack.push( (!(t1 != 0 && t2 != 0) 
+                            && (t1 != 0 || t2 != 0)) ? 1 : 0 );
                 break;
             case NOT:    // 35
                 /* push( !pop() ); */
@@ -386,12 +398,12 @@ public class Driver {
                 break;
             case ADDX:   // 37
                 /* push( pop()+addr ); */
-                addr = addrToArg.get(PC);
+                addr = opAddrToArg.get(PC);
                 stack.push(stack.pop() + addr);
                 break;
             case ADDSP:  // 38
                 /* SP += value; */
-                value = addrToArg.get(PC);
+                value = opAddrToArg.get(PC);
                 stack.SP += value;
                 break;
             case READ:   // 39
@@ -455,8 +467,9 @@ public class Driver {
     }
 
     public static void printMapping() {
-        /* test and see if the addresses ARE mapped to the values */
-        for (Map.Entry<Integer, Integer> entry : addrToArg.entrySet()) {
+        /* test and see if the addresses ARE mapped to the values 
+         * THANKS to rogerdpack from stackoverflow.com for this one! */
+        for (Map.Entry<Integer, Integer> entry : opAddrToArg.entrySet()) {
             System.out.println("Address: " + entry.getKey() + "  Argument: " +
                     entry.getValue());
         }

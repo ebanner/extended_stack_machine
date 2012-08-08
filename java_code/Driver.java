@@ -5,7 +5,6 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.InputMismatchException;
 
 /* TODO: Support command line arguments:
  *           - Base address
@@ -20,7 +19,7 @@ public class Driver {
     /* this is *the* master stack in the stack machine emulator */
     public static final Stack stack = new Stack(50);  
     /* assume for now that opcodes start at position 16 */
-    public static int PC = 16;
+    //public static int PC = 16;
     /* values used to help compute the values of instructions */
     public static int addr, value, temp, t1, t2;
     /* TRACE mode can either be ON of OFF */
@@ -33,27 +32,31 @@ public class Driver {
 
     public static void main(String[] args) throws IOException {
 
-        /* throw the opcodes onto the stack */
-        initializeStack();
+        /* assume for now that opcodes start at position 16 */
+        int baseAddr = 16;
 
+        /* throw the opcodes onto the stack */
+        initializeStack(baseAddr);
         putTestValuesOnStack();  /* DEBUGGING */
 
+        int PC = baseAddr;
         while (stack.getContents(PC) != HALT)
             /* keep executing instructions until a HALT command is reached */
-            executeInstruction(PC++);
+            PC = executeInstruction(PC);
 
         /* reveal the stack at the end for a great surprise! */
         stack.reveal();
         System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         //printMapping();
+        executeInstruction(PC);
     }
 
-    public static void initializeStack() throws IOException {
+    public static void initializeStack(int baseAddr) throws IOException {
         /* place opcodes onto the stack starting at location 16 for now */
 
         /* keep track of where the next position an opcode needs to go on the
          * stack */
-        int nextFreeAddr = PC;  /* just 16 until we support CLI options */
+        int nextFreeAddr = baseAddr;  /* just 16 until we support CLI options */
         Scanner sc = null;
         String instruction = null;
 
@@ -202,8 +205,9 @@ public class Driver {
         }
     }
 
-    public static void executeInstruction(int PC) {
+    public static int executeInstruction(int PC) {
         /* executes the instruction that PC is pointing to */
+        boolean pcModified = false;
         int opcode = stack.getContents(PC);
 
         switch(opcode) {
@@ -306,33 +310,39 @@ public class Driver {
                 addr = opAddrToArg.get(PC);
                 if (stack.pop() != 0)
                     PC = addr;
+                pcModified = true;
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
                 addr = opAddrToArg.get(PC);
                 if (stack.pop() == 0)
                     PC = addr;
+                pcModified = true;
                 break;
             case BR:     // 21
                 /* PC=addr; */
                 addr = opAddrToArg.get(PC);
                 PC = addr;
+                pcModified = true;
                 break;
             case CALL:   // 22
                 /* push(PC); PC=addr; */
                 stack.push(PC);
                 addr = opAddrToArg.get(PC);
                 PC = addr;
+                pcModified = true;
                 break;
             case CALLS:  // 23
                 /* temp=pop(); push(PC); PC=temp; */
                 temp = stack.pop();
                 stack.push(PC);
                 PC = temp;
+                pcModified = true;
                 break;
             case RETURN: // 24
                 /* PC=pop(); */
                 PC = stack.pop();
+                pcModified = true;
                 break;
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
@@ -340,6 +350,7 @@ public class Driver {
                 value = opAddrToArg.get(PC);
                 stack.SP += value;
                 PC = temp;
+                pcModified = true;
                 break;
             case HALT:   // 26
                 /* halt program execution */
@@ -438,8 +449,15 @@ public class Driver {
                 dump(stack.pop(), temp);
                 break;
         }
+
         /* update SP */
         stack.putContents(0, stack.SP);
+
+        /* increment PC by one unless it has already been modified */
+        if (! pcModified)
+            return PC + 1;
+        else
+            return PC;
     }
 
     public static void pass(int op) {

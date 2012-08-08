@@ -14,15 +14,15 @@ import java.util.EmptyStackException;
 
 public class Stack {
 
-    public int SP;  
-    // assume stack is full for now and that SP is not contained on the stack
     public int[] stack;
+    public int SP;  
     public int height;
 
     public Stack(int height) {
-        this.SP = height;
-        this.stack = new int[height];  /* create the stack with specified
-                                          height */
+        /* create the stack with specified height */
+        this.stack = new int[height];
+        /* point SP to one position above the stack */
+        this.SP = this.stack.length;
         this.height = height;
     }
 
@@ -31,39 +31,37 @@ public class Stack {
             System.err.println("Can't push another value--full stack.");
             System.exit(1);
         } else {
-            this.stack[--SP] = val;
+            this.stack[--this.SP] = val;
         }
     }
 
     public int pop() {
-        if (SP >= height) {  /* empty stack */
-            /* need to throw an exception because Java complains that we're not
-             * returning anything if we just quit */
+        if (this.SP >= this.height) {  /* empty stack */
             throw new EmptyStackException();  
         } else {
-            return this.stack[SP++];
+            return this.stack[this.SP++];
         }
     }
 
     public int getContents(int addr) {  
         /* get the contents at a specific address */
-        return stack[addr];
+        return this.stack[addr];
     }
 
-    public void putContents(int addr, int val) {
+    public void putContents(int addr, int value) {
         /* *addr = val */
-        stack[addr] = val;
+        this.stack[addr] = value;
     }
 
     public void reveal() { 
         /* prints out the stack much like how our brains imagine what a stack
          * looks like */
         for (int pointer = height-1; pointer >= 0; pointer--) { 
-            /* start from the top of the stack and don't stop until you get
-             * past SP */
-            System.out.format("%2d| %2s%s\n", pointer, stack[pointer], (pointer == SP) ? " <-- SP" : "");
-            /* the turnary part prints out an arrow that points to where SP
+            /* start from the top of the stack and print adresses & value pairs
+             * all the way down to SP -- also print out an arrow to where SP
              * points */
+            System.out.format("%2d| %2s%s\n", pointer, this.stack[pointer], 
+                    (pointer == this.SP) ? " <-- SP" : "");
         }
     }
 }

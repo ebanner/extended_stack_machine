@@ -47,5 +47,5 @@
 ;PRINTC
 ;TRON
 TROFF
-DUMP
+DUMP ;dumps output
 HALT

@@ -64,10 +64,14 @@ public class Driver {
             sc = new Scanner(new BufferedReader(new FileReader("test.esm")));
 
             while (sc.hasNextLine()) {  /* grab the next instruction */
-                instruction = sc.nextLine();
+                /* trim off whitespace to the left and right */
+                instruction = sc.nextLine().trim();
 
-                if (Pattern.matches("^;.*", instruction)) {
-                    /* esm only supports entire commented lines at this point */
+                if (Pattern.matches(".*;.*", instruction)) {
+                    /* grab the part of the string before the `;' and trim off
+                     * excess whitespce */
+                    instruction = instruction.split(";")[0].trim();
+                    if (instruction.equals(""))
                     continue;
                 }
 
@@ -97,8 +101,6 @@ public class Driver {
         /* inserts the opcode of the next instruction in the user's program
          * into the next available free loaction (growing upwards) */
 
-        instr = instr.trim();  /* remove leading & trailing whitespace from
-                                  current instruction */
         if (instr.equals("BKPT")) {
             stack.putContents(nextFreeAddr, BKPT);
         } else if (Pattern.matches("PUSH (\\d+)", instr)) {
@@ -201,6 +203,7 @@ public class Driver {
             stack.putContents(nextFreeAddr, DUMP);
         } else {
             System.err.println("Invalid instruction--exiting.");
+            System.err.println(instr);
             System.exit(1);
         }
     }
@@ -454,10 +457,7 @@ public class Driver {
         stack.putContents(0, stack.SP);
 
         /* increment PC by one unless it has already been modified */
-        if (! pcModified)
-            return PC + 1;
-        else
-            return PC;
+        return pcModified ? PC : PC+1;
     }
 
     public static void pass(int op) {

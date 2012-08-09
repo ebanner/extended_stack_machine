@@ -47,5 +47,5 @@ READ
 ;PRINTC
 ;TRON
 ;TROFF
-;DUMP ;dumps output
+DUMP ;dumps output
 HALT

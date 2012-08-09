@@ -5,6 +5,8 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 
 /* TODO: Support command line arguments:
  *           - Base address
@@ -18,7 +20,7 @@ public class Driver {
     /* this is *the* master stack in the stack machine emulator */
     public static final Stack stack = new Stack(50);  
     /* values used to help compute the values of instructions */
-    public static int addr, value, temp, t1, t2;
+    public static int temp, t1, t2;
     /* TRACE mode can either be ON of OFF */
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
@@ -202,9 +204,9 @@ public class Driver {
         } else if (instr.equals("DUMP")) {
             stack.putContents(nextFreeAddr, DUMP);
         } else {
-            System.err.println("Invalid instruction--exiting.");
+            System.err.println("Invalid op code");
             System.err.println(instr);
-            System.exit(1);
+            System.exit(6);
         }
     }
 
@@ -212,6 +214,8 @@ public class Driver {
         /* executes the instruction that PC is pointing to */
         boolean pcModified = false;
         int opcode = stack.getContents(PC);
+        Integer addr, value;
+        addr = value = opAddrToArg.get(PC);
 
         switch(opcode) {
             case BKPT:   // 0
@@ -220,12 +224,11 @@ public class Driver {
                 break;
             case PUSH:   // 1
                 /* push(*addr); */
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 stack.push(stack.getContents(addr));
                 break;
             case PUSHV:  // 2
                 /* push(value); */
-                value = opAddrToArg.get(PC);
                 stack.push(value);
                 break;
             case PUSHS:  // 3
@@ -234,12 +237,12 @@ public class Driver {
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 stack.push(stack.getContents(stack.pop()+addr));
                 break;
             case POP:    // 5
                 /* *addr=pop(); */
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 stack.putContents(addr, stack.pop());
                 break;
             case POPS:   // 6
@@ -250,7 +253,7 @@ public class Driver {
             case POPX:   // 7
                 /* temp=pop(); *(pop()+addr)=temp; */
                 temp = stack.pop();
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 stack.putContents(stack.pop()+addr, temp);
                 break;
             case DUPL:   // 8
@@ -310,7 +313,7 @@ public class Driver {
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 if (stack.pop() != 0) {
                     PC = addr;
                     pcModified = true;
@@ -318,7 +321,7 @@ public class Driver {
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 if (stack.pop() == 0) {
                     PC = addr;
                     pcModified = true;
@@ -326,14 +329,14 @@ public class Driver {
                 break;
             case BR:     // 21
                 /* PC=addr; */
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 PC = addr;
                 pcModified = true;
                 break;
             case CALL:   // 22
                 /* push(PC); PC=addr; */
                 stack.push(PC);
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 PC = addr;
                 pcModified = true;
                 break;
@@ -352,7 +355,6 @@ public class Driver {
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
                 temp = stack.pop();
-                value = opAddrToArg.get(PC);
                 stack.SP += value;
                 PC = temp;
                 pcModified = true;
@@ -380,7 +382,12 @@ public class Driver {
             case DIV:    // 30
                 /* temp=pop(); push( pop() / temp ); */
                 temp = stack.pop();
-                stack.push(stack.pop() / temp);
+                try {
+                    stack.push(stack.pop() / temp);
+                } catch (ArithmeticException e) {
+                    System.err.println("ERROR 1: Attemp to divide by zero");
+                    System.exit(1);
+                }
                 break;
             case MOD:    // 31
                 /* temp=pop(); push( pop() % temp ); */
@@ -414,17 +421,29 @@ public class Driver {
                 break;
             case ADDX:   // 37
                 /* push( pop()+addr ); */
-                addr = opAddrToArg.get(PC);
+                ensureValidity(addr);
                 stack.push(stack.pop() + addr);
                 break;
             case ADDSP:  // 38
                 /* SP += value; */
-                value = opAddrToArg.get(PC);
                 stack.SP += value;
                 break;
             case READ:   // 39
                 /* read temp in %d format; push(temp); */
-                temp = in.nextInt();
+                try {
+                    temp = in.nextInt();
+                } catch (Exception e) {
+                    if (e instanceof InputMismatchException) {
+                        System.err.println("ERROR 8: Illegal integer on READ");
+                        System.exit(8);
+                    } else if (e instanceof NoSuchElementException) {
+                        System.err.println("ERROR 7: Attempted to READ past end of file");
+                        System.exit(7);
+                    } else {
+                        System.err.println("Didn't account for this excpetion.  File this as a bug to Edward Banner at edward.banner@gmail.com");
+                        System.exit(42);
+                    }
+                }
                 stack.push(temp);
                 break;
             case PRINT:  // 40
@@ -457,7 +476,9 @@ public class Driver {
 
         /* update SP */
         stack.putContents(0, stack.SP);
+        ensureValidity(stack.SP, "SP");
 
+        ensureValidity(PC, "PC");
         /* increment PC by one unless it has already been modified */
         return pcModified ? PC : PC+1;
     }
@@ -475,6 +496,11 @@ public class Driver {
     }
 
     public static void dump(int pop, int temp) {
+        if (pop < temp || 0 > pop || pop > stack.height-1
+                || 0 < temp || temp > stack.height-1) {
+            System.err.println("ERROR 4: Illegal dump range");
+            System.exit(4);
+        }
         for (; pop >= temp; pop--)
             System.out.println(stack.getContents(pop));
     }
@@ -483,7 +509,7 @@ public class Driver {
         for (int i = 25; i < 45; i++)
             stack.push(i-4);
         //stack.putContents(31, 1);
-        //stack.putContents(30, 35);
+        //stack.putContents(30, 0);
     }
 
     public static void printMapping() {
@@ -492,6 +518,29 @@ public class Driver {
         for (Map.Entry<Integer, Integer> entry : opAddrToArg.entrySet()) {
             System.out.println("Address: " + entry.getKey() + "  Argument: " +
                     entry.getValue());
+        }
+    }
+
+    public static void ensureValidity(Integer addr) {
+        if (0 <= addr && addr <= stack.height-1)
+            return;
+        else {
+            System.err.println("ERROR 2: Address out of range");
+            System.exit(2);
+        }
+    }
+
+    public static void ensureValidity(int pointer, String identifier) {
+        if (0 <= pointer && pointer <= stack.height-1)
+            return;
+        else {  /* pointer is out of range */
+            if (identifier.equals("SP")) {
+                System.err.println("ERROR 3: SP out of range");
+                System.exit(3);
+            } else {
+                System.err.println("ERROR 5: Invalid PC");
+                System.exit(5);
+            }
         }
     }
 

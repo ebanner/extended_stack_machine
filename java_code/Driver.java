@@ -8,9 +8,8 @@ import java.util.Map;
 
 /* TODO: Support command line arguments:
  *           - Base address
- *       Test all opcodes to ensure they still work
- *       Partial line commenting
- *       Write some actual programs
+ *       Test some actual programs
+ *       Return correct error codes
  *       GUI (!!)
  */
 
@@ -18,8 +17,6 @@ public class Driver {
 
     /* this is *the* master stack in the stack machine emulator */
     public static final Stack stack = new Stack(50);  
-    /* assume for now that opcodes start at position 16 */
-    //public static int PC = 16;
     /* values used to help compute the values of instructions */
     public static int addr, value, temp, t1, t2;
     /* TRACE mode can either be ON of OFF */
@@ -40,9 +37,10 @@ public class Driver {
         putTestValuesOnStack();  /* DEBUGGING */
 
         int PC = baseAddr;
-        while (stack.getContents(PC) != HALT)
+        while (stack.getContents(PC) != HALT) {
             /* keep executing instructions until a HALT command is reached */
             PC = executeInstruction(PC);
+        }
 
         /* reveal the stack at the end for a great surprise! */
         stack.reveal();
@@ -62,6 +60,7 @@ public class Driver {
 
         try {  /* open up a scanner and start reading all lines of input */
             sc = new Scanner(new BufferedReader(new FileReader("test.esm")));
+            in = new Scanner(System.in);
 
             while (sc.hasNextLine()) {  /* grab the next instruction */
                 /* trim off whitespace to the left and right */
@@ -72,12 +71,13 @@ public class Driver {
                      * excess whitespce */
                     instruction = instruction.split(";")[0].trim();
                     if (instruction.equals(""))
-                    continue;
+                        continue;
                 }
 
                 /* put the instruction's opcode on the stack so PC to read it
                  * later */
                 insertOpcode(nextFreeAddr, instruction);
+                System.out.println(instruction);
 
                 /* create a mapping between the location of the instruction and
                  * its possible argument so we can recall it later.
@@ -103,21 +103,21 @@ public class Driver {
 
         if (instr.equals("BKPT")) {
             stack.putContents(nextFreeAddr, BKPT);
-        } else if (Pattern.matches("PUSH (\\d+)", instr)) {
+        } else if (Pattern.matches("PUSH -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, PUSH);
-        } else if (Pattern.matches("PUSHV (\\d+)", instr)) {
+        } else if (Pattern.matches("PUSHV -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, PUSHV);
         } else if (instr.equals("PUSHS")) {
             stack.putContents(nextFreeAddr, PUSHS);
         } else if (instr.equals("INDIR")) {
             stack.putContents(nextFreeAddr, INDIR);
-        } else if (Pattern.matches("PUSHX (\\d+)", instr)) {
+        } else if (Pattern.matches("PUSHX -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, PUSHX);
-        } else if (Pattern.matches("POP (\\d+)", instr)) {
+        } else if (Pattern.matches("POP -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, POP);
         } else if (instr.equals("POPS")) {
             stack.putContents(nextFreeAddr, POPS);
-        } else if (Pattern.matches("POPX (\\d+)", instr)) {
+        } else if (Pattern.matches("POPX -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, POPX);
         } else if (instr.equals("DUPL")) {
             stack.putContents(nextFreeAddr, DUPL);
@@ -141,17 +141,17 @@ public class Driver {
             stack.putContents(nextFreeAddr, TSTEQ);
         } else if (instr.equals("TSTNE")) {
             stack.putContents(nextFreeAddr, TSTNE);
-        } else if (Pattern.matches("BNE (\\d+)", instr)) {
+        } else if (Pattern.matches("BNE -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, BNE);
-        } else if (Pattern.matches("BT (\\d+)", instr)) {
+        } else if (Pattern.matches("BT -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, BT);
-        } else if (Pattern.matches("BEQ (\\d+)", instr)) {
+        } else if (Pattern.matches("BEQ -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, BEQ);
-        } else if (Pattern.matches("BF (\\d+)", instr)) {
+        } else if (Pattern.matches("BF -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, BF);
-        } else if (Pattern.matches("BR (\\d+)", instr)) {
+        } else if (Pattern.matches("BR -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, BR);
-        } else if (Pattern.matches("CALL (\\d+)", instr)) {
+        } else if (Pattern.matches("CALL -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, CALL);
         } else if (instr.equals("CALLS")) {
             stack.putContents(nextFreeAddr, CALLS);
@@ -159,7 +159,7 @@ public class Driver {
             stack.putContents(nextFreeAddr, RETURN);
         } else if (instr.equals("POPPC")) {
             stack.putContents(nextFreeAddr, POPPC);
-        } else if (Pattern.matches("RETN (\\d+)", instr)) {
+        } else if (Pattern.matches("RETN -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, RETN);
         } else if (instr.equals("HALT")) {
             stack.putContents(nextFreeAddr, HALT);
@@ -183,9 +183,9 @@ public class Driver {
             stack.putContents(nextFreeAddr, NOT);
         } else if (instr.equals("NEG")) {
             stack.putContents(nextFreeAddr, NEG);
-        } else if (Pattern.matches("ADDX (\\d+)", instr)) {
+        } else if (Pattern.matches("ADDX -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, ADDX);
-        } else if (Pattern.matches("ADDSP (\\d+)", instr)) {
+        } else if (Pattern.matches("ADDSP -?(\\d+)", instr)) {
             stack.putContents(nextFreeAddr, ADDSP);
         } else if (instr.equals("READ")) {
             stack.putContents(nextFreeAddr, READ);
@@ -311,16 +311,18 @@ public class Driver {
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
                 addr = opAddrToArg.get(PC);
-                if (stack.pop() != 0)
+                if (stack.pop() != 0) {
                     PC = addr;
-                pcModified = true;
+                    pcModified = true;
+                }
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
                 addr = opAddrToArg.get(PC);
-                if (stack.pop() == 0)
+                if (stack.pop() == 0) {
                     PC = addr;
-                pcModified = true;
+                    pcModified = true;
+                }
                 break;
             case BR:     // 21
                 /* PC=addr; */

@@ -3,16 +3,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-/* TODO: Support command line arguments:
- *           - Base address
- *       Test some actual programs
- *       Return correct error codes
- *       GUI (!!)
+/* TODO: Figure out how to execute instructions
+ *       Support `:' skipping over memory cells
+ *       Support `%' to denote the different sections in a program
  */
 
 public class Driver {
@@ -25,9 +21,6 @@ public class Driver {
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
     public static Scanner in = null;
-    /* map is used to map opcode addresses to their arguement */
-    public static Map<Integer, Integer> opAddrToArg = 
-        new HashMap<Integer, Integer>();
 
     public static void main(String[] args) throws IOException {
 
@@ -39,24 +32,23 @@ public class Driver {
         putTestValuesOnStack();  /* DEBUGGING */
 
         int PC = baseAddr;
-        while (stack.getContents(PC) != HALT) {
-            /* keep executing instructions until a HALT command is reached */
+        /*while (stack.getContents(PC) != HALT) {
+            // keep executing instructions until a HALT command is reached
             PC = executeInstruction(PC);
-        }
+        }*/
 
         /* reveal the stack at the end for a great surprise! */
         stack.reveal();
         System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         //printMapping();
-        executeInstruction(PC);
+        //executeInstruction(PC);
     }
 
-    public static void initializeStack(int baseAddr) throws IOException {
+    public static void initializeStack(int nextFreeAddr) throws IOException {
         /* place opcodes onto the stack starting at location 16 for now */
 
         /* keep track of where the next position an opcode needs to go on the
          * stack */
-        int nextFreeAddr = baseAddr;  /* just 16 until we support CLI options */
         Scanner sc = null;
         String instruction = null;
 
@@ -69,6 +61,7 @@ public class Driver {
                 instruction = sc.nextLine().trim();
 
                 if (Pattern.matches(".*;.*", instruction)) {
+                    /* if the line contains a comment, 
                     /* grab the part of the string before the `;' and trim off
                      * excess whitespce */
                     instruction = instruction.split(";")[0].trim();
@@ -80,14 +73,6 @@ public class Driver {
                  * later */
                 insertOpcode(nextFreeAddr, instruction);
                 System.out.println(instruction);
-
-                /* create a mapping between the location of the instruction and
-                 * its possible argument so we can recall it later.
-                 * when it comes time to read the next instruction, all we have
-                 * to look at is an opcode.  we need some way to remember that
-                 * some of these opcodes have arguments we provided as users.
-                 * if an opcode doesn't have an arguement, its arg is null */
-                opAddrToArg.put(nextFreeAddr, getArg(instruction));
 
                 /* point nextFreeAddr to the next free position on the stack to stick
                  * the next opcode */
@@ -103,384 +88,15 @@ public class Driver {
         /* inserts the opcode of the next instruction in the user's program
          * into the next available free loaction (growing upwards) */
 
-        if (instr.equals("BKPT")) {
-            stack.putContents(nextFreeAddr, BKPT);
-        } else if (Pattern.matches("PUSH -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, PUSH);
-        } else if (Pattern.matches("PUSHV -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, PUSHV);
-        } else if (instr.equals("PUSHS")) {
-            stack.putContents(nextFreeAddr, PUSHS);
-        } else if (instr.equals("INDIR")) {
-            stack.putContents(nextFreeAddr, INDIR);
-        } else if (Pattern.matches("PUSHX -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, PUSHX);
-        } else if (Pattern.matches("POP -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, POP);
-        } else if (instr.equals("POPS")) {
-            stack.putContents(nextFreeAddr, POPS);
-        } else if (Pattern.matches("POPX -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, POPX);
-        } else if (instr.equals("DUPL")) {
-            stack.putContents(nextFreeAddr, DUPL);
-        } else if (instr.equals("SWAP")) {
-            stack.putContents(nextFreeAddr, SWAP);
-        } else if (instr.equals("OVER")) {
-            stack.putContents(nextFreeAddr, OVER);
-        } else if (instr.equals("DROP")) {
-            stack.putContents(nextFreeAddr, DROP);
-        } else if (instr.equals("ROT")) {
-            stack.putContents(nextFreeAddr, ROT);
-        } else if (instr.equals("TSTLT")) {
-            stack.putContents(nextFreeAddr, TSTLT);
-        } else if (instr.equals("TSTLE")) {
-            stack.putContents(nextFreeAddr, TSTLE);
-        } else if (instr.equals("TSTGT")) {
-            stack.putContents(nextFreeAddr, TSTGT);
-        } else if (instr.equals("TSTGE")) {
-            stack.putContents(nextFreeAddr, TSTGE);
-        } else if (instr.equals("TSTEQ")) {
-            stack.putContents(nextFreeAddr, TSTEQ);
-        } else if (instr.equals("TSTNE")) {
-            stack.putContents(nextFreeAddr, TSTNE);
-        } else if (Pattern.matches("BNE -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, BNE);
-        } else if (Pattern.matches("BT -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, BT);
-        } else if (Pattern.matches("BEQ -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, BEQ);
-        } else if (Pattern.matches("BF -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, BF);
-        } else if (Pattern.matches("BR -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, BR);
-        } else if (Pattern.matches("CALL -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, CALL);
-        } else if (instr.equals("CALLS")) {
-            stack.putContents(nextFreeAddr, CALLS);
-        } else if (instr.equals("RETURN")) {
-            stack.putContents(nextFreeAddr, RETURN);
-        } else if (instr.equals("POPPC")) {
-            stack.putContents(nextFreeAddr, POPPC);
-        } else if (Pattern.matches("RETN -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, RETN);
-        } else if (instr.equals("HALT")) {
-            stack.putContents(nextFreeAddr, HALT);
-        } else if (instr.equals("ADD")) {
-            stack.putContents(nextFreeAddr, ADD);
-        } else if (instr.equals("SUB")) {
-            stack.putContents(nextFreeAddr, SUB);
-        } else if (instr.equals("MUL")) {
-            stack.putContents(nextFreeAddr, MUL);
-        } else if (instr.equals("DIV")) {
-            stack.putContents(nextFreeAddr, DIV);
-        } else if (instr.equals("MOD")) {
-            stack.putContents(nextFreeAddr, MOD);
-        } else if (instr.equals("OR")) {
-            stack.putContents(nextFreeAddr, OR);
-        } else if (instr.equals("AND")) {
-            stack.putContents(nextFreeAddr, AND);
-        } else if (instr.equals("XOR")) {
-            stack.putContents(nextFreeAddr, XOR);
-        } else if (instr.equals("NOT")) {
-            stack.putContents(nextFreeAddr, NOT);
-        } else if (instr.equals("NEG")) {
-            stack.putContents(nextFreeAddr, NEG);
-        } else if (Pattern.matches("ADDX -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, ADDX);
-        } else if (Pattern.matches("ADDSP -?(\\d+)", instr)) {
-            stack.putContents(nextFreeAddr, ADDSP);
-        } else if (instr.equals("READ")) {
-            stack.putContents(nextFreeAddr, READ);
-        } else if (instr.equals("PRINT")) {
-            stack.putContents(nextFreeAddr, PRINT);
-        } else if (instr.equals("READC")) {
-            stack.putContents(nextFreeAddr, READC);
-        } else if (instr.equals("PRINTC")) {
-            stack.putContents(nextFreeAddr, PRINTC);
-        } else if (instr.equals("TRON")) {
-            stack.putContents(nextFreeAddr, TRON);
-        } else if (instr.equals("TROFF")) {
-            stack.putContents(nextFreeAddr, TROFF);
-        } else if (instr.equals("DUMP")) {
-            stack.putContents(nextFreeAddr, DUMP);
-        } else {
-            System.err.println("Invalid op code");
-            System.err.println(instr);
-            System.exit(6);
-        }
-    }
-
-    public static int executeInstruction(int PC) {
-        /* executes the instruction that PC is pointing to */
-        boolean pcModified = false;
-        int opcode = stack.getContents(PC);
-        Integer addr, value;
-        addr = value = opAddrToArg.get(PC);
-
-        switch(opcode) {
-            case BKPT:   // 0
-                 /* unconditionally enter the sxx debugger */
-                pass(BKPT);
-                break;
-            case PUSH:   // 1
-                /* push(*addr); */
-                ensureValidity(addr);
-                stack.push(stack.getContents(addr));
-                break;
-            case PUSHV:  // 2
-                /* push(value); */
-                stack.push(value);
-                break;
-            case PUSHS:  // 3
-                 /* push(*pop()); */
-                stack.push(stack.getContents(stack.pop()));
-                break;
-            case PUSHX:  // 4
-                /* push(*(pop()+addr)); */
-                ensureValidity(addr);
-                stack.push(stack.getContents(stack.pop()+addr));
-                break;
-            case POP:    // 5
-                /* *addr=pop(); */
-                ensureValidity(addr);
-                stack.putContents(addr, stack.pop());
-                break;
-            case POPS:   // 6
-                /* temp=pop(); *pop()=temp; */
-                temp = stack.pop();
-                stack.putContents(stack.pop(), temp);
-                break;
-            case POPX:   // 7
-                /* temp=pop(); *(pop()+addr)=temp; */
-                temp = stack.pop();
-                ensureValidity(addr);
-                stack.putContents(stack.pop()+addr, temp);
-                break;
-            case DUPL:   // 8
-                /* push(*SP); */
-                stack.push(stack.getContents(stack.SP));
-                break;
-            case SWAP:   // 9
-                /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
-                temp = stack.getContents(stack.SP);
-                stack.putContents(stack.SP, stack.getContents(stack.SP+1));
-                stack.putContents(stack.SP+1, temp);
-                break;
-            case OVER:   // 10
-                /* push(*(SP+1)); */
-                stack.push(stack.getContents(stack.SP+1));
-                break;
-            case DROP:   // 11
-                /* SP++; */
-                stack.SP++;
-                break;
-            case ROT:    // 12
-                /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
-                temp = stack.getContents(stack.SP);
-                stack.putContents(stack.SP, stack.getContents(stack.SP+2));
-                stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
-                stack.putContents(stack.SP+1, temp);
-                break;
-            case TSTLT:  // 13
-                /* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
-                temp = stack.pop();
-                stack.push( (temp < 0) ? 1 : 0 );
-                break;
-            case TSTLE:  // 14
-                /* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
-                temp = stack.pop();
-                stack.push( (temp <= 0) ? 1 : 0 );
-                break;
-            case TSTGT:  // 15
-                /* temp=pop(); push((temp>0)?1:0); */
-                temp = stack.pop();
-                stack.push( (temp > 0) ? 1 : 0 );
-                break;
-            case TSTGE:  // 16
-                /* temp=pop(); push((temp>=0)?1:0); */
-                temp = stack.pop();
-                stack.push( (temp >= 0) ? 1 : 0 );
-                break;
-            case TSTEQ:  // 17
-                /* temp=pop(); push((temp==0)?1:0); */
-                temp = stack.pop();
-                stack.push( (temp == 0) ? 1 : 0);
-                break;
-            case TSTNE:  // 18
-                /* temp=pop(); push((temp!=0)?1:0); */
-                temp = stack.pop();
-                stack.push( (temp != 0) ? 1 : 0 );
-                break;
-            case BNE:    // 19
-                /* if (pop()!=0) PC=addr; */
-                ensureValidity(addr);
-                if (stack.pop() != 0) {
-                    PC = addr;
-                    pcModified = true;
-                }
-                break;
-            case BEQ:    // 20
-                /* if (pop()==0) PC=addr; */
-                ensureValidity(addr);
-                if (stack.pop() == 0) {
-                    PC = addr;
-                    pcModified = true;
-                }
-                break;
-            case BR:     // 21
-                /* PC=addr; */
-                ensureValidity(addr);
-                PC = addr;
-                pcModified = true;
-                break;
-            case CALL:   // 22
-                /* push(PC); PC=addr; */
-                stack.push(PC);
-                ensureValidity(addr);
-                PC = addr;
-                pcModified = true;
-                break;
-            case CALLS:  // 23
-                /* temp=pop(); push(PC); PC=temp; */
-                temp = stack.pop();
-                stack.push(PC);
-                PC = temp;
-                pcModified = true;
-                break;
-            case RETURN: // 24
-                /* PC=pop(); */
-                PC = stack.pop();
-                pcModified = true;
-                break;
-            case RETN:   // 25
-                /* temp=pop(); SP += value; PC=temp; */
-                temp = stack.pop();
-                stack.SP += value;
-                PC = temp;
-                pcModified = true;
-                break;
-            case HALT:   // 26
-                /* halt program execution */
-                System.out.println("Halting program execution");
-                System.exit(0);
-                break;
-            case ADD:    // 27
-                /* temp=pop(); push( pop() + temp ); */
-                temp = stack.pop();
-                stack.push(stack.pop()+temp);
-                break;
-            case SUB:    // 28
-                /* temp=pop(); push( pop() - temp ); */
-                temp = stack.pop();
-                stack.push(stack.pop()-temp);
-                break;
-            case MUL:    // 29
-                /* temp=pop(); push( pop() * temp ); */
-                temp = stack.pop();
-                stack.push(stack.pop() * temp);
-                break;
-            case DIV:    // 30
-                /* temp=pop(); push( pop() / temp ); */
-                temp = stack.pop();
-                try {
-                    stack.push(stack.pop() / temp);
-                } catch (ArithmeticException e) {
-                    System.err.println("ERROR 1: Attemp to divide by zero");
-                    System.exit(1);
-                }
-                break;
-            case MOD:    // 31
-                /* temp=pop(); push( pop() % temp ); */
-                temp = stack.pop();
-                stack.push(stack.pop() % temp);
-                break;
-            case OR:     // 32
-                /* temp=pop(); push( pop() || temp ); */
-                temp = stack.pop();
-                stack.push( (stack.pop() != 0 || temp != 0) ? 1 : 0 );
-                break;
-            case AND:    // 33
-                /* temp=pop(); push( pop() && temp ); */
-                temp = stack.pop();
-                stack.push( (stack.pop() != 0 && temp != 0) ? 1 : 0 );
-                break;
-            case XOR:    // 34
-                /* temp=pop(); push( pop() xor temp ); [see below] */
-                t1 = stack.pop();
-                t2 = stack.pop();
-                stack.push( (!(t1 != 0 && t2 != 0) 
-                            && (t1 != 0 || t2 != 0)) ? 1 : 0 );
-                break;
-            case NOT:    // 35
-                /* push( !pop() ); */
-                stack.push( !(stack.pop() != 0) ? 1 : 0 );
-                break;
-            case NEG:    // 36
-                /* push( -pop() ); */
-                stack.push( -1*stack.pop());
-                break;
-            case ADDX:   // 37
-                /* push( pop()+addr ); */
-                ensureValidity(addr);
-                stack.push(stack.pop() + addr);
-                break;
-            case ADDSP:  // 38
-                /* SP += value; */
-                stack.SP += value;
-                break;
-            case READ:   // 39
-                /* read temp in %d format; push(temp); */
-                try {
-                    temp = in.nextInt();
-                } catch (Exception e) {
-                    if (e instanceof InputMismatchException) {
-                        System.err.println("ERROR 8: Illegal integer on READ");
-                        System.exit(8);
-                    } else if (e instanceof NoSuchElementException) {
-                        System.err.println("ERROR 7: Attempted to READ past end of file");
-                        System.exit(7);
-                    } else {
-                        System.err.println("Didn't account for this excpetion.  File this as a bug to Edward Banner at edward.banner@gmail.com");
-                        System.exit(42);
-                    }
-                }
-                stack.push(temp);
-                break;
-            case PRINT:  // 40
-                /* print pop() in %d format */
-                System.out.println(stack.pop());
-                break;
-            case READC:  // 41
-                /* read temp in %c format; push(temp); */
-                temp = in.nextLine().charAt(0);
-                stack.push(temp);
-                break;
-            case PRINTC: // 42
-                /* print pop() in %c format */
-                System.out.println((char)stack.pop());
-                break;
-            case TRON:   // 43
-                /* turn on trace feature */
-                TRACE = true;
-                break;
-            case TROFF:  // 44
-                /* turn off trace feature */
-                TRACE = false;
-                break;
-            case DUMP:   // 45
-                /* temp=pop(); dump memory from pop() to temp; */
-                temp = stack.pop();
-                dump(stack.pop(), temp);
-                break;
+        if (! Pattern.matches("^-?(\\d)+$", instr)) {
+            /* test to see if the next value is a digit */
+            System.out.println("Not a digit:");
+            System.out.println("  " + instr);
+            System.exit(1);
         }
 
-        /* update SP */
-        stack.putContents(0, stack.SP);
-        ensureValidity(stack.SP, "SP");
-
-        ensureValidity(PC, "PC");
-        /* increment PC by one unless it has already been modified */
-        return pcModified ? PC : PC+1;
+        /* we now know that we have a digit */
+        stack.putContents(nextFreeAddr, Integer.parseInt(instr));
     }
 
     public static void pass(int op) {
@@ -512,14 +128,14 @@ public class Driver {
         //stack.putContents(30, 0);
     }
 
-    public static void printMapping() {
-        /* test and see if the addresses ARE mapped to the values 
-         * THANKS to rogerdpack from stackoverflow.com for this one! */
+    /*public static void printMapping() {
+        // test and see if the addresses ARE mapped to the values 
+        // THANKS to rogerdpack from stackoverflow.com for this one!
         for (Map.Entry<Integer, Integer> entry : opAddrToArg.entrySet()) {
             System.out.println("Address: " + entry.getKey() + "  Argument: " +
                     entry.getValue());
         }
-    }
+    }*/
 
     public static void ensureValidity(Integer addr) {
         if (0 <= addr && addr <= stack.height-1)

@@ -64,4 +64,7 @@ public class Stack {
                     (pointer == this.SP) ? " <-- SP" : "");
         }
     }
+    public static void main(String[] args) {
+        System.out.println("Hello, world!");
+    }
 }

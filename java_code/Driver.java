@@ -30,12 +30,15 @@ public class Driver {
         /* throw the opcodes onto the stack */
         initializeStack(baseAddr);
         putTestValuesOnStack();  /* DEBUGGING */
+        //stack.reveal();
 
         int PC = baseAddr;
-        /*while (stack.getContents(PC) != HALT) {
+        while (stack.getContents(PC) != HALT) {
             // keep executing instructions until a HALT command is reached
             PC = executeInstruction(PC);
-        }*/
+            stack.reveal();
+            System.out.format("%nPC: %d  temp: %d%n", PC, temp);
+        }
 
         /* reveal the stack at the end for a great surprise! */
         stack.reveal();
@@ -53,7 +56,7 @@ public class Driver {
         String instruction = null;
 
         try {  /* open up a scanner and start reading all lines of input */
-            sc = new Scanner(new BufferedReader(new FileReader("test.esm")));
+            sc = new Scanner(new BufferedReader(new FileReader("push.esm")));
             in = new Scanner(System.in);
 
             while (sc.hasNextLine()) {  /* grab the next instruction */
@@ -79,9 +82,319 @@ public class Driver {
                 nextFreeAddr++;
             }
         } finally {
+            // close the scanners
             if (sc != null)
                 sc.close();
         }
+    }
+
+    public static int executeInstruction(int PC) {
+        int opcode = stack.getContents(PC);
+        int addr, value; 
+        addr = value = 0;
+
+        if (instructionRequiresParameter(opcode)) {
+            // if it's an instruction that needs an `addr' or `value'
+            // parameter, save that argument
+            addr = value = stack.getContents(PC+1);
+        }
+
+        switch(opcode) {
+            case BKPT:   // 0
+                /* unconditionally enter the sxx debugger */
+                pass(BKPT);
+                PC++;
+                break;
+            case PUSH:   // 1
+                /* push(*addr); */
+                ensureValidity(addr);
+                stack.push(stack.getContents(addr));
+                PC += 2;
+                break;
+            case PUSHV:  // 2
+                /* push(value); */
+                stack.push(value);
+                PC += 2;
+                break;
+            case PUSHS:  // 3
+                /* push(*pop()); */
+                stack.push(stack.getContents(stack.pop()));
+                PC++;
+                break;
+            case PUSHX:  // 4
+                /* push(*(pop()+addr)); */
+                ensureValidity(addr);
+                stack.push(stack.getContents(stack.pop()+addr));
+                PC += 2;
+                break;
+            case POP:    // 5
+                /* *addr=pop(); */
+                ensureValidity(addr);
+                stack.putContents(addr, stack.pop());
+                PC += 2;
+                break;
+            case POPS:   // 6
+                /* temp=pop(); *pop()=temp; */
+                temp = stack.pop();
+                stack.putContents(stack.pop(), temp);
+                PC++;
+                break;
+            case POPX:   // 7
+                /* temp=pop(); *(pop()+addr)=temp; */
+                temp = stack.pop();
+                ensureValidity(addr);
+                stack.putContents(stack.pop()+addr, temp);
+                PC += 2;
+                break;
+            case DUPL:   // 8
+                /* push(*SP); */
+                stack.push(stack.getContents(stack.SP));
+                PC++;
+                break;
+            case SWAP:   // 9
+                /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
+                temp = stack.getContents(stack.SP);
+                stack.putContents(stack.SP, stack.getContents(stack.SP+1));
+                stack.putContents(stack.SP+1, temp);
+                PC++;
+                break;
+            case OVER:   // 10
+                /* push(*(SP+1)); */
+                stack.push(stack.getContents(stack.SP+1));
+                PC++;
+                break;
+            case DROP:   // 11
+                /* SP++; */
+                stack.SP++;
+                PC++;
+                break;
+            case ROT:    // 12
+                /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
+                temp = stack.getContents(stack.SP);
+                stack.putContents(stack.SP, stack.getContents(stack.SP+2));
+                stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
+                stack.putContents(stack.SP+1, temp);
+                PC++;
+                break;
+            case TSTLT:  // 13
+                /* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
+                temp = stack.pop();
+                stack.push( (temp < 0) ? 1 : 0 );
+                PC++;
+                break;
+            case TSTLE:  // 14
+                /* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
+                temp = stack.pop();
+                stack.push( (temp <= 0) ? 1 : 0 );
+                PC++;
+                break;
+            case TSTGT:  // 15
+                /* temp=pop(); push((temp>0)?1:0); */
+                temp = stack.pop();
+                stack.push( (temp > 0) ? 1 : 0 );
+                PC++;
+                break;
+            case TSTGE:  // 16
+                /* temp=pop(); push((temp>=0)?1:0); */
+                temp = stack.pop();
+                stack.push( (temp >= 0) ? 1 : 0 );
+                PC++;
+                break;
+            case TSTEQ:  // 17
+                /* temp=pop(); push((temp==0)?1:0); */
+                temp = stack.pop();
+                stack.push( (temp == 0) ? 1 : 0);
+                PC++;
+                break;
+            case TSTNE:  // 18
+                /* temp=pop(); push((temp!=0)?1:0); */
+                temp = stack.pop();
+                stack.push( (temp != 0) ? 1 : 0 );
+                PC++;
+                break;
+            case BNE:    // 19
+                /* if (pop()!=0) PC=addr; */
+                ensureValidity(addr);
+                if (stack.pop() != 0) {
+                    PC = addr;
+                }
+                break;
+            case BEQ:    // 20
+                /* if (pop()==0) PC=addr; */
+                ensureValidity(addr);
+                if (stack.pop() == 0) {
+                    PC = addr;
+                }
+                break;
+            case BR:     // 21
+                /* PC=addr; */
+                ensureValidity(addr);
+                PC = addr;
+                break;
+            case CALL:   // 22
+                /* push(PC); PC=addr; */
+                stack.push(PC);
+                ensureValidity(addr);
+                PC = addr;
+                break;
+            case CALLS:  // 23
+                /* temp=pop(); push(PC); PC=temp; */
+                temp = stack.pop();
+                stack.push(PC);
+                PC = temp;
+                break;
+            case RETURN: // 24
+                /* PC=pop(); */
+                PC = stack.pop();
+                break;
+            case RETN:   // 25
+                /* temp=pop(); SP += value; PC=temp; */
+                temp = stack.pop();
+                stack.SP += value;
+                PC = temp;
+                break;
+            case HALT:   // 26
+                /* halt program execution */
+                System.out.println("Halting program execution");
+                System.exit(0);
+                PC++;
+                break;
+            case ADD:    // 27
+                /* temp=pop(); push( pop() + temp ); */
+                temp = stack.pop();
+                stack.push(stack.pop()+temp);
+                PC++;
+                break;
+            case SUB:    // 28
+                /* temp=pop(); push( pop() - temp ); */
+                temp = stack.pop();
+                stack.push(stack.pop()-temp);
+                PC++;
+                break;
+            case MUL:    // 29
+                /* temp=pop(); push( pop() * temp ); */
+                temp = stack.pop();
+                stack.push(stack.pop() * temp);
+                PC++;
+                break;
+            case DIV:    // 30
+                /* temp=pop(); push( pop() / temp ); */
+                temp = stack.pop();
+                try {
+                    stack.push(stack.pop() / temp);
+                } catch (ArithmeticException e) {
+                    System.err.println("ERROR 1: Attemp to divide by zero");
+                    System.exit(1);
+                }
+                PC++;
+                break;
+            case MOD:    // 31
+                /* temp=pop(); push( pop() % temp ); */
+                temp = stack.pop();
+                stack.push(stack.pop() % temp);
+                PC++;
+                break;
+            case OR:     // 32
+                /* temp=pop(); push( pop() || temp ); */
+                temp = stack.pop();
+                stack.push( (stack.pop() != 0 || temp != 0) ? 1 : 0 );
+                PC++;
+                break;
+            case AND:    // 33
+                /* temp=pop(); push( pop() && temp ); */
+                temp = stack.pop();
+                stack.push( (stack.pop() != 0 && temp != 0) ? 1 : 0 );
+                PC++;
+                break;
+            case XOR:    // 34
+                /* temp=pop(); push( pop() xor temp ); [see below] */
+                t1 = stack.pop();
+                t2 = stack.pop();
+                stack.push( (!(t1 != 0 && t2 != 0) 
+                            && (t1 != 0 || t2 != 0)) ? 1 : 0 );
+                PC++;
+                break;
+            case NOT:    // 35
+                /* push( !pop() ); */
+                stack.push( !(stack.pop() != 0) ? 1 : 0 );
+                PC++;
+                break;
+            case NEG:    // 36
+                /* push( -pop() ); */
+                stack.push( -1*stack.pop());
+                PC++;
+                break;
+            case ADDX:   // 37
+                /* push( pop()+addr ); */
+                ensureValidity(addr);
+                stack.push(stack.pop() + addr);
+                PC += 2;
+                break;
+            case ADDSP:  // 38
+                /* SP += value; */
+                stack.SP += value;
+                PC += 2;
+                break;
+            case READ:   // 39
+                /* read temp in %d format; push(temp); */
+                try {
+                    temp = in.nextInt();
+                } catch (Exception e) {
+                    if (e instanceof InputMismatchException) {
+                        System.err.println("ERROR 8: Illegal integer on READ");
+                        System.exit(8);
+                    } else if (e instanceof NoSuchElementException) {
+                        System.err.println("ERROR 7: Attempted to READ past end of file");
+                        System.exit(7);
+                    } else {
+                        System.err.println("Didn't account for this excpetion.  File this as a bug to Edward Banner at edward.banner@gmail.com");
+                        System.exit(42);
+                    }
+                }
+                stack.push(temp);
+                PC++;
+                break;
+            case PRINT:  // 40
+                /* print pop() in %d format */
+                System.out.println(stack.pop());
+                PC++;
+                break;
+            case READC:  // 41
+                /* read temp in %c format; push(temp); */
+                temp = in.nextLine().charAt(0);
+                stack.push(temp);
+                PC++;
+                break;
+            case PRINTC: // 42
+                /* print pop() in %c format */
+                System.out.println((char)stack.pop());
+                PC++;
+                break;
+            case TRON:   // 43
+                /* turn on trace feature */
+                TRACE = true;
+                PC++;
+                break;
+            case TROFF:  // 44
+                /* turn off trace feature */
+                TRACE = false;
+                PC++;
+                break;
+            case DUMP:   // 45
+                /* temp=pop(); dump memory from pop() to temp; */
+                temp = stack.pop();
+                dump(stack.pop(), temp);
+                PC++;
+                break;
+        }
+
+        /* update SP */
+        stack.putContents(0, stack.SP);
+        ensureValidity(stack.SP, "SP");
+
+        ensureValidity(PC, "PC");
+        // return the new PC
+        return PC;
     }
 
     public static void insertOpcode(int nextFreeAddr, String instr) {
@@ -158,6 +471,34 @@ public class Driver {
                 System.exit(5);
             }
         }
+    }
+
+    public static boolean instructionRequiresParameter(int opcode) {
+        // informs the caller whether the current opcode needs to look at the
+        // next location in memory for an argument to the instruction
+        boolean requiresParameter;
+
+        switch (opcode) {
+            case PUSH:
+            case PUSHV:
+            case PUSHX:
+            case POP:
+            case POPX:
+            case BNE:
+            case BEQ:
+            case BR:
+            case CALL:
+            case RETN:
+            case ADDX:
+            case ADDSP:
+                requiresParameter = true;
+                break;
+            default:
+                requiresParameter = false;
+                break;
+        }
+
+        return requiresParameter;
     }
 
     /* mneumonics and their opcodes */

@@ -257,7 +257,6 @@ public class Driver {
                 /* halt program execution */
                 System.out.println("Halting program execution");
                 System.exit(0);
-                PC++;
                 break;
             case ADD:    // 27
                 /* temp=pop(); push( pop() + temp ); */

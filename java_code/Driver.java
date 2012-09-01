@@ -16,7 +16,7 @@ public class Driver {
     /* this is *the* master stack in the stack machine emulator */
     public static final Stack stack = new Stack(50);  
     /* values used to help compute the values of instructions */
-    public static int temp, t1, t2;
+    public static int temp;
     /* TRACE mode can either be ON of OFF */
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
@@ -26,9 +26,10 @@ public class Driver {
 
         /* assume for now that opcodes start at position 16 */
         int baseAddr = 16;
+        String file = args[0];
 
         /* throw the opcodes onto the stack */
-        initializeStack(baseAddr, args[0]);
+        initializeStack(baseAddr, file);
         putTestValuesOnStack();  /* DEBUGGING */
 
         int PC = baseAddr;
@@ -55,7 +56,7 @@ public class Driver {
          * stack */
         Scanner sc = null;
         String instruction = null;
-        file = "tests/" + file;
+        file = "tests/" + file;  // just for debugging (saves some typing)
 
         try {  /* open up a scanner and start reading all lines of input */
             //sc = new Scanner(new BufferedReader(new FileReader("tests/pushs.esm")));
@@ -70,7 +71,7 @@ public class Driver {
                 if (instruction.isEmpty()) {
                     // skip blank lines
                     continue;
-                } else if (Pattern.matches(".*;.*", instruction)) {
+                } else if (Pattern.matches(".*#.*", instruction)) {
                     /* if the line contains a comment, 
                     /* grab the part of the string before the `;' and trim off
                      * excess whitespce */
@@ -97,8 +98,8 @@ public class Driver {
 
     public static int executeInstruction(int PC) {
         int opcode = stack.getContents(PC);
-        int addr, value, num; 
-        addr = value = num = 0;
+        int addr, value, num, t1, t2; 
+        addr = value = num = t1 = t2 = 0;
 
         if (instructionRequiresParameter(opcode)) {
             // if it's an instruction that needs an `addr' or `value'

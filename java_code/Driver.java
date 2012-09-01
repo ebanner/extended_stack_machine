@@ -28,11 +28,12 @@ public class Driver {
         int baseAddr = 16;
 
         /* throw the opcodes onto the stack */
-        initializeStack(baseAddr);
+        initializeStack(baseAddr, args[0]);
         putTestValuesOnStack();  /* DEBUGGING */
-        //stack.reveal();
 
         int PC = baseAddr;
+        stack.reveal();
+        System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
         while (stack.getContents(PC) != HALT) {
             // keep executing instructions until a HALT command is reached
             PC = executeInstruction(PC);
@@ -41,29 +42,35 @@ public class Driver {
         }
 
         /* reveal the stack at the end for a great surprise! */
-        stack.reveal();
-        System.out.format("%nPC: %d  temp: %d%n", PC, temp);
+        //stack.reveal();
+        //System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         //printMapping();
         //executeInstruction(PC);
     }
 
-    public static void initializeStack(int nextFreeAddr) throws IOException {
+    public static void initializeStack(int nextFreeAddr, String file) throws IOException {
         /* place opcodes onto the stack starting at location 16 for now */
 
         /* keep track of where the next position an opcode needs to go on the
          * stack */
         Scanner sc = null;
         String instruction = null;
+        file = "tests/" + file;
 
         try {  /* open up a scanner and start reading all lines of input */
-            sc = new Scanner(new BufferedReader(new FileReader("push.fail")));
+            //sc = new Scanner(new BufferedReader(new FileReader("tests/pushs.esm")));
+            sc = new Scanner(new BufferedReader(new FileReader(file)));
             in = new Scanner(System.in);
 
             while (sc.hasNextLine()) {  /* grab the next instruction */
                 /* trim off whitespace to the left and right */
                 instruction = sc.nextLine().trim();
 
-                if (Pattern.matches(".*;.*", instruction)) {
+                //if (Pattern.matches("^(\\s)+$", instruction)) {
+                if (instruction.isEmpty()) {
+                    // skip blank lines
+                    continue;
+                } else if (Pattern.matches(".*;.*", instruction)) {
                     /* if the line contains a comment, 
                     /* grab the part of the string before the `;' and trim off
                      * excess whitespce */
@@ -230,6 +237,8 @@ public class Driver {
                 ensureValidity(addr, "PC");
                 if (stack.pop() != 0) {
                     PC = addr;
+                } else {
+                    PC++;
                 }
                 break;
             case BEQ:    // 20
@@ -237,6 +246,8 @@ public class Driver {
                 ensureValidity(addr, "PC");
                 if (stack.pop() == 0) {
                     PC = addr;
+                } else {
+                    PC++;
                 }
                 break;
             case BR:     // 21
@@ -367,7 +378,9 @@ public class Driver {
                         System.err.println("ERROR 7: Attempted to READ past end of file");
                         System.exit(7);
                     } else {
-                        System.err.println("Didn't account for this excpetion.  Please report this bug to Edward Banner at edward.banner@gmail.com");
+                        System.err.println("Didn't account for this excpetion.");  
+                        System.err.println("Please report this bug to Edward ");
+                        System.err.println("Banner at edward.banner@gmail.com");
                         System.exit(42);
                     }
                 }
@@ -448,7 +461,7 @@ public class Driver {
         // dumps memory in descending order
         // pop MUST be greater than or equal to temp
         if (pop < temp || 0 > pop || pop > stack.height-1
-                || 0 < temp || temp > stack.height-1) {
+                || 0 > temp || temp > stack.height-1) {
             System.err.println("ERROR 4: Illegal dump range");
             System.exit(4);
         }
@@ -459,8 +472,8 @@ public class Driver {
     public static void putTestValuesOnStack() {
         for (int i = 25; i < 45; i++)
             stack.push(i-4);
-        //stack.putContents(31, 1);
-        //stack.putContents(30, 0);
+        //stack.putContents(31, 49);
+        //stack.putContents(30, 30);
     }
 
     public static void ensureValidity(Integer addr) {

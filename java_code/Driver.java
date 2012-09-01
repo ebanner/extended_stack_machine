@@ -56,7 +56,7 @@ public class Driver {
         String instruction = null;
 
         try {  /* open up a scanner and start reading all lines of input */
-            sc = new Scanner(new BufferedReader(new FileReader("push.esm")));
+            sc = new Scanner(new BufferedReader(new FileReader("push.fail")));
             in = new Scanner(System.in);
 
             while (sc.hasNextLine()) {  /* grab the next instruction */
@@ -90,8 +90,8 @@ public class Driver {
 
     public static int executeInstruction(int PC) {
         int opcode = stack.getContents(PC);
-        int addr, value; 
-        addr = value = 0;
+        int addr, value, num; 
+        addr = value = num = 0;
 
         if (instructionRequiresParameter(opcode)) {
             // if it's an instruction that needs an `addr' or `value'
@@ -118,13 +118,16 @@ public class Driver {
                 break;
             case PUSHS:  // 3
                 /* push(*pop()); */
-                stack.push(stack.getContents(stack.pop()));
+                num = stack.pop();
+                ensureValidity(num);
+                stack.push(stack.getContents(num));
                 PC++;
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
-                ensureValidity(addr);
-                stack.push(stack.getContents(stack.pop()+addr));
+                num = stack.pop()+addr;
+                ensureValidity(num);
+                stack.push(stack.getContents(num));
                 PC += 2;
                 break;
             case POP:    // 5
@@ -136,30 +139,37 @@ public class Driver {
             case POPS:   // 6
                 /* temp=pop(); *pop()=temp; */
                 temp = stack.pop();
-                stack.putContents(stack.pop(), temp);
+                num = stack.pop();
+                ensureValidity(num);
+                stack.putContents(num, temp);
                 PC++;
                 break;
             case POPX:   // 7
                 /* temp=pop(); *(pop()+addr)=temp; */
                 temp = stack.pop();
-                ensureValidity(addr);
-                stack.putContents(stack.pop()+addr, temp);
+                num = stack.pop()+addr;
+                ensureValidity(num);
+                stack.putContents(num, temp);
                 PC += 2;
                 break;
             case DUPL:   // 8
                 /* push(*SP); */
+                ensureValidity(stack.SP, "SP");
                 stack.push(stack.getContents(stack.SP));
                 PC++;
                 break;
             case SWAP:   // 9
                 /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
+                ensureValidity(stack.SP, "SP");
                 temp = stack.getContents(stack.SP);
+                ensureValidity(stack.SP+1);
                 stack.putContents(stack.SP, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
                 PC++;
                 break;
             case OVER:   // 10
                 /* push(*(SP+1)); */
+                ensureValidity(stack.SP+1);
                 stack.push(stack.getContents(stack.SP+1));
                 PC++;
                 break;
@@ -170,8 +180,11 @@ public class Driver {
                 break;
             case ROT:    // 12
                 /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
+                ensureValidity(stack.SP, "SP");
                 temp = stack.getContents(stack.SP);
+                ensureValidity(stack.SP+2);
                 stack.putContents(stack.SP, stack.getContents(stack.SP+2));
+                ensureValidity(stack.SP+1);
                 stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
                 PC++;
@@ -214,43 +227,47 @@ public class Driver {
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
-                ensureValidity(addr);
+                ensureValidity(addr, "PC");
                 if (stack.pop() != 0) {
                     PC = addr;
                 }
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
-                ensureValidity(addr);
+                ensureValidity(addr, "PC");
                 if (stack.pop() == 0) {
                     PC = addr;
                 }
                 break;
             case BR:     // 21
                 /* PC=addr; */
-                ensureValidity(addr);
+                ensureValidity(addr, "PC");
                 PC = addr;
                 break;
             case CALL:   // 22
                 /* push(PC); PC=addr; */
                 stack.push(PC);
-                ensureValidity(addr);
+                ensureValidity(addr, "PC");
                 PC = addr;
                 break;
             case CALLS:  // 23
                 /* temp=pop(); push(PC); PC=temp; */
                 temp = stack.pop();
                 stack.push(PC);
+                ensureValidity(temp, "PC");
                 PC = temp;
                 break;
             case RETURN: // 24
                 /* PC=pop(); */
-                PC = stack.pop();
+                num = stack.pop();
+                ensureValidity(num, "PC");
+                PC = num;
                 break;
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
                 temp = stack.pop();
                 stack.SP += value;
+                ensureValidity(temp, "PC");
                 PC = temp;
                 break;
             case HALT:   // 26
@@ -282,7 +299,7 @@ public class Driver {
                 try {
                     stack.push(stack.pop() / temp);
                 } catch (ArithmeticException e) {
-                    System.err.println("ERROR 1: Attemp to divide by zero");
+                    System.err.println("ERROR 1: Attempt to divide by zero");
                     System.exit(1);
                 }
                 PC++;
@@ -290,7 +307,12 @@ public class Driver {
             case MOD:    // 31
                 /* temp=pop(); push( pop() % temp ); */
                 temp = stack.pop();
-                stack.push(stack.pop() % temp);
+                try {
+                    stack.push(stack.pop() % temp);
+                } catch (ArithmeticException e) {
+                    System.err.println("ERROR 1: Attempt to mod by zero");
+                    System.exit(1);
+                }
                 PC++;
                 break;
             case OR:     // 32
@@ -325,7 +347,6 @@ public class Driver {
                 break;
             case ADDX:   // 37
                 /* push( pop()+addr ); */
-                ensureValidity(addr);
                 stack.push(stack.pop() + addr);
                 PC += 2;
                 break;
@@ -346,7 +367,7 @@ public class Driver {
                         System.err.println("ERROR 7: Attempted to READ past end of file");
                         System.exit(7);
                     } else {
-                        System.err.println("Didn't account for this excpetion.  File this as a bug to Edward Banner at edward.banner@gmail.com");
+                        System.err.println("Didn't account for this excpetion.  Please report this bug to Edward Banner at edward.banner@gmail.com");
                         System.exit(42);
                     }
                 }
@@ -424,6 +445,8 @@ public class Driver {
     }
 
     public static void dump(int pop, int temp) {
+        // dumps memory in descending order
+        // pop MUST be greater than or equal to temp
         if (pop < temp || 0 > pop || pop > stack.height-1
                 || 0 < temp || temp > stack.height-1) {
             System.err.println("ERROR 4: Illegal dump range");
@@ -440,33 +463,26 @@ public class Driver {
         //stack.putContents(30, 0);
     }
 
-    /*public static void printMapping() {
-        // test and see if the addresses ARE mapped to the values 
-        // THANKS to rogerdpack from stackoverflow.com for this one!
-        for (Map.Entry<Integer, Integer> entry : opAddrToArg.entrySet()) {
-            System.out.println("Address: " + entry.getKey() + "  Argument: " +
-                    entry.getValue());
-        }
-    }*/
-
     public static void ensureValidity(Integer addr) {
+        // check to see if addr is in range
         if (0 <= addr && addr <= stack.height-1)
             return;
         else {
-            System.err.println("ERROR 2: Address out of range");
+            System.err.println("ERROR 2: Address out of range: " + addr);
             System.exit(2);
         }
     }
 
     public static void ensureValidity(int pointer, String identifier) {
+        // this method can be used to ensure either SP and/or PC are in range
         if (0 <= pointer && pointer <= stack.height-1)
             return;
         else {  /* pointer is out of range */
             if (identifier.equals("SP")) {
-                System.err.println("ERROR 3: SP out of range");
+                System.err.println("ERROR 3: SP out of range: " + pointer);
                 System.exit(3);
             } else {
-                System.err.println("ERROR 5: Invalid PC");
+                System.err.println("ERROR 5: Invalid PC: " + pointer);
                 System.exit(5);
             }
         }

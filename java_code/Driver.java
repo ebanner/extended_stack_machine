@@ -449,14 +449,6 @@ public class Driver {
         System.out.println("/\\/" + op + "\\/\\");
     }
 
-    public static Integer getArg(String instr) {
-        String[] args = instr.split(" ");
-        if (args.length == 1)
-            return null;
-        else
-            return Integer.parseInt(instr.split(" ")[1]);
-    }
-
     public static void dump(int pop, int temp) {
         // dumps memory in descending order
         // pop MUST be greater than or equal to temp

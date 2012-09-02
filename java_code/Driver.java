@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-/* TODO: Support `:' for skipping over memory cells
- *       Support `%' to denote the different sections in a program
+/* TODO: Support `%' to denote the different sections in a program
  */
 
 public class Driver {
@@ -41,21 +40,18 @@ public class Driver {
             stack.reveal();
             System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         }
-
-        /* reveal the stack at the end for a great surprise! */
-        //stack.reveal();
-        //System.out.format("%nPC: %d  temp: %d%n", PC, temp);
-        //printMapping();
-        //executeInstruction(PC);
     }
 
     public static void initializeStack(int nextFreeAddr, String file) throws IOException {
         // this method
         //   1. parses the header
         //   2. inserts opcodes and data into memory cells in the stack machine
-        //   3. 
 
-        file = "tests/" + file;
+        // ############## Begin Parse Header ##################
+
+        int baseAddr = nextFreeAddr;  // keep the base address around
+        
+        file = "tests/" + file;  // append files with directory path for testing purposes
         try {  // open up a new scanner on the source file
             sc = new Scanner(new BufferedReader(new FileReader(file)));
         } catch (Exception e) {
@@ -67,42 +63,84 @@ public class Driver {
         // information about a header that we find useful
         Header header = new Header(sc); 
         sc = header.parseHeader();
+        
+        // ################ End Parse Header #################
 
         String instruction = null;
 
-        try {  /* open up a scanner and start reading all lines of input */
-            in = new Scanner(System.in);
+        try {
+            //in = new Scanner(System.in);
+            while ((instruction = sc.nextLine()).charAt(0) != '%') {  /* grab the next instruction */
+                // trim off whitespace
+                instruction = instruction.trim();
 
-            while (sc.hasNextLine()) {  /* grab the next instruction */
-                /* trim off whitespace to the left and right */
-                instruction = sc.nextLine().trim();
+                if (instruction.isEmpty() || instruction.charAt(0) == '#') {
+                    continue; // skip blank lines and comments
+                }
+                // insert the opcode/data into the stack machine
+                // or skip over memory cells if the instruction begins with `:'
+                nextFreeAddr = insertOpcode(nextFreeAddr, instruction);
+            }
 
-                if (instruction.isEmpty()) {
-                    // skip blank lines
-                    continue;
-                } else if (Pattern.matches(".*#.*", instruction)) {
-                    /* if the line contains a comment, 
-                    /* grab the part of the string before the `;' and trim off
-                     * excess whitespce */
-                    instruction = instruction.split("#")[0].trim();
-                    if (instruction.isEmpty())
-                        continue;
+            // ############# BEGIN RELOCATION PROCESS ###############
+            
+            while ((instruction = sc.nextLine()).charAt(0) != '%') {  
+                instruction = instruction.trim();
+
+                if (instruction.isEmpty() || instruction.charAt(0) == '#') {
+                    continue; // skip blank lines and comments
                 }
 
-                // put the instruction's opcode on the stack so PC to read it
-                // later
-                insertOpcode(nextFreeAddr, instruction);
-                System.out.println(instruction);
-
-                /* point nextFreeAddr to the next free position on the stack to stick
-                 * the next opcode */
-                nextFreeAddr++;
+                nextFreeAddr = insertRelocation(baseAddr, instruction, nextFreeAddr);
             }
         } finally {
             // close the scanners
             if (sc != null)
                 sc.close();
         }
+    }
+    
+    public static int insertOpcode(int nextFreeAddr, String instr) {
+        // inserts the opcode of the next instruction or skips over a number of
+        // memory cells if a line staring with `:' is encountered
+                                                                                
+        String number = "^-?(\\d)+$";
+        String colonInstruction = "^:(\\d)+$";
+                                                                                
+        if (Pattern.matches(number, instr)) {
+            /* we now know that we have a digit */
+            stack.putContents(nextFreeAddr, Integer.parseInt(instr));
+            System.out.println("Digit: " + instr);
+            nextFreeAddr++;
+        } else if (Pattern.matches(colonInstruction, instr)) {
+            System.out.println("Colon: " + instr);
+            nextFreeAddr += Integer.parseInt(instr.split(":")[1]);
+        } else {
+            /* test to see if the next value is a digit */
+            System.err.println("ERROR: Not a valid line:");
+            System.err.println("  " + instr);
+            System.exit(1);
+        }
+                                                                                
+        return nextFreeAddr;
+    }
+
+    public static int insertRelocation(int baseAddr, String value, int nextFreeAddr) {
+        // insert into the current memory address the following:
+        //     *(baseAddr+value) + baseAddr
+
+        String number = "^-?(\\d)+$";
+
+        if (! Pattern.matches(number, value)) {
+            System.err.println("ERROR: Not a valid line:");
+            System.err.println("  " + value);
+            System.exit(1);
+        } else {
+            int num = Integer.parseInt(value);
+            stack.putContents(nextFreeAddr, stack.getContents(baseAddr+num) + baseAddr);
+        }
+
+        return nextFreeAddr++;
     }
 
     public static int executeInstruction(int PC) {
@@ -124,7 +162,6 @@ public class Driver {
                 break;
             case PUSH:   // 1
                 /* push(*addr); */
-                ensureValidity(addr);
                 stack.push(stack.getContents(addr));
                 PC += 2;
                 break;
@@ -136,20 +173,17 @@ public class Driver {
             case PUSHS:  // 3
                 /* push(*pop()); */
                 num = stack.pop();
-                ensureValidity(num);
                 stack.push(stack.getContents(num));
                 PC++;
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
                 num = stack.pop()+addr;
-                ensureValidity(num);
                 stack.push(stack.getContents(num));
                 PC += 2;
                 break;
             case POP:    // 5
                 /* *addr=pop(); */
-                ensureValidity(addr);
                 stack.putContents(addr, stack.pop());
                 PC += 2;
                 break;
@@ -157,7 +191,6 @@ public class Driver {
                 /* temp=pop(); *pop()=temp; */
                 temp = stack.pop();
                 num = stack.pop();
-                ensureValidity(num);
                 stack.putContents(num, temp);
                 PC++;
                 break;
@@ -165,28 +198,23 @@ public class Driver {
                 /* temp=pop(); *(pop()+addr)=temp; */
                 temp = stack.pop();
                 num = stack.pop()+addr;
-                ensureValidity(num);
                 stack.putContents(num, temp);
                 PC += 2;
                 break;
             case DUPL:   // 8
                 /* push(*SP); */
-                ensureValidity(stack.SP, "SP");
                 stack.push(stack.getContents(stack.SP));
                 PC++;
                 break;
             case SWAP:   // 9
                 /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
-                ensureValidity(stack.SP, "SP");
                 temp = stack.getContents(stack.SP);
-                ensureValidity(stack.SP+1);
                 stack.putContents(stack.SP, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
                 PC++;
                 break;
             case OVER:   // 10
                 /* push(*(SP+1)); */
-                ensureValidity(stack.SP+1);
                 stack.push(stack.getContents(stack.SP+1));
                 PC++;
                 break;
@@ -197,11 +225,8 @@ public class Driver {
                 break;
             case ROT:    // 12
                 /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
-                ensureValidity(stack.SP, "SP");
                 temp = stack.getContents(stack.SP);
-                ensureValidity(stack.SP+2);
                 stack.putContents(stack.SP, stack.getContents(stack.SP+2));
-                ensureValidity(stack.SP+1);
                 stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
                 PC++;
@@ -244,7 +269,6 @@ public class Driver {
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
-                ensureValidity(addr, "PC");
                 if (stack.pop() != 0) {
                     PC = addr;
                 } else {
@@ -253,7 +277,6 @@ public class Driver {
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
-                ensureValidity(addr, "PC");
                 if (stack.pop() == 0) {
                     PC = addr;
                 } else {
@@ -262,33 +285,28 @@ public class Driver {
                 break;
             case BR:     // 21
                 /* PC=addr; */
-                ensureValidity(addr, "PC");
                 PC = addr;
                 break;
             case CALL:   // 22
                 /* push(PC); PC=addr; */
                 stack.push(PC);
-                ensureValidity(addr, "PC");
                 PC = addr;
                 break;
             case CALLS:  // 23
                 /* temp=pop(); push(PC); PC=temp; */
                 temp = stack.pop();
                 stack.push(PC);
-                ensureValidity(temp, "PC");
                 PC = temp;
                 break;
             case RETURN: // 24
                 /* PC=pop(); */
                 num = stack.pop();
-                ensureValidity(num, "PC");
                 PC = num;
                 break;
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
                 temp = stack.pop();
                 stack.SP += value;
-                ensureValidity(temp, "PC");
                 PC = temp;
                 break;
             case HALT:   // 26
@@ -433,26 +451,9 @@ public class Driver {
 
         /* update SP */
         stack.putContents(0, stack.SP);
-        ensureValidity(stack.SP, "SP");
 
-        ensureValidity(PC, "PC");
         // return the new PC
         return PC;
-    }
-
-    public static void insertOpcode(int nextFreeAddr, String instr) {
-        /* inserts the opcode of the next instruction in the user's program
-         * into the next available free loaction (growing upwards) */
-
-        if (! Pattern.matches("^-?(\\d)+$", instr)) {
-            /* test to see if the next value is a digit */
-            System.out.println("Not a digit:");
-            System.out.println("  " + instr);
-            System.exit(1);
-        }
-
-        /* we now know that we have a digit */
-        stack.putContents(nextFreeAddr, Integer.parseInt(instr));
     }
 
     public static void pass(int op) {
@@ -476,31 +477,6 @@ public class Driver {
             stack.push(i-4);
         //stack.putContents(31, 49);
         //stack.putContents(30, 30);
-    }
-
-    public static void ensureValidity(Integer addr) {
-        // check to see if addr is in range
-        if (0 <= addr && addr <= stack.height-1)
-            return;
-        else {
-            System.err.println("ERROR 2: Address out of range: " + addr);
-            System.exit(2);
-        }
-    }
-
-    public static void ensureValidity(int pointer, String identifier) {
-        // this method can be used to ensure either SP and/or PC are in range
-        if (0 <= pointer && pointer <= stack.height-1)
-            return;
-        else {  /* pointer is out of range */
-            if (identifier.equals("SP")) {
-                System.err.println("ERROR 3: SP out of range: " + pointer);
-                System.exit(3);
-            } else {
-                System.err.println("ERROR 5: Invalid PC: " + pointer);
-                System.exit(5);
-            }
-        }
     }
 
     public static boolean instructionRequiresParameter(int opcode) {

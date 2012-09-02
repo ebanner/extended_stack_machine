@@ -18,6 +18,7 @@ public class Header {
         try {
             // this is the first line in the source code file
             this.type = sc.nextLine();
+            System.out.println("Type: " + this.type);
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
             System.exit(1);
@@ -32,6 +33,7 @@ public class Header {
         try {
             this.length = sc.nextInt();
             skipToEOL();
+            System.out.println("Length: " + this.length);
             // the first thing on this line should be an integer containing
             // the length of the program
         } catch (Exception e) {
@@ -42,6 +44,7 @@ public class Header {
         try {
             this.entry = sc.nextInt();
             skipToEOL();
+            System.out.println("Entry: " + this.entry);
             // the first thing on this line should be an integer containing
             // the entry point for the program counter
         } catch (Exception e) {
@@ -51,6 +54,7 @@ public class Header {
         }
 
         String text = sc.nextLine();
+        System.out.println("Text: " + text);
         // this line should be a line that starts with a `%' sign
         if (text.charAt(0) != '%') {
             System.err.println("ERROR: The line must start with a percent sign:");

@@ -1,0 +1,8 @@
+else if (Pattern.matches(".*#.*", instruction)) {
+    // if the line contains a comment, 
+    // grab the part of the string before the `;' and trim off
+    // excess whitespce
+    instruction = instruction.split("#")[0].trim();
+    if (instruction.isEmpty())
+        continue;
+}

@@ -17,6 +17,7 @@ public class Header {
 
         try {
             // this is the first line in the source code file
+            // it must be of the form `%SXX-E...'
             this.type = sc.nextLine();
             System.out.println("Type: " + this.type);
         } catch (Exception e) {
@@ -24,38 +25,37 @@ public class Header {
             System.exit(1);
         }
         if (! type.substring(0,6).equals("%SXX-E")) {
-            // first line of the executable MUST start with `%SXX-E'
             System.err.println("ERROR:  The first line in any sxx executable file must start with `%SXX-E':");
             System.err.println("  " + this.type);
             System.exit(1);
         }
 
         try {
+            // the first thing on this line should be an integer containing the
+            // length of the program
             this.length = sc.nextInt();
             skipToEOL();
             System.out.println("Length: " + this.length);
-            // the first thing on this line should be an integer containing
-            // the length of the program
         } catch (Exception e) {
             System.err.println("ERROR: The first thing in this line must be the length of the program:");
             System.err.println("  " + this.length);
             System.exit(1);
         }
         try {
+            // the first thing on this line should be an integer containing
+            // the entry point for the program counter
             this.entry = sc.nextInt();
             skipToEOL();
             System.out.println("Entry: " + this.entry);
-            // the first thing on this line should be an integer containing
-            // the entry point for the program counter
         } catch (Exception e) {
             System.err.println("ERROR: The first thing in the line must be the entry point:");
             System.err.println("  " + this.length);
             System.exit(1);
         }
 
+        // this line should be a line that starts with a `%' sign
         String text = sc.nextLine();
         System.out.println("Text: " + text);
-        // this line should be a line that starts with a `%' sign
         if (text.charAt(0) != '%') {
             System.err.println("ERROR: The line must start with a percent sign:");
             System.err.println("  " + text);

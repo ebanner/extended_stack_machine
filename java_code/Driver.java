@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-/* TODO: Figure out how to execute instructions
- *       Support `:' skipping over memory cells
+/* TODO: Support `:' for skipping over memory cells
  *       Support `%' to denote the different sections in a program
  */
 
@@ -21,14 +20,16 @@ public class Driver {
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
     public static Scanner in = null;
+    // scanner used for parsing the source file
+    public static Scanner sc = null;
 
     public static void main(String[] args) throws IOException {
-
         /* assume for now that opcodes start at position 16 */
         int baseAddr = 16;
+        String file = args[0];
 
         /* throw the opcodes onto the stack */
-        initializeStack(baseAddr, args[0]);
+        initializeStack(baseAddr, file);
         putTestValuesOnStack();  /* DEBUGGING */
 
         int PC = baseAddr;
@@ -49,38 +50,47 @@ public class Driver {
     }
 
     public static void initializeStack(int nextFreeAddr, String file) throws IOException {
-        /* place opcodes onto the stack starting at location 16 for now */
+        // this method
+        //   1. parses the header
+        //   2. inserts opcodes and data into memory cells in the stack machine
+        //   3. 
 
-        /* keep track of where the next position an opcode needs to go on the
-         * stack */
-        Scanner sc = null;
-        String instruction = null;
         file = "tests/" + file;
+        try {  // open up a new scanner on the source file
+            sc = new Scanner(new BufferedReader(new FileReader(file)));
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
+            System.exit(1);
+        }
+                                                                          
+        // a `Header' object's sole purpose is to parse a header and hold
+        // information about a header that we find useful
+        Header header = new Header(sc); 
+        sc = header.parseHeader();
+
+        String instruction = null;
 
         try {  /* open up a scanner and start reading all lines of input */
-            //sc = new Scanner(new BufferedReader(new FileReader("tests/pushs.esm")));
-            sc = new Scanner(new BufferedReader(new FileReader(file)));
             in = new Scanner(System.in);
 
             while (sc.hasNextLine()) {  /* grab the next instruction */
                 /* trim off whitespace to the left and right */
                 instruction = sc.nextLine().trim();
 
-                //if (Pattern.matches("^(\\s)+$", instruction)) {
                 if (instruction.isEmpty()) {
                     // skip blank lines
                     continue;
-                } else if (Pattern.matches(".*;.*", instruction)) {
+                } else if (Pattern.matches(".*#.*", instruction)) {
                     /* if the line contains a comment, 
                     /* grab the part of the string before the `;' and trim off
                      * excess whitespce */
-                    instruction = instruction.split(";")[0].trim();
-                    if (instruction.equals(""))
+                    instruction = instruction.split("#")[0].trim();
+                    if (instruction.isEmpty())
                         continue;
                 }
 
-                /* put the instruction's opcode on the stack so PC to read it
-                 * later */
+                // put the instruction's opcode on the stack so PC to read it
+                // later
                 insertOpcode(nextFreeAddr, instruction);
                 System.out.println(instruction);
 

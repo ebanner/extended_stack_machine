@@ -31,8 +31,8 @@ public class Header {
         }
 
         try {
-            // the first thing on this line should be an integer containing the
-            // length of the program
+            // the first thing on next line must be an integer containing the
+            // number of words that will be inserted into the stack machine
             this.length = sc.nextInt();
             skipToEOL();
             System.out.println("Length: " + this.length);
@@ -42,7 +42,7 @@ public class Header {
             System.exit(1);
         }
         try {
-            // the first thing on this line should be an integer containing
+            // the first thing on the next line must be an integer containing
             // the entry point for the program counter
             this.entry = sc.nextInt();
             skipToEOL();
@@ -53,7 +53,7 @@ public class Header {
             System.exit(1);
         }
 
-        // this line should be a line that starts with a `%' sign
+        // the next line must start with a `%'
         String text = sc.nextLine();
         System.out.println("Text: " + text);
         if (text.charAt(0) != '%') {
@@ -62,6 +62,8 @@ public class Header {
             System.exit(1);
         }
 
+        // return the scanner so the rest of the program can pick up where the
+        // header leaves off
         return sc;
     }
 

@@ -16,7 +16,7 @@ public class Driver {
     /* this is *the* master stack in the stack machine emulator */
     public static final Stack stack = new Stack(50);
     /* values used to help compute the values of instructions */
-    public static int temp;
+    public static int temp, t1, t2;
     /* TRACE mode can either be ON of OFF */
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */

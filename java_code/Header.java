@@ -8,7 +8,7 @@ public class Header {
     public String type;  // e.g. SXX-E for Executable
     public int length;   // length of program
     public int entry;    // how far off the offset to start PC
-    public boolean newStyle;  // program is `New Style' is type is `%SXX+E'
+    public boolean oldStyle;  // program is `New Style' is type is `%SXX+E'
 
     public Header(Scanner sc) {
         this.sc = sc;
@@ -25,7 +25,7 @@ public class Header {
             System.out.println("Type: " + this.type);
             // read the FUCKING manual next time
             if (Pattern.matches("^%SXX[+-]E", this.type)) {
-                this.newStyle = (this.type.charAt(4) == '+') ? true : false;
+                this.oldStyle = (this.type.charAt(4) == '-') ? true : false;
             } else {
                 System.err.println("ERROR:  The first line in any SXX " +
                         "executable file must start with `%SXX[+-]E':");

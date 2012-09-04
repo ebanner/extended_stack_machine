@@ -3,13 +3,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import java.util.Random;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-/* TODO: Ensure the length is less than 15,999 - 15 + 1 = 15985
- *       Before inserting an opcode, check to make sure the length isn't
- *         exceeded
- *       Support the legacy opcode convention by subtracting 1 from every
+/* TODO: Support the legacy opcode convention by subtracting 1 from every
  *         opcode that's higher than 22
  */
 
@@ -23,39 +21,42 @@ public class Driver {
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
     public static Scanner in = null;
+    // if oldStyle is true, then we are using the legacy opcode numbering
+    // convention
+    public static boolean oldStyle;
 
     public static void main(String[] args) throws IOException {
         /* assume for now that opcodes start at position 16 */
+        //int baseAddr = new Random().nextInt(984) + 16;
         int baseAddr = 16;
         String file = args[0];
 
-        /* throw the opcodes onto the stack */
-        initializeStack(baseAddr, file);
-        putTestValuesOnStack();  /* DEBUGGING */
+        // insert opcodes and data into the stack machine
+        int entryPoint = initializeStack(baseAddr, file);
 
-        int PC = baseAddr;
-        stack.reveal();
-        System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
+        int PC = baseAddr + entryPoint;
+        //System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
         
         // open up a scanner to read input
         in = new Scanner(System.in);
         while (stack.getContents(PC) != HALT) {
             // keep executing instructions until a HALT command is reached
             PC = executeInstruction(PC);
-            stack.reveal();
-            System.out.format("%nPC: %d  temp: %d%n", PC, temp);
+            //stack.reveal();
+            //System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         }
+        stack.reveal();
+        System.out.format("%nPC: %d  temp: %d%n", PC, temp);
     }
 
-    public static void initializeStack(int nextFreeAddr, String file) throws IOException {
+    public static int initializeStack(int nextFreeAddr, String file) throws IOException {
         // this method
         //   1. parses the header
         //   2. inserts opcodes and data into memory cells in the stack machine
+        // this method returns the entry point for which PC's initial value
+        // will be calculated with
         
         int baseAddr = nextFreeAddr;  // keep the base address around
-
-        // ############## BEGIN PARSE HEADER ##################
-
         Scanner sc = null;
         try {  // open up a new scanner on the source file
             sc = new Scanner(new BufferedReader(new FileReader(file)));
@@ -64,10 +65,13 @@ public class Driver {
             System.exit(1);
         }
                                                                           
-        // a `Header' object's sole purpose is to parse a header and hold
+        // ############## BEGIN PARSE HEADER ##################
+        // a `Header' object's purpose is to parse a header and hold
         // information about a header that we find useful
         Header header = new Header(sc); 
         sc = header.parseHeader();
+        // the header will tell us if we're using old style opcode numbering
+        oldStyle = header.oldStyle;
 
         if (0 > header.length || 
                 header.length > stack.height-baseAddr) {
@@ -99,6 +103,8 @@ public class Driver {
                 words += nextFreeAddr - currFreeAddr;
             }
         } 
+        System.out.println("Stack after opcodes/data have been inserted:");
+        stack.reveal();
         // ############### END INSERTING OPCODES ################
 
         // ############# BEGIN RELOCATION PROCESS ###############
@@ -114,6 +120,8 @@ public class Driver {
                 nextFreeAddr = insertRelocation(baseAddr, opcode, nextFreeAddr);
             }
         }
+        System.out.println("Stack after relocation:");
+        stack.reveal();
         // ############## END RELOCATION PROCESS ################
 
         try { }
@@ -121,6 +129,7 @@ public class Driver {
             if (sc != null)
                 sc.close();  // close the scanner
         }
+        return header.entry;
     }
     
     public static int insertOpcode(int nextFreeAddr, String instr) {
@@ -167,6 +176,13 @@ public class Driver {
 
     public static int executeInstruction(int PC) {
         int opcode = stack.getContents(PC);
+        // support legacy opcode numbering convention
+        if (opcode > 22 && oldStyle == true) {
+            opcode--;
+        }
+        stack.reveal();
+        System.out.format("PC: %d  temp: %d%n%n", PC, temp);
+        System.out.println("Executing opcode: " + opcode);
         int addr, value, num; 
         addr = value = num = 0;
 
@@ -469,6 +485,10 @@ public class Driver {
                 dump(stack.pop(), temp);
                 PC++;
                 break;
+            default:
+                System.err.println("ERROR: Invalid opcode");
+                System.err.println("  " + opcode);
+                System.exit(1);
         }
 
         /* update SP */

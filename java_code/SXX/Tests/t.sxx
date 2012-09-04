@@ -1,0 +1,94 @@
+%SXX-Executable
+321 text length
+302 ENTRY file=tests.out
+% text
+# File reads.out
+# Offset 0
+9
+40
+8
+2
+-1
+27
+20
+21
+10
+10
+6
+2
+10
+27
+20
+26
+2
+1
+26
+21
+1
+11
+2
+0
+6
+23
+2
+0
+7
+1
+23
+# File writes.out
+# Offset 31
+9
+8
+3
+8
+20
+43
+41
+2
+1
+26
+21
+32
+37
+2
+23
+# File tests.out
+# Offset 46
+:256
+2
+46
+22
+0
+1
+46
+20
+320
+2
+46
+22
+31
+2
+46
+22
+31
+21
+302
+25
+% relocation dictionary
+7
+15
+20
+36
+42
+303
+305
+307
+309
+311
+313
+315
+317
+319
+% end of executable module
+# PUBLIC read_string 0 file=reads.out
+# PUBLIC write_string 31 file=writes.out

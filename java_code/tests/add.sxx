@@ -1,6 +1,10 @@
-%SXX-Executable
-400 text length
-292 ENTRY file=fmem.out
+%SXX+Executable
+#
+#
+3 text length
+#
+0 ENTRY file=fmem.out
+#
 % text
 27
 :1

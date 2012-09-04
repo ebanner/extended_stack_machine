@@ -6,21 +6,23 @@ import java.util.regex.Pattern;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-/* TODO: Support `%' to denote the different sections in a program
+/* TODO: Ensure the length is less than 15,999 - 15 + 1 = 15985
+ *       Before inserting an opcode, check to make sure the length isn't
+ *         exceeded
+ *       Support the legacy opcode convention by subtracting 1 from every
+ *         opcode that's higher than 22
  */
 
 public class Driver {
 
     /* this is *the* master stack in the stack machine emulator */
-    public static final Stack stack = new Stack(50);  
+    public static final Stack stack = new Stack(50);
     /* values used to help compute the values of instructions */
     public static int temp, t1, t2;
     /* TRACE mode can either be ON of OFF */
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
     public static Scanner in = null;
-    // scanner used for parsing the source file
-    public static Scanner sc = null;
 
     public static void main(String[] args) throws IOException {
         /* assume for now that opcodes start at position 16 */
@@ -34,6 +36,9 @@ public class Driver {
         int PC = baseAddr;
         stack.reveal();
         System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
+        
+        // open up a scanner to read input
+        in = new Scanner(System.in);
         while (stack.getContents(PC) != HALT) {
             // keep executing instructions until a HALT command is reached
             PC = executeInstruction(PC);
@@ -46,12 +51,12 @@ public class Driver {
         // this method
         //   1. parses the header
         //   2. inserts opcodes and data into memory cells in the stack machine
-
-        // ############## Begin Parse Header ##################
-
-        int baseAddr = nextFreeAddr;  // keep the base address around
         
-        file = "tests/" + file;  // append files with directory path for testing purposes
+        int baseAddr = nextFreeAddr;  // keep the base address around
+
+        // ############## BEGIN PARSE HEADER ##################
+
+        Scanner sc = null;
         try {  // open up a new scanner on the source file
             sc = new Scanner(new BufferedReader(new FileReader(file)));
         } catch (Exception e) {
@@ -63,40 +68,58 @@ public class Driver {
         // information about a header that we find useful
         Header header = new Header(sc); 
         sc = header.parseHeader();
+
+        if (0 > header.length || 
+                header.length > stack.height-baseAddr) {
+            System.err.println("Illegal length: Out of range");
+            System.err.println("  " + header.length);
+            System.exit(1);
+        }
+        // ################ END PARSE HEADER #################
         
-        // ################ End Parse Header #################
+        // ############ BEGIN INSERTING OPCODES ##############
+        String opcode = null;
+        int words = 0; // keep track of how many words are inserted into memory
+        int currFreeAddr;
+        while (sc.hasNextLine() && words <= header.length) {  // grab the next opcode
+            opcode = sc.nextLine().trim();  // trim off whitespace
 
-        String instruction = null;
-
-        try {
-            //in = new Scanner(System.in);
-            while ((instruction = sc.nextLine()).charAt(0) != '%') {  /* grab the next instruction */
-                // trim off whitespace
-                instruction = instruction.trim();
-
-                if (instruction.isEmpty() || instruction.charAt(0) == '#') {
-                    continue; // skip blank lines and comments
-                }
+            if (opcode.isEmpty() || opcode.charAt(0) == '#') {
+                continue; // skip blank lines and comments
+            } else if (opcode.charAt(0) == '%') {
+                break;  // break out of loop where we consider each element and
+                // opcode, data, or skipping command
+            } else {
+                currFreeAddr = nextFreeAddr;
                 // insert the opcode/data into the stack machine
-                // or skip over memory cells if the instruction begins with `:'
-                nextFreeAddr = insertOpcode(nextFreeAddr, instruction);
+                // or skip over memory cells if the opcode begins with `:'
+                nextFreeAddr = insertOpcode(nextFreeAddr, opcode);
+                // update the number of words that have been inserted into
+                // memory
+                words += nextFreeAddr - currFreeAddr;
             }
+        } 
+        // ############### END INSERTING OPCODES ################
 
-            // ############# BEGIN RELOCATION PROCESS ###############
-            
-            while ((instruction = sc.nextLine()).charAt(0) != '%') {  
-                instruction = instruction.trim();
+        // ############# BEGIN RELOCATION PROCESS ###############
+        while (sc.hasNextLine()) {  
+            opcode = sc.nextLine().trim();
 
-                if (instruction.isEmpty() || instruction.charAt(0) == '#') {
-                    continue; // skip blank lines and comments
-                }
-
-                nextFreeAddr = insertRelocation(baseAddr, instruction, nextFreeAddr);
+            if (opcode.isEmpty() || opcode.charAt(0) == '#') {
+                continue; // skip blank lines and comments
+            } else if (opcode.charAt(0) == '%') {
+                break;  // break out of loop where we consider each element and
+                // opcode, data, or skipping command
+            } else{
+                nextFreeAddr = insertRelocation(baseAddr, opcode, nextFreeAddr);
             }
-        } finally {
-            // close the scanners
+        }
+        // ############## END RELOCATION PROCESS ################
+
+        try { }
+        finally {
             if (sc != null)
-                sc.close();
+                sc.close();  // close the scanner
         }
     }
     
@@ -128,16 +151,15 @@ public class Driver {
     public static int insertRelocation(int baseAddr, String value, int nextFreeAddr) {
         // insert into the current memory address the following:
         //     *(baseAddr+value) + baseAddr
-
         String number = "^-?(\\d)+$";
 
         if (! Pattern.matches(number, value)) {
-            System.err.println("ERROR: Not a valid line:");
+            System.err.println("ERROR: Not a relocation value:");
             System.err.println("  " + value);
             System.exit(1);
         } else {
-            int num = Integer.parseInt(value);
-            stack.putContents(nextFreeAddr, stack.getContents(baseAddr+num) + baseAddr);
+            int addr = Integer.parseInt(value) + baseAddr;
+            stack.putContents(addr, stack.getContents(addr)+baseAddr);
         }
 
         return nextFreeAddr++;

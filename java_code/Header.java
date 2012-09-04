@@ -1,4 +1,6 @@
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Header {
 
@@ -6,6 +8,7 @@ public class Header {
     public String type;  // e.g. SXX-E for Executable
     public int length;   // length of program
     public int entry;    // how far off the offset to start PC
+    public boolean newStyle;  // program is `New Style' is type is `%SXX+E'
 
     public Header(Scanner sc) {
         this.sc = sc;
@@ -15,49 +18,38 @@ public class Header {
         // this method endows this Header object with all of its instance
         // variables by parsing the header of the source code file
 
-        try {
-            // this is the first line in the source code file
-            // it must be of the form `%SXX-E...'
-            this.type = sc.nextLine();
+        String line;
+
+        if (sc.hasNextLine()) {
+            this.type = sc.nextLine().substring(0,6);
             System.out.println("Type: " + this.type);
-        } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
-            System.exit(1);
-        }
-        if (! type.substring(0,6).equals("%SXX-E")) {
-            System.err.println("ERROR:  The first line in any sxx executable file must start with `%SXX-E':");
-            System.err.println("  " + this.type);
-            System.exit(1);
-        }
-
-        try {
-            // the first thing on next line must be an integer containing the
-            // number of words that will be inserted into the stack machine
-            this.length = sc.nextInt();
-            skipToEOL();
-            System.out.println("Length: " + this.length);
-        } catch (Exception e) {
-            System.err.println("ERROR: The first thing in this line must be the length of the program:");
-            System.err.println("  " + this.length);
-            System.exit(1);
-        }
-        try {
-            // the first thing on the next line must be an integer containing
-            // the entry point for the program counter
-            this.entry = sc.nextInt();
-            skipToEOL();
-            System.out.println("Entry: " + this.entry);
-        } catch (Exception e) {
-            System.err.println("ERROR: The first thing in the line must be the entry point:");
-            System.err.println("  " + this.length);
+            // read the FUCKING manual next time
+            if (Pattern.matches("^%SXX[+-]E", this.type)) {
+                this.newStyle = (this.type.charAt(4) == '+') ? true : false;
+            } else {
+                System.err.println("ERROR:  The first line in any SXX " +
+                        "executable file must start with `%SXX[+-]E':");
+                System.err.println("  " + this.type);
+            }
+        } else {
+            System.err.println("ERROR: Empty file");
             System.exit(1);
         }
 
-        // the next line must start with a `%'
-        String text = sc.nextLine();
-        System.out.println("Text: " + text);
-        if (text.charAt(0) != '%') {
-            System.err.println("ERROR: The line must start with a percent sign:");
+        // get the length and entry values of the header
+        this.length = returnFirstElement(sc, "length", "int" );
+        this.entry  = returnFirstElement(sc, "entry",  "int" );
+
+        if (0 > this.entry || this.entry >= this.length) {
+            System.err.println("ERROR: Illegal entry point");
+            System.exit(1);
+        }
+
+        char text = (char)returnFirstElement(sc, "text", "char");
+
+        if (text != '%') {
+            System.err.println("ERROR: `%' sign indicating start of text " +
+                    "missing:");
             System.err.println("  " + text);
             System.exit(1);
         }
@@ -69,5 +61,46 @@ public class Header {
 
     public void skipToEOL() {
         sc.nextLine();
+    }
+
+    public int returnFirstElement(Scanner sc, String value, String type) {
+        String line = null;
+
+        while (sc.hasNextLine()) {
+            line = sc.nextLine();
+            if (isCommentOrBlank(line)) {
+                continue;
+            } else {
+                try {
+                    if (type.equals("int")) {
+                        System.out.format("%s: %s%n", value, 
+                            Integer.parseInt(line.split("\\D")[0]));
+                    } else if (type.equals("char")) {
+                        return line.charAt((int)0);
+                    }
+                    return Integer.parseInt(line.split("\\D")[0]);
+                } catch (Exception e) {
+                    System.err.format("ERROR: The first thing in this line " +
+                            "must be the %s of the program:%n", value);
+                    System.err.println("  " + line);
+                    System.exit(1);
+                }
+            }
+        }
+        // didn't find an integer, so quit
+        System.err.format("No %s provided%n", value);
+        System.exit(1);
+
+        return -1;
+    }
+
+    public boolean isCommentOrBlank(String line) {
+        line = line.trim();
+
+        if (line.isEmpty() || line.charAt(0) == '#') {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

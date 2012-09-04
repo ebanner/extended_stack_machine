@@ -1,0 +1,83 @@
+%SXX-Executable
+317 text length
+302 entry point
+% text
+# File reads.out
+9
+40
+8
+2
+-1
+27
+20
+21
+10
+10
+6
+2
+10
+27
+20
+26
+2
+1
+26
+21
+1
+11
+2
+0
+6
+23
+2
+0
+7
+1
+23
+# File writes.out
+9
+8
+3
+8
+20
+43
+41
+2
+1
+26
+21
+32
+37
+2
+23
+# File tests.out
+:256
+2
+46
+22
+0
+1
+46
+20
+316
+2
+46
+22
+46
+21
+302
+25
+% relocation dictionary
+7
+15
+20
+36
+42
+303
+305
+307
+309
+311
+313
+315
+% end of executable module

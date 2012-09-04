@@ -31,14 +31,8 @@ public class Driver {
         int baseAddr = 16;
         String file = args[0];
 
-<<<<<<< HEAD
-        /* throw the opcodes onto the stack */
-        initializeStack(baseAddr, file);
-        putTestValuesOnStack();  /* DEBUGGING */
-=======
         // insert opcodes and data into the stack machine
         int entryPoint = initializeStack(baseAddr, file);
->>>>>>> experimental
 
         int PC = baseAddr + entryPoint;
         //System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
@@ -64,15 +58,7 @@ public class Driver {
         
         int baseAddr = nextFreeAddr;  // keep the base address around
         Scanner sc = null;
-<<<<<<< HEAD
-        String instruction = null;
-        file = "tests/" + file;  // just for debugging (saves some typing)
-
-        try {  /* open up a scanner and start reading all lines of input */
-            //sc = new Scanner(new BufferedReader(new FileReader("tests/pushs.esm")));
-=======
         try {  // open up a new scanner on the source file
->>>>>>> experimental
             sc = new Scanner(new BufferedReader(new FileReader(file)));
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
@@ -138,20 +124,6 @@ public class Driver {
         stack.reveal();
         // ############## END RELOCATION PROCESS ################
 
-<<<<<<< HEAD
-                //if (Pattern.matches("^(\\s)+$", instruction)) {
-                if (instruction.isEmpty()) {
-                    // skip blank lines
-                    continue;
-                } else if (Pattern.matches(".*#.*", instruction)) {
-                    /* if the line contains a comment, 
-                    /* grab the part of the string before the `;' and trim off
-                     * excess whitespce */
-                    instruction = instruction.split(";")[0].trim();
-                    if (instruction.equals(""))
-                        continue;
-                }
-=======
         try { }
         finally {
             if (sc != null)
@@ -184,7 +156,6 @@ public class Driver {
                                                                                 
         return nextFreeAddr;
     }
->>>>>>> experimental
 
     public static int insertRelocation(int baseAddr, String value, int nextFreeAddr) {
         // insert into the current memory address the following:
@@ -205,10 +176,6 @@ public class Driver {
 
     public static int executeInstruction(int PC) {
         int opcode = stack.getContents(PC);
-<<<<<<< HEAD
-        int addr, value, num, t1, t2; 
-        addr = value = num = t1 = t2 = 0;
-=======
         // support legacy opcode numbering convention
         if (opcode > 22 && oldStyle == true) {
             opcode--;
@@ -218,7 +185,6 @@ public class Driver {
         System.out.println("Executing opcode: " + opcode);
         int addr, value, num; 
         addr = value = num = 0;
->>>>>>> experimental
 
         if (instructionRequiresParameter(opcode)) {
             // if it's an instruction that needs an `addr' or `value'

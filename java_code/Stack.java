@@ -45,11 +45,23 @@ public class Stack {
 
     public int getContents(int addr) {  
         /* get the contents at a specific address */
+        if (0 > addr || addr > this.height-1) {
+            System.err.println("ERROR: Attempt to get a value from an address out of range");
+            System.err.println("  Illegal Address: " + addr);
+            System.exit(1);
+        }
+
         return this.stack[addr];
     }
 
     public void putContents(int addr, int value) {
         /* *addr = val */
+        if (0 > addr || addr > this.height-1) {
+            System.err.println("ERROR: Attempt to put a value into an address out of range");
+            System.err.println("  Illegal Address: " + addr);
+            System.exit(1);
+        } 
+
         this.stack[addr] = value;
     }
 

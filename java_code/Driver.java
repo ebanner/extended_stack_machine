@@ -3,70 +3,142 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import java.util.Random;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-/* TODO: Figure out how to execute instructions
- *       Support `:' skipping over memory cells
- *       Support `%' to denote the different sections in a program
+/* TODO: Support the legacy opcode convention by subtracting 1 from every
+ *         opcode that's higher than 22
  */
 
 public class Driver {
 
     /* this is *the* master stack in the stack machine emulator */
-    public static final Stack stack = new Stack(50);  
+    public static final Stack stack = new Stack(50);
     /* values used to help compute the values of instructions */
     public static int temp;
     /* TRACE mode can either be ON of OFF */
     public static boolean TRACE;
     /* scanner is used for READ and READC commands */
     public static Scanner in = null;
+    // if oldStyle is true, then we are using the legacy opcode numbering
+    // convention
+    public static boolean oldStyle;
 
     public static void main(String[] args) throws IOException {
-
         /* assume for now that opcodes start at position 16 */
+        //int baseAddr = new Random().nextInt(984) + 16;
         int baseAddr = 16;
         String file = args[0];
 
+<<<<<<< HEAD
         /* throw the opcodes onto the stack */
         initializeStack(baseAddr, file);
         putTestValuesOnStack();  /* DEBUGGING */
+=======
+        // insert opcodes and data into the stack machine
+        int entryPoint = initializeStack(baseAddr, file);
+>>>>>>> experimental
 
-        int PC = baseAddr;
-        stack.reveal();
-        System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
+        int PC = baseAddr + entryPoint;
+        //System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
+        
+        // open up a scanner to read input
+        in = new Scanner(System.in);
         while (stack.getContents(PC) != HALT) {
             // keep executing instructions until a HALT command is reached
             PC = executeInstruction(PC);
-            stack.reveal();
-            System.out.format("%nPC: %d  temp: %d%n", PC, temp);
+            //stack.reveal();
+            //System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         }
-
-        /* reveal the stack at the end for a great surprise! */
-        //stack.reveal();
-        //System.out.format("%nPC: %d  temp: %d%n", PC, temp);
-        //printMapping();
-        //executeInstruction(PC);
+        stack.reveal();
+        System.out.format("%nPC: %d  temp: %d%n", PC, temp);
     }
 
-    public static void initializeStack(int nextFreeAddr, String file) throws IOException {
-        /* place opcodes onto the stack starting at location 16 for now */
-
-        /* keep track of where the next position an opcode needs to go on the
-         * stack */
+    public static int initializeStack(int nextFreeAddr, String file) throws IOException {
+        // this method
+        //   1. parses the header
+        //   2. inserts opcodes and data into memory cells in the stack machine
+        // this method returns the entry point for which PC's initial value
+        // will be calculated with
+        
+        int baseAddr = nextFreeAddr;  // keep the base address around
         Scanner sc = null;
+<<<<<<< HEAD
         String instruction = null;
         file = "tests/" + file;  // just for debugging (saves some typing)
 
         try {  /* open up a scanner and start reading all lines of input */
             //sc = new Scanner(new BufferedReader(new FileReader("tests/pushs.esm")));
+=======
+        try {  // open up a new scanner on the source file
+>>>>>>> experimental
             sc = new Scanner(new BufferedReader(new FileReader(file)));
-            in = new Scanner(System.in);
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
+            System.exit(1);
+        }
+                                                                          
+        // ############## BEGIN PARSE HEADER ##################
+        // a `Header' object's purpose is to parse a header and hold
+        // information about a header that we find useful
+        Header header = new Header(sc); 
+        sc = header.parseHeader();
+        // the header will tell us if we're using old style opcode numbering
+        oldStyle = header.oldStyle;
 
-            while (sc.hasNextLine()) {  /* grab the next instruction */
-                /* trim off whitespace to the left and right */
-                instruction = sc.nextLine().trim();
+        if (0 > header.length || 
+                header.length > stack.height-baseAddr) {
+            System.err.println("Illegal length: Out of range");
+            System.err.println("  " + header.length);
+            System.exit(1);
+        }
+        // ################ END PARSE HEADER #################
+        
+        // ############ BEGIN INSERTING OPCODES ##############
+        String opcode = null;
+        int words = 0; // keep track of how many words are inserted into memory
+        int currFreeAddr;
+        while (sc.hasNextLine() && words <= header.length) {  // grab the next opcode
+            opcode = sc.nextLine().trim();  // trim off whitespace
 
+            if (opcode.isEmpty() || opcode.charAt(0) == '#') {
+                continue; // skip blank lines and comments
+            } else if (opcode.charAt(0) == '%') {
+                break;  // break out of loop where we consider each element and
+                // opcode, data, or skipping command
+            } else {
+                currFreeAddr = nextFreeAddr;
+                // insert the opcode/data into the stack machine
+                // or skip over memory cells if the opcode begins with `:'
+                nextFreeAddr = insertOpcode(nextFreeAddr, opcode);
+                // update the number of words that have been inserted into
+                // memory
+                words += nextFreeAddr - currFreeAddr;
+            }
+        } 
+        System.out.println("Stack after opcodes/data have been inserted:");
+        stack.reveal();
+        // ############### END INSERTING OPCODES ################
+
+        // ############# BEGIN RELOCATION PROCESS ###############
+        while (sc.hasNextLine()) {  
+            opcode = sc.nextLine().trim();
+
+            if (opcode.isEmpty() || opcode.charAt(0) == '#') {
+                continue; // skip blank lines and comments
+            } else if (opcode.charAt(0) == '%') {
+                break;  // break out of loop where we consider each element and
+                // opcode, data, or skipping command
+            } else{
+                nextFreeAddr = insertRelocation(baseAddr, opcode, nextFreeAddr);
+            }
+        }
+        System.out.println("Stack after relocation:");
+        stack.reveal();
+        // ############## END RELOCATION PROCESS ################
+
+<<<<<<< HEAD
                 //if (Pattern.matches("^(\\s)+$", instruction)) {
                 if (instruction.isEmpty()) {
                     // skip blank lines
@@ -79,27 +151,74 @@ public class Driver {
                     if (instruction.equals(""))
                         continue;
                 }
-
-                /* put the instruction's opcode on the stack so PC to read it
-                 * later */
-                insertOpcode(nextFreeAddr, instruction);
-                System.out.println(instruction);
-
-                /* point nextFreeAddr to the next free position on the stack to stick
-                 * the next opcode */
-                nextFreeAddr++;
-            }
-        } finally {
-            // close the scanners
+=======
+        try { }
+        finally {
             if (sc != null)
-                sc.close();
+                sc.close();  // close the scanner
         }
+        return header.entry;
+    }
+    
+    public static int insertOpcode(int nextFreeAddr, String instr) {
+        // inserts the opcode of the next instruction or skips over a number of
+        // memory cells if a line staring with `:' is encountered
+                                                                                
+        String number = "^-?(\\d)+$";
+        String colonInstruction = "^:(\\d)+$";
+                                                                                
+        if (Pattern.matches(number, instr)) {
+            /* we now know that we have a digit */
+            stack.putContents(nextFreeAddr, Integer.parseInt(instr));
+            System.out.println("Digit: " + instr);
+            nextFreeAddr++;
+        } else if (Pattern.matches(colonInstruction, instr)) {
+            System.out.println("Colon: " + instr);
+            nextFreeAddr += Integer.parseInt(instr.split(":")[1]);
+        } else {
+            /* test to see if the next value is a digit */
+            System.err.println("ERROR: Not a valid line:");
+            System.err.println("  " + instr);
+            System.exit(1);
+        }
+                                                                                
+        return nextFreeAddr;
+    }
+>>>>>>> experimental
+
+    public static int insertRelocation(int baseAddr, String value, int nextFreeAddr) {
+        // insert into the current memory address the following:
+        //     *(baseAddr+value) + baseAddr
+        String number = "^-?(\\d)+$";
+
+        if (! Pattern.matches(number, value)) {
+            System.err.println("ERROR: Not a relocation value:");
+            System.err.println("  " + value);
+            System.exit(1);
+        } else {
+            int addr = Integer.parseInt(value) + baseAddr;
+            stack.putContents(addr, stack.getContents(addr)+baseAddr);
+        }
+
+        return nextFreeAddr++;
     }
 
     public static int executeInstruction(int PC) {
         int opcode = stack.getContents(PC);
+<<<<<<< HEAD
         int addr, value, num, t1, t2; 
         addr = value = num = t1 = t2 = 0;
+=======
+        // support legacy opcode numbering convention
+        if (opcode > 22 && oldStyle == true) {
+            opcode--;
+        }
+        stack.reveal();
+        System.out.format("PC: %d  temp: %d%n%n", PC, temp);
+        System.out.println("Executing opcode: " + opcode);
+        int addr, value, num; 
+        addr = value = num = 0;
+>>>>>>> experimental
 
         if (instructionRequiresParameter(opcode)) {
             // if it's an instruction that needs an `addr' or `value'
@@ -115,7 +234,6 @@ public class Driver {
                 break;
             case PUSH:   // 1
                 /* push(*addr); */
-                ensureValidity(addr);
                 stack.push(stack.getContents(addr));
                 PC += 2;
                 break;
@@ -127,20 +245,17 @@ public class Driver {
             case PUSHS:  // 3
                 /* push(*pop()); */
                 num = stack.pop();
-                ensureValidity(num);
                 stack.push(stack.getContents(num));
                 PC++;
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
                 num = stack.pop()+addr;
-                ensureValidity(num);
                 stack.push(stack.getContents(num));
                 PC += 2;
                 break;
             case POP:    // 5
                 /* *addr=pop(); */
-                ensureValidity(addr);
                 stack.putContents(addr, stack.pop());
                 PC += 2;
                 break;
@@ -148,7 +263,6 @@ public class Driver {
                 /* temp=pop(); *pop()=temp; */
                 temp = stack.pop();
                 num = stack.pop();
-                ensureValidity(num);
                 stack.putContents(num, temp);
                 PC++;
                 break;
@@ -156,28 +270,23 @@ public class Driver {
                 /* temp=pop(); *(pop()+addr)=temp; */
                 temp = stack.pop();
                 num = stack.pop()+addr;
-                ensureValidity(num);
                 stack.putContents(num, temp);
                 PC += 2;
                 break;
             case DUPL:   // 8
                 /* push(*SP); */
-                ensureValidity(stack.SP, "SP");
                 stack.push(stack.getContents(stack.SP));
                 PC++;
                 break;
             case SWAP:   // 9
                 /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
-                ensureValidity(stack.SP, "SP");
                 temp = stack.getContents(stack.SP);
-                ensureValidity(stack.SP+1);
                 stack.putContents(stack.SP, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
                 PC++;
                 break;
             case OVER:   // 10
                 /* push(*(SP+1)); */
-                ensureValidity(stack.SP+1);
                 stack.push(stack.getContents(stack.SP+1));
                 PC++;
                 break;
@@ -188,11 +297,8 @@ public class Driver {
                 break;
             case ROT:    // 12
                 /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
-                ensureValidity(stack.SP, "SP");
                 temp = stack.getContents(stack.SP);
-                ensureValidity(stack.SP+2);
                 stack.putContents(stack.SP, stack.getContents(stack.SP+2));
-                ensureValidity(stack.SP+1);
                 stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
                 PC++;
@@ -235,7 +341,6 @@ public class Driver {
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
-                ensureValidity(addr, "PC");
                 if (stack.pop() != 0) {
                     PC = addr;
                 } else {
@@ -244,7 +349,6 @@ public class Driver {
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
-                ensureValidity(addr, "PC");
                 if (stack.pop() == 0) {
                     PC = addr;
                 } else {
@@ -253,33 +357,28 @@ public class Driver {
                 break;
             case BR:     // 21
                 /* PC=addr; */
-                ensureValidity(addr, "PC");
                 PC = addr;
                 break;
             case CALL:   // 22
                 /* push(PC); PC=addr; */
                 stack.push(PC);
-                ensureValidity(addr, "PC");
                 PC = addr;
                 break;
             case CALLS:  // 23
                 /* temp=pop(); push(PC); PC=temp; */
                 temp = stack.pop();
                 stack.push(PC);
-                ensureValidity(temp, "PC");
                 PC = temp;
                 break;
             case RETURN: // 24
                 /* PC=pop(); */
                 num = stack.pop();
-                ensureValidity(num, "PC");
                 PC = num;
                 break;
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
                 temp = stack.pop();
                 stack.SP += value;
-                ensureValidity(temp, "PC");
                 PC = temp;
                 break;
             case HALT:   // 26
@@ -420,30 +519,17 @@ public class Driver {
                 dump(stack.pop(), temp);
                 PC++;
                 break;
+            default:
+                System.err.println("ERROR: Invalid opcode");
+                System.err.println("  " + opcode);
+                System.exit(1);
         }
 
         /* update SP */
         stack.putContents(0, stack.SP);
-        ensureValidity(stack.SP, "SP");
 
-        ensureValidity(PC, "PC");
         // return the new PC
         return PC;
-    }
-
-    public static void insertOpcode(int nextFreeAddr, String instr) {
-        /* inserts the opcode of the next instruction in the user's program
-         * into the next available free loaction (growing upwards) */
-
-        if (! Pattern.matches("^-?(\\d)+$", instr)) {
-            /* test to see if the next value is a digit */
-            System.out.println("Not a digit:");
-            System.out.println("  " + instr);
-            System.exit(1);
-        }
-
-        /* we now know that we have a digit */
-        stack.putContents(nextFreeAddr, Integer.parseInt(instr));
     }
 
     public static void pass(int op) {
@@ -467,31 +553,6 @@ public class Driver {
             stack.push(i-4);
         //stack.putContents(31, 49);
         //stack.putContents(30, 30);
-    }
-
-    public static void ensureValidity(Integer addr) {
-        // check to see if addr is in range
-        if (0 <= addr && addr <= stack.height-1)
-            return;
-        else {
-            System.err.println("ERROR 2: Address out of range: " + addr);
-            System.exit(2);
-        }
-    }
-
-    public static void ensureValidity(int pointer, String identifier) {
-        // this method can be used to ensure either SP and/or PC are in range
-        if (0 <= pointer && pointer <= stack.height-1)
-            return;
-        else {  /* pointer is out of range */
-            if (identifier.equals("SP")) {
-                System.err.println("ERROR 3: SP out of range: " + pointer);
-                System.exit(3);
-            } else {
-                System.err.println("ERROR 5: Invalid PC: " + pointer);
-                System.exit(5);
-            }
-        }
     }
 
     public static boolean instructionRequiresParameter(int opcode) {

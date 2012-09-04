@@ -1,0 +1,64 @@
+  Line	Source code
+  ----	-----------
+     1	program oddeven
+     2	
+     3	  var integer i
+     4	
+     5	  function boolean even (integer i)
+     6	    
+     7	    procedure ev (integer i)
+     8	
+     9	      procedure od (integer i)
+    10	
+    11	        begin
+    12	          if i = 0 then
+    13	            even := false
+    14	          else
+    15	            call ev(i-1)
+    16	          endif
+    17	        end
+    18	
+    19	      begin
+    20	        if i = 0 then
+    21	          even := true
+    22	        else
+    23	          call od(i-1)
+    24	        endif
+    25	      end
+    26	
+    27	    begin // even
+    28	      call ev(i)
+    29	    end
+    30	  
+    31	  function boolean odd (integer i)
+    32	    begin
+    33	      odd := not even(i)
+    34	    end
+    35	
+    36	  begin
+    37	    i := 0
+    38	    while i <= 10 do
+    39	      write i
+    40	      writec ' '
+    41	      if odd(i) then writec "odd"
+    42	      else writec "even"
+    43	      endif
+    44	      writec '\n'
+    45	      i := i+1
+    46	    endwhile
+    47	  end 
+
+Identifier Cross-reference
+--------------------------
+FALSE                            Const   Bool    13
+ODDEVEN                           Prog            1
+.EVEN                             Func   Bool     5   13   21   33
+..EV                              Proc            7   15   28
+...I                              Svar    Int     7   20   23
+...OD                             Proc            9   23
+....I                             Svar    Int     9   12   15
+..I                               Svar    Int     5   28
+.I                                Svar    Int     3   37   38   39   41   45
+.ODD                              Func   Bool    31   33   41
+..I                               Svar    Int    31   33
+TRUE                             Const   Bool    21

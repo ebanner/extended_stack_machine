@@ -24,79 +24,75 @@ public class Driver {
     // if oldStyle is true, then we are using the legacy opcode numbering
     // convention
     public static boolean oldStyle;
-    public static int length;
+    public static int length;  // this is only around for debugging purposes
 
     public static void main(String[] args) throws IOException {
-        /* assume for now that opcodes start at position 16 */
+        // main loads the SXX machine code into memory and executes it
+
         // base address starts somewhere between 15 and 1000 exclusive
-        //int baseAddr = new Random().nextInt(984) + 16;
-        int baseAddr = 16;
+        int baseAddr = new Random().nextInt(984) + 16;
+        //int baseAddr = 16;
         String file = args[0];
 
-        // insert opcodes and data into the stack machine
+        // insert opcodes and data into the stack machine and perform
+        // relocation process
         int entryPoint = initializeStack(baseAddr, file);
-
         int PC = baseAddr + entryPoint;
-        //System.out.format("%nPC: %d  temp: %d%n%n", PC, temp);
         
-        // open up a scanner to read input
-        in = new Scanner(System.in);
-        //while (stack.getContents((oldStyle == true) ? PC+1 : PC) != HALT) {
-        while (true) {
-            // keep executing instructions until a HALT command is reached
+        in = new Scanner(System.in); // open up a scanner to read future input
+        while (true) { // execute opcodes
             PC = executeInstruction(PC);
-            //stack.reveal();
-            //System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         }
     }
 
-    public static int initializeStack(int nextFreeAddr, String file) throws IOException {
-        // this method
-        //   1. parses the header
-        //   2. inserts opcodes and data into memory cells in the stack machine
-        // this method returns the entry point for which PC's initial value
-        // will be calculated with
+    public static int initializeStack(int nextFreeAddr, String file) {
+        // This method [1] parses the header of the SXX program and then 
+        // [2] loads opcodes and data into memory.
+        // The return value is the entry point provided by the SXX header.
         
         int baseAddr = nextFreeAddr;  // keep the base address around
         Scanner sc = null;
         try {  // open up a new scanner on the source file
             sc = new Scanner(new BufferedReader(new FileReader(file)));
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
-            System.exit(1);
+            errorAndExit("ERROR: " + e.getMessage());
         }
                                                                           
         // ############## BEGIN PARSE HEADER ##################
-        // a `Header' object's purpose is to parse a header and hold
-        // information about a header that we find useful
+        // a `Header' object's purpose is to parse the header of the SXX
+        // program and hold useful information
         Header header = new Header(sc); 
+        // parse the header and give us back the scanner where the header ends
         sc = header.parseHeader();
         // the header will tell us if we're using old style opcode numbering
         oldStyle = header.oldStyle;
 
         if (0 > header.length || 
                 header.length > stack.height-baseAddr) {
+            // make sure the length is in range
             System.err.println("Illegal length: Out of range");
             System.err.println("  " + header.length);
             System.exit(1);
         }
-
         length = header.length;  // make header global for the time being
         // ################ END PARSE HEADER #################
         
         // ############ BEGIN INSERTING OPCODES ##############
         String opcode = null;
-        int words = 0; // keep track of how many words are inserted into memory
+        // keep track of how many words have been inserted into memory
+        int words = 0; 
         int currFreeAddr;
-        while (sc.hasNextLine() && words <= header.length) {  // grab the next opcode
-            opcode = sc.nextLine().trim();  // trim off whitespace
+        while (sc.hasNextLine() && words <= header.length) {
+            // read the next opcode and trim off whitespace
+            opcode = sc.nextLine().trim();
 
-            if (opcode.isEmpty() || opcode.charAt(0) == '#') {
-                continue; // skip blank lines and comments
+            if (isCommentOrBlankLine(opcode)) {
+                continue;
             } else if (opcode.charAt(0) == '%') {
-                break;  // break out of loop where we consider each element and
-                // opcode, data, or skipping command
+                break;  // move onto the relocation process
             } else {
+                // keep current address around so we can tell after how many
+                // memory cells we consumed
                 currFreeAddr = nextFreeAddr;
                 // insert the opcode/data into the stack machine
                 // or skip over memory cells if the opcode begins with `:'
@@ -106,31 +102,25 @@ public class Driver {
                 words += nextFreeAddr - currFreeAddr;
             }
         } 
-        //System.out.println("Stack after opcodes/data have been inserted:");
-        //stack.reveal();
         // ############### END INSERTING OPCODES ################
 
         // ############# BEGIN RELOCATION PROCESS ###############
         while (sc.hasNextLine()) {  
             opcode = sc.nextLine().trim();
 
-            if (opcode.isEmpty() || opcode.charAt(0) == '#') {
-                continue; // skip blank lines and comments
+            if (isCommentOrBlankLine(opcode)) {
+                continue;
             } else if (opcode.charAt(0) == '%') {
-                break;  // break out of loop where we consider each element and
-                // opcode, data, or skipping command
+                break;  // we're done reading the SXX program
             } else{
                 nextFreeAddr = insertRelocation(baseAddr, opcode, nextFreeAddr);
             }
-        }
-        //System.out.println("Stack after relocation:");
-        //stack.reveal();
-        // ############## END RELOCATION PROCESS ################
+        } // ############## END RELOCATION PROCESS ################
 
         try { }
-        finally {
+        finally {  // close the scanner
             if (sc != null)
-                sc.close();  // close the scanner
+                sc.close();
         }
         return header.entry;
     }
@@ -143,28 +133,26 @@ public class Driver {
         String colonInstruction = "^:(\\d)+$";
                                                                                 
         if (Pattern.matches(number, instr)) {
-            /* we now know that we have a digit */
+            // we now know that we have a digit
             stack.putContents(nextFreeAddr, Integer.parseInt(instr));
-            //System.out.println("Digit: " + instr);
             nextFreeAddr++;
         } else if (Pattern.matches(colonInstruction, instr)) {
-            //System.out.println("Colon: " + instr);
             nextFreeAddr += Integer.parseInt(instr.split(":")[1]);
         } else {
-            /* test to see if the next value is a digit */
+            // test to see if the next value is a digit
             System.err.println("ERROR: Not a valid line:");
             System.err.println("  " + instr);
             System.exit(1);
         }
-                                                                                
+
         return nextFreeAddr;
     }
 
     public static int insertRelocation(int baseAddr, String value, int nextFreeAddr) {
         // insert into the current memory address the following:
         //     *(baseAddr+value) + baseAddr
+        
         String number = "^-?(\\d)+$";
-
         if (! Pattern.matches(number, value)) {
             System.err.println("ERROR: Not a relocation value:");
             System.err.println("  " + value);
@@ -180,15 +168,19 @@ public class Driver {
     public static int executeInstruction(int PC) {
         int opcode = stack.getContents(PC);
         PC++;  // increment PC immediately
-        // support legacy opcode numbering convention
         if (oldStyle == true && opcode > 22) {
+            // support legacy opcode numbering convention
             opcode++;
         }
+
+        // START DEBUGGING
         //System.out.println("About to execute opcode: " + opcode);
         //stack.reveal();
         //System.out.println("\nInstructions:");
         //printInstructions(length, PC-1);
         //System.out.format("PC: %d  temp: %d%n%n", PC-1, temp);
+        // END DEBUGGING
+        
         int addr, value, num; 
         addr = value = num = 0;
 
@@ -359,8 +351,7 @@ public class Driver {
                 try {
                     stack.push(stack.pop() / temp);
                 } catch (ArithmeticException e) {
-                    System.err.println("ERROR 1: Attempt to divide by zero");
-                    System.exit(1);
+                    errorAndExit("ERROR: Attempt to divide by zero");
                 }
                 break;
             case MOD:    // 31
@@ -369,8 +360,7 @@ public class Driver {
                 try {
                     stack.push(stack.pop() % temp);
                 } catch (ArithmeticException e) {
-                    System.err.println("ERROR 1: Attempt to mod by zero");
-                    System.exit(1);
+                    errorAndExit("ERROR: Attempt to mod by zero");
                 }
                 break;
             case OR:     // 32
@@ -412,16 +402,13 @@ public class Driver {
                     temp = in.nextInt();
                 } catch (Exception e) {
                     if (e instanceof InputMismatchException) {
-                        System.err.println("ERROR 8: Illegal integer on READ");
-                        System.exit(8);
+                        errorAndExit("ERROR: Illegal integer on READ");
                     } else if (e instanceof NoSuchElementException) {
-                        System.err.println("ERROR 7: Attempted to READ past end of file");
-                        System.exit(7);
+                        errorAndExit("ERROR: Attempted to READ past end of file");
                     } else {
-                        System.err.println("Didn't account for this excpetion.");  
-                        System.err.println("Please report this bug to Edward ");
-                        System.err.println("Banner at edward.banner@gmail.com");
-                        System.exit(42);
+                        errorAndExit("Didn't account for this excpetion.\n" +
+                        "Please report this bug to Edward\n" +
+                        "Banner at edward.banner@gmail.com");
                     }
                 }
                 stack.push(temp);
@@ -474,8 +461,7 @@ public class Driver {
         // pop MUST be greater than or equal to temp
         if (pop < temp || 0 > pop || pop > stack.height-1
                 || 0 > temp || temp > stack.height-1) {
-            System.err.println("ERROR 4: Illegal dump range");
-            System.exit(4);
+            errorAndExit("ERROR 4: Illegal dump range");
         }
         for (; pop >= temp; pop--)
             System.out.println(stack.getContents(pop));
@@ -522,6 +508,19 @@ public class Driver {
                     (pointer == PC) ? " <-- PC" : "");
         System.out.println();
     }
+
+    public static boolean isCommentOrBlankLine(String line) {
+        if (line.isEmpty() || line.charAt(0) == '#')
+            return true;
+        else
+            return false;
+    }
+
+    public static void errorAndExit(String error) {
+        System.err.println(error);
+        System.exit(1);
+    }
+
 
     /* mneumonics and their opcodes */
     public static final int BKPT   =   0;

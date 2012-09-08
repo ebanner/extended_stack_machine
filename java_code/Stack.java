@@ -68,7 +68,7 @@ public class Stack {
     public void reveal() { 
         /* prints out the stack much like how our brains imagine what a stack
          * looks like */
-        for (int pointer = height-1; pointer >= 0; pointer--) { 
+        for (int pointer = height-1; pointer >= 15990; pointer--) { 
             /* start from the top of the stack and print adresses & value pairs
              * all the way down to SP -- also print out an arrow to where SP
              * points */

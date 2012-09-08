@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 public class Driver {
 
     /* this is *the* master stack in the stack machine emulator */
-    public static final Stack stack = new Stack(50);
+    public static final Stack stack = new Stack(16000);
     /* values used to help compute the values of instructions */
     public static int temp, t1, t2;
     /* TRACE mode can either be ON of OFF */
@@ -24,9 +24,11 @@ public class Driver {
     // if oldStyle is true, then we are using the legacy opcode numbering
     // convention
     public static boolean oldStyle;
+    public static int length;
 
     public static void main(String[] args) throws IOException {
         /* assume for now that opcodes start at position 16 */
+        // base address starts somewhere between 15 and 1000 exclusive
         //int baseAddr = new Random().nextInt(984) + 16;
         int baseAddr = 16;
         String file = args[0];
@@ -39,14 +41,13 @@ public class Driver {
         
         // open up a scanner to read input
         in = new Scanner(System.in);
-        while (stack.getContents(PC) != HALT) {
+        //while (stack.getContents((oldStyle == true) ? PC+1 : PC) != HALT) {
+        while (true) {
             // keep executing instructions until a HALT command is reached
             PC = executeInstruction(PC);
             //stack.reveal();
             //System.out.format("%nPC: %d  temp: %d%n", PC, temp);
         }
-        stack.reveal();
-        System.out.format("%nPC: %d  temp: %d%n", PC, temp);
     }
 
     public static int initializeStack(int nextFreeAddr, String file) throws IOException {
@@ -79,6 +80,8 @@ public class Driver {
             System.err.println("  " + header.length);
             System.exit(1);
         }
+
+        length = header.length;  // make header global for the time being
         // ################ END PARSE HEADER #################
         
         // ############ BEGIN INSERTING OPCODES ##############
@@ -103,8 +106,8 @@ public class Driver {
                 words += nextFreeAddr - currFreeAddr;
             }
         } 
-        System.out.println("Stack after opcodes/data have been inserted:");
-        stack.reveal();
+        //System.out.println("Stack after opcodes/data have been inserted:");
+        //stack.reveal();
         // ############### END INSERTING OPCODES ################
 
         // ############# BEGIN RELOCATION PROCESS ###############
@@ -120,8 +123,8 @@ public class Driver {
                 nextFreeAddr = insertRelocation(baseAddr, opcode, nextFreeAddr);
             }
         }
-        System.out.println("Stack after relocation:");
-        stack.reveal();
+        //System.out.println("Stack after relocation:");
+        //stack.reveal();
         // ############## END RELOCATION PROCESS ################
 
         try { }
@@ -142,10 +145,10 @@ public class Driver {
         if (Pattern.matches(number, instr)) {
             /* we now know that we have a digit */
             stack.putContents(nextFreeAddr, Integer.parseInt(instr));
-            System.out.println("Digit: " + instr);
+            //System.out.println("Digit: " + instr);
             nextFreeAddr++;
         } else if (Pattern.matches(colonInstruction, instr)) {
-            System.out.println("Colon: " + instr);
+            //System.out.println("Colon: " + instr);
             nextFreeAddr += Integer.parseInt(instr.split(":")[1]);
         } else {
             /* test to see if the next value is a digit */
@@ -179,11 +182,13 @@ public class Driver {
         PC++;  // increment PC immediately
         // support legacy opcode numbering convention
         if (oldStyle == true && opcode > 22) {
-            opcode--;
+            opcode++;
         }
-        stack.reveal();
-        System.out.format("PC: %d  temp: %d%n%n", PC, temp);
-        System.out.println("Executing opcode: " + opcode);
+        //System.out.println("About to execute opcode: " + opcode);
+        //stack.reveal();
+        //System.out.println("\nInstructions:");
+        //printInstructions(length, PC-1);
+        //System.out.format("PC: %d  temp: %d%n%n", PC-1, temp);
         int addr, value, num; 
         addr = value = num = 0;
 
@@ -329,6 +334,8 @@ public class Driver {
             case HALT:   // 26
                 /* halt program execution */
                 System.out.println("Halting program execution");
+                stack.reveal();
+                System.out.format("%nPC: %d  temp: %d%n", PC-1, temp);
                 System.exit(0);
                 break;
             case ADD:    // 27
@@ -421,7 +428,7 @@ public class Driver {
                 break;
             case PRINT:  // 40
                 /* print pop() in %d format */
-                System.out.println(stack.pop());
+                System.out.print(stack.pop());
                 break;
             case READC:  // 41
                 /* read temp in %c format; push(temp); */
@@ -430,7 +437,7 @@ public class Driver {
                 break;
             case PRINTC: // 42
                 /* print pop() in %c format */
-                System.out.println((char)stack.pop());
+                System.out.print((char)stack.pop());
                 break;
             case TRON:   // 43
                 /* turn on trace feature */
@@ -507,6 +514,13 @@ public class Driver {
         }
 
         return requiresParameter;
+    }
+
+    public static void printInstructions(int length, int PC) {
+        for (int pointer = 16+length; pointer >= 16; pointer--)
+            System.out.format("%2d| %2s%s\n", pointer, stack.getContents(pointer), 
+                    (pointer == PC) ? " <-- PC" : "");
+        System.out.println();
     }
 
     /* mneumonics and their opcodes */

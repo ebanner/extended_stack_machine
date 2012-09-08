@@ -176,8 +176,9 @@ public class Driver {
 
     public static int executeInstruction(int PC) {
         int opcode = stack.getContents(PC);
+        PC++;  // increment PC immediately
         // support legacy opcode numbering convention
-        if (opcode > 22 && oldStyle == true) {
+        if (oldStyle == true && opcode > 22) {
             opcode--;
         }
         stack.reveal();
@@ -189,77 +190,66 @@ public class Driver {
         if (instructionRequiresParameter(opcode)) {
             // if it's an instruction that needs an `addr' or `value'
             // parameter, save that argument
-            addr = value = stack.getContents(PC+1);
+            addr = value = stack.getContents(PC);
+            PC++;  // increment PC again
         }
 
         switch(opcode) {
             case BKPT:   // 0
                 /* unconditionally enter the sxx debugger */
                 pass(BKPT);
-                PC++;
                 break;
             case PUSH:   // 1
                 /* push(*addr); */
                 stack.push(stack.getContents(addr));
-                PC += 2;
                 break;
             case PUSHV:  // 2
                 /* push(value); */
                 stack.push(value);
-                PC += 2;
                 break;
             case PUSHS:  // 3
                 /* push(*pop()); */
                 num = stack.pop();
                 stack.push(stack.getContents(num));
-                PC++;
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
                 num = stack.pop()+addr;
                 stack.push(stack.getContents(num));
-                PC += 2;
                 break;
             case POP:    // 5
                 /* *addr=pop(); */
                 stack.putContents(addr, stack.pop());
-                PC += 2;
                 break;
             case POPS:   // 6
                 /* temp=pop(); *pop()=temp; */
                 temp = stack.pop();
                 num = stack.pop();
                 stack.putContents(num, temp);
-                PC++;
                 break;
             case POPX:   // 7
                 /* temp=pop(); *(pop()+addr)=temp; */
                 temp = stack.pop();
                 num = stack.pop()+addr;
                 stack.putContents(num, temp);
-                PC += 2;
                 break;
             case DUPL:   // 8
                 /* push(*SP); */
                 stack.push(stack.getContents(stack.SP));
-                PC++;
                 break;
             case SWAP:   // 9
                 /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
                 temp = stack.getContents(stack.SP);
                 stack.putContents(stack.SP, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
-                PC++;
                 break;
             case OVER:   // 10
                 /* push(*(SP+1)); */
                 stack.push(stack.getContents(stack.SP+1));
-                PC++;
                 break;
             case DROP:   // 11
                 /* SP++; */
                 stack.SP++;
-                PC++;
                 break;
             case ROT:    // 12
                 /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
@@ -267,58 +257,47 @@ public class Driver {
                 stack.putContents(stack.SP, stack.getContents(stack.SP+2));
                 stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
                 stack.putContents(stack.SP+1, temp);
-                PC++;
                 break;
             case TSTLT:  // 13
                 /* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
                 temp = stack.pop();
                 stack.push( (temp < 0) ? 1 : 0 );
-                PC++;
                 break;
             case TSTLE:  // 14
                 /* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
                 temp = stack.pop();
                 stack.push( (temp <= 0) ? 1 : 0 );
-                PC++;
                 break;
             case TSTGT:  // 15
                 /* temp=pop(); push((temp>0)?1:0); */
                 temp = stack.pop();
                 stack.push( (temp > 0) ? 1 : 0 );
-                PC++;
                 break;
             case TSTGE:  // 16
                 /* temp=pop(); push((temp>=0)?1:0); */
                 temp = stack.pop();
                 stack.push( (temp >= 0) ? 1 : 0 );
-                PC++;
                 break;
             case TSTEQ:  // 17
                 /* temp=pop(); push((temp==0)?1:0); */
                 temp = stack.pop();
                 stack.push( (temp == 0) ? 1 : 0);
-                PC++;
                 break;
             case TSTNE:  // 18
                 /* temp=pop(); push((temp!=0)?1:0); */
                 temp = stack.pop();
                 stack.push( (temp != 0) ? 1 : 0 );
-                PC++;
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
                 if (stack.pop() != 0) {
                     PC = addr;
-                } else {
-                    PC++;
                 }
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
                 if (stack.pop() == 0) {
                     PC = addr;
-                } else {
-                    PC++;
                 }
                 break;
             case BR:     // 21
@@ -356,19 +335,16 @@ public class Driver {
                 /* temp=pop(); push( pop() + temp ); */
                 temp = stack.pop();
                 stack.push(stack.pop()+temp);
-                PC++;
                 break;
             case SUB:    // 28
                 /* temp=pop(); push( pop() - temp ); */
                 temp = stack.pop();
                 stack.push(stack.pop()-temp);
-                PC++;
                 break;
             case MUL:    // 29
                 /* temp=pop(); push( pop() * temp ); */
                 temp = stack.pop();
                 stack.push(stack.pop() * temp);
-                PC++;
                 break;
             case DIV:    // 30
                 /* temp=pop(); push( pop() / temp ); */
@@ -379,7 +355,6 @@ public class Driver {
                     System.err.println("ERROR 1: Attempt to divide by zero");
                     System.exit(1);
                 }
-                PC++;
                 break;
             case MOD:    // 31
                 /* temp=pop(); push( pop() % temp ); */
@@ -390,19 +365,16 @@ public class Driver {
                     System.err.println("ERROR 1: Attempt to mod by zero");
                     System.exit(1);
                 }
-                PC++;
                 break;
             case OR:     // 32
                 /* temp=pop(); push( pop() || temp ); */
                 temp = stack.pop();
                 stack.push( (stack.pop() != 0 || temp != 0) ? 1 : 0 );
-                PC++;
                 break;
             case AND:    // 33
                 /* temp=pop(); push( pop() && temp ); */
                 temp = stack.pop();
                 stack.push( (stack.pop() != 0 && temp != 0) ? 1 : 0 );
-                PC++;
                 break;
             case XOR:    // 34
                 /* temp=pop(); push( pop() xor temp ); [see below] */
@@ -410,27 +382,22 @@ public class Driver {
                 t2 = stack.pop();
                 stack.push( (!(t1 != 0 && t2 != 0) 
                             && (t1 != 0 || t2 != 0)) ? 1 : 0 );
-                PC++;
                 break;
             case NOT:    // 35
                 /* push( !pop() ); */
                 stack.push( !(stack.pop() != 0) ? 1 : 0 );
-                PC++;
                 break;
             case NEG:    // 36
                 /* push( -pop() ); */
                 stack.push( -1*stack.pop());
-                PC++;
                 break;
             case ADDX:   // 37
                 /* push( pop()+addr ); */
                 stack.push(stack.pop() + addr);
-                PC += 2;
                 break;
             case ADDSP:  // 38
                 /* SP += value; */
                 stack.SP += value;
-                PC += 2;
                 break;
             case READ:   // 39
                 /* read temp in %d format; push(temp); */
@@ -451,39 +418,32 @@ public class Driver {
                     }
                 }
                 stack.push(temp);
-                PC++;
                 break;
             case PRINT:  // 40
                 /* print pop() in %d format */
                 System.out.println(stack.pop());
-                PC++;
                 break;
             case READC:  // 41
                 /* read temp in %c format; push(temp); */
                 temp = in.nextLine().charAt(0);
                 stack.push(temp);
-                PC++;
                 break;
             case PRINTC: // 42
                 /* print pop() in %c format */
                 System.out.println((char)stack.pop());
-                PC++;
                 break;
             case TRON:   // 43
                 /* turn on trace feature */
                 TRACE = true;
-                PC++;
                 break;
             case TROFF:  // 44
                 /* turn off trace feature */
                 TRACE = false;
-                PC++;
                 break;
             case DUMP:   // 45
                 /* temp=pop(); dump memory from pop() to temp; */
                 temp = stack.pop();
                 dump(stack.pop(), temp);
-                PC++;
                 break;
             default:
                 System.err.println("ERROR: Invalid opcode");

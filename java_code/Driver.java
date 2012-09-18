@@ -30,8 +30,8 @@ public class Driver {
         // main loads the SXX machine code into memory and executes it
 
         // base address starts somewhere between 15 and 1000 exclusive
-        int baseAddr = new Random().nextInt(984) + 16;
-        //int baseAddr = 16;
+        //int baseAddr = new Random().nextInt(984) + 16;
+        int baseAddr = 16;
         String file = args[0];
 
         // insert opcodes and data into the stack machine and perform
@@ -172,14 +172,9 @@ public class Driver {
             // support legacy opcode numbering convention
             opcode++;
         }
-
-        // START DEBUGGING
-        //System.out.println("About to execute opcode: " + opcode);
-        //stack.reveal();
-        //System.out.println("\nInstructions:");
-        //printInstructions(length, PC-1);
-        //System.out.format("PC: %d  temp: %d%n%n", PC-1, temp);
-        // END DEBUGGING
+        
+        // for DEBUGGING!
+        //printDebug(opcode, length, PC, temp);  
         
         int addr, value, num; 
         addr = value = num = 0;
@@ -503,7 +498,7 @@ public class Driver {
     }
 
     public static void printInstructions(int length, int PC) {
-        for (int pointer = 16+length; pointer >= 16; pointer--)
+        for (int pointer = 16+length-1; pointer >= 16; pointer--)
             System.out.format("%2d| %2s%s\n", pointer, stack.getContents(pointer), 
                     (pointer == PC) ? " <-- PC" : "");
         System.out.println();
@@ -521,6 +516,13 @@ public class Driver {
         System.exit(1);
     }
 
+    public static void printDebug(int opcode, int length, int PC, int temp) {
+        System.out.println("About to execute opcode: " + opcode);
+        stack.reveal();
+        System.out.println("\nInstructions:");
+        printInstructions(length, PC-1);
+        System.out.format("PC: %d  temp: %d%n%n", PC-1, temp); 
+    }
 
     /* mneumonics and their opcodes */
     public static final int BKPT   =   0;

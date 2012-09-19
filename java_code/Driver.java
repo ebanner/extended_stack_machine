@@ -2,6 +2,9 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Scanner;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.InputMismatchException;
@@ -19,8 +22,8 @@ public class Driver {
     public static int temp, t1, t2;
     /* TRACE mode can either be ON of OFF */
     public static boolean TRACE;
-    /* scanner is used for READ and READC commands */
-    public static Scanner in = null;
+    /* BufferedReader is used for READ and READC commands */
+    public static BufferedReader br = null;
     // if oldStyle is true, then we are using the legacy opcode numbering
     // convention
     public static boolean oldStyle;
@@ -39,7 +42,8 @@ public class Driver {
         int entryPoint = initializeStack(baseAddr, file);
         int PC = baseAddr + entryPoint;
         
-        in = new Scanner(System.in); // open up a scanner to read future input
+        // open up a scanner to read future input
+        br = new BufferedReader(new InputStreamReader(System.in)); 
         while (true) { // execute opcodes
             PC = executeInstruction(PC);
         }
@@ -393,6 +397,7 @@ public class Driver {
                 break;
             case READ:   // 39
                 /* read temp in %d format; push(temp); */
+                /*
                 try {
                     temp = in.nextInt();
                 } catch (Exception e) {
@@ -406,6 +411,13 @@ public class Driver {
                         "Banner at edward.banner@gmail.com");
                     }
                 }
+                */
+                try {
+                    temp = Integer.parseInt(br.readLine());
+                } catch (IOException e) {
+                    System.err.println(e.getMessage());
+                    System.exit(1);
+                }
                 stack.push(temp);
                 break;
             case PRINT:  // 40
@@ -414,7 +426,12 @@ public class Driver {
                 break;
             case READC:  // 41
                 /* read temp in %c format; push(temp); */
-                temp = in.nextLine().charAt(0);
+                try {
+                    temp = br.read();
+                } catch (IOException e) {
+                    System.err.println(e.getMessage());
+                    System.exit(1);
+                }
                 stack.push(temp);
                 break;
             case PRINTC: // 42
@@ -440,7 +457,7 @@ public class Driver {
                 System.exit(1);
         }
 
-        /* update SP */
+        // update SP 
         stack.putContents(0, stack.SP);
 
         // return the new PC

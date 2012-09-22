@@ -1,31 +1,27 @@
 import java.io.FileReader;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Scanner;
 import java.io.Reader;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-/* TODO: Support the legacy opcode convention by subtracting 1 from every
- *         opcode that's higher than 22
- */
+// TODO: Figure out why unsax.sxx isn't working.
 
 public class Driver {
 
-    /* this is *the* master stack in the stack machine emulator */
+    // this is *the* master stack in the stack machine emulator
     public static final Stack stack = new Stack(16000);
-    /* values used to help compute the values of instructions */
+    // values used to help compute the values of instructions
     public static int temp, t1, t2;
-    /* TRACE mode can either be ON of OFF */
+    // TRACE mode can either be ON of OFF
     public static boolean TRACE;
-    /* BufferedReader is used for READ and READC commands */
+    // Scanner on STDIN is used for READ and READC commands
     public static Scanner in = null;
     // if oldStyle is true, then we are using the legacy opcode numbering
-    // convention
+    // system
     public static boolean oldStyle;
     public static int length;  // this is only around for debugging purposes
 
@@ -63,7 +59,7 @@ public class Driver {
         }
                                                                           
         // ############## BEGIN PARSE HEADER ##################
-        // a `Header' object's purpose is to parse the header of the SXX
+        // a Header object's purpose is to parse the header of the SXX
         // program and hold useful information
         Header header = new Header(sc); 
         // parse the header and give us back the scanner where the header ends
@@ -78,7 +74,7 @@ public class Driver {
             System.err.println("  " + header.length);
             System.exit(1);
         }
-        length = header.length;  // make header global for the time being
+        length = header.length;  // make header global for debugging
         // ################ END PARSE HEADER #################
         
         // ############ BEGIN INSERTING OPCODES ##############
@@ -117,7 +113,7 @@ public class Driver {
             } else if (opcode.charAt(0) == '%') {
                 break;  // we're done reading the SXX program
             } else{
-                nextFreeAddr = insertRelocation(baseAddr, opcode, nextFreeAddr);
+                insertRelocation(baseAddr, opcode);
             }
         } // ############## END RELOCATION PROCESS ################
 
@@ -143,7 +139,6 @@ public class Driver {
         } else if (Pattern.matches(colonInstruction, instr)) {
             nextFreeAddr += Integer.parseInt(instr.split(":")[1]);
         } else {
-            // test to see if the next value is a digit
             System.err.println("ERROR: Not a valid line:");
             System.err.println("  " + instr);
             System.exit(1);
@@ -152,21 +147,19 @@ public class Driver {
         return nextFreeAddr;
     }
 
-    public static int insertRelocation(int baseAddr, String value, int nextFreeAddr) {
+    public static void insertRelocation(int baseAddr, String address) {
         // insert into the current memory address the following:
-        //     *(baseAddr+value) + baseAddr
+        //     *(baseAddr+addresss) + baseAddr
         
         String number = "^-?(\\d)+$";
-        if (! Pattern.matches(number, value)) {
-            System.err.println("ERROR: Not a relocation value:");
-            System.err.println("  " + value);
+        if (! Pattern.matches(number, address)) {
+            System.err.println("ERROR: Not a relocation address:");
+            System.err.println("  " + address);
             System.exit(1);
         } else {
-            int addr = Integer.parseInt(value) + baseAddr;
+            int addr = Integer.parseInt(address) + baseAddr;
             stack.putContents(addr, stack.getContents(addr)+baseAddr);
         }
-
-        return nextFreeAddr++;
     }
 
     public static int executeInstruction(int PC) {
@@ -313,8 +306,7 @@ public class Driver {
                 break;
             case RETURN: // 24
                 /* PC=pop(); */
-                num = stack.pop();
-                PC = num;
+                PC = stack.pop();
                 break;
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
@@ -374,10 +366,10 @@ public class Driver {
                 break;
             case XOR:    // 34
                 /* temp=pop(); push( pop() xor temp ); [see below] */
-                t1 = stack.pop();
-                t2 = stack.pop();
-                stack.push( (!(t1 != 0 && t2 != 0) 
-                            && (t1 != 0 || t2 != 0)) ? 1 : 0 );
+                temp = stack.pop();
+                stack.push( (stack.pop() != 0 ^ temp != 0) ? 1 : 0 );
+                //stack.push( (!(t1 != 0 && t2 != 0) 
+                //            && (t1 != 0 || t2 != 0)) ? 1 : 0 );
                 break;
             case NOT:    // 35
                 /* push( !pop() ); */
@@ -385,7 +377,7 @@ public class Driver {
                 break;
             case NEG:    // 36
                 /* push( -pop() ); */
-                stack.push( -1*stack.pop());
+                stack.push( (-1)*stack.pop());
                 break;
             case ADDX:   // 37
                 /* push( pop()+addr ); */

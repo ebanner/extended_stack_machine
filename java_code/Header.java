@@ -30,6 +30,7 @@ public class Header {
                 System.err.println("ERROR:  The first line in any SXX " +
                         "executable file must start with `%SXX[+-]E':");
                 System.err.println("  " + this.type);
+                System.exit(1);
             }
         } else {
             System.err.println("ERROR: Empty file");
@@ -42,6 +43,7 @@ public class Header {
 
         if (0 > this.entry || this.entry >= this.length) {
             System.err.println("ERROR: Illegal entry point");
+            System.err.println("  " + this.entry);
             System.exit(1);
         }
 
@@ -59,10 +61,18 @@ public class Header {
         return sc;
     }
 
-    public void skipToEOL() {
-        sc.nextLine();
-    }
-
+    /**
+     * Returns the first element in a line.
+     *
+     * @param sc the scanner which points to the line you want the first
+     * element of.
+     *
+     * @param value can either be `length', `entry', or `text'.  this is used
+     * to indicate what type of value you are looking for
+     *
+     * @param type the return type (int or char)
+     *
+     */
     public int returnFirstElement(Scanner sc, String value, String type) {
         String line = null;
 

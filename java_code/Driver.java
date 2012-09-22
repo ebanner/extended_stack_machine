@@ -23,7 +23,7 @@ public class Driver {
     /* TRACE mode can either be ON of OFF */
     public static boolean TRACE;
     /* BufferedReader is used for READ and READC commands */
-    public static BufferedReader br = null;
+    public static Scanner in = null;
     // if oldStyle is true, then we are using the legacy opcode numbering
     // convention
     public static boolean oldStyle;
@@ -43,7 +43,7 @@ public class Driver {
         int PC = baseAddr + entryPoint;
         
         // open up a scanner to read future input
-        br = new BufferedReader(new InputStreamReader(System.in)); 
+        in = new Scanner(System.in); 
         while (true) { // execute opcodes
             PC = executeInstruction(PC);
         }
@@ -396,28 +396,7 @@ public class Driver {
                 stack.SP += value;
                 break;
             case READ:   // 39
-                /* read temp in %d format; push(temp); */
-                /*
-                try {
-                    temp = in.nextInt();
-                } catch (Exception e) {
-                    if (e instanceof InputMismatchException) {
-                        errorAndExit("ERROR: Illegal integer on READ");
-                    } else if (e instanceof NoSuchElementException) {
-                        errorAndExit("ERROR: Attempted to READ past end of file");
-                    } else {
-                        errorAndExit("Didn't account for this excpetion.\n" +
-                        "Please report this bug to Edward\n" +
-                        "Banner at edward.banner@gmail.com");
-                    }
-                }
-                */
-                try {
-                    temp = Integer.parseInt(br.readLine());
-                } catch (IOException e) {
-                    System.err.println(e.getMessage());
-                    System.exit(1);
-                }
+                temp = Read.READ(in);
                 stack.push(temp);
                 break;
             case PRINT:  // 40
@@ -426,12 +405,7 @@ public class Driver {
                 break;
             case READC:  // 41
                 /* read temp in %c format; push(temp); */
-                try {
-                    temp = br.read();
-                } catch (IOException e) {
-                    System.err.println(e.getMessage());
-                    System.exit(1);
-                }
+                temp = Read.READC(in);
                 stack.push(temp);
                 break;
             case PRINTC: // 42

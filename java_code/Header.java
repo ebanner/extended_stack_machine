@@ -9,7 +9,7 @@ public class Header {
     public int length;   // length of program
     public int entry;    // how far off the offset to start PC
     public boolean oldStyle;  // program is `New Style' is type is `%SXX+E'
-    public final int DEBUG = 1;
+    public final int DEBUG = 0;
 
     public Header(Scanner sc) {
         this.sc = sc;

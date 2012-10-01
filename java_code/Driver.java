@@ -24,7 +24,7 @@ public class Driver {
     // system
     public static boolean oldStyle;
     public static int length;  // this is only around for DEBUGging purposes
-    public static int DEBUG = 1;
+    public static int DEBUG = 0;
 
     public static void main(String[] args) throws IOException {
         // main loads the SXX machine code into memory and executes it

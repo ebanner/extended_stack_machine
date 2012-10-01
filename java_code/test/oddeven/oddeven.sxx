@@ -1,8 +1,13 @@
-%SXX+Object Module
-# Object module for file oddeven.sax
-# Mon Dec 16 21:14:07 2002
-215 text length
+%SXX+Executable
+# Sat Sep 22 13:30:23 EDT 2012
+261 text length
+149 ENTRY file=oddeven.out
+# PUBLIC symbols and addresses:
+# PUBLIC read_string 215 file=reads.out
+# PUBLIC write_string 246 file=writes.out
 % text
+# File oddeven.out
+# Offset 0
 70
 84
 :1
@@ -190,7 +195,7 @@
 2
 180
 22
-0
+246
 21
 201
 21
@@ -203,7 +208,7 @@
 2
 192
 22
-0
+246
 2
 10
 42
@@ -218,6 +223,56 @@
 21
 154
 26
+# File reads.out
+# Offset 215
+9
+41
+8
+2
+-1
+28
+20
+236
+10
+10
+6
+2
+10
+28
+20
+241
+2
+1
+27
+21
+216
+11
+2
+0
+6
+24
+2
+0
+7
+1
+24
+# File writes.out
+# Offset 246
+9
+8
+3
+8
+20
+258
+42
+2
+1
+27
+21
+247
+38
+2
+24
 % relocation dictionary
 4
 13
@@ -240,13 +295,17 @@
 177
 179
 185
+187
 189
 191
 198
+200
 205
 207
 213
-% ENTRY, EXTERN, and PUBLIC references
-ENTRY L0000 149
-EXTERN write_string 187 200
-% end of object module
+222
+230
+235
+251
+257
+% end of executable module

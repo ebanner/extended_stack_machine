@@ -1,0 +1,32 @@
+%SXX+Object Module
+# Object module for file tests.sax
+# Sat Sep 22 14:09:789 EDT 2012
+271 text length
+% text
+2
+15
+22
+0
+1
+15
+20
+14
+2
+15
+22
+0
+21
+0
+26
+:256
+% relocation dictionary
+1
+5
+7
+9
+13
+% ENTRY, EXTERN, and PUBLIC references
+ENTRY main 0
+EXTERN read_string 3
+EXTERN write_string 11
+% end of object module

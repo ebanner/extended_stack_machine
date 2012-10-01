@@ -1,0 +1,16 @@
+; test the read_string and write_string routines
+; reads input from terminal and prints it back, line by line
+;
+main:	pushv	buffer
+	call	read_string	; read the string
+	push	buffer		; check for null string (indicating EOF)
+	beq	done
+	pushv	buffer
+	call	write_string	; print the string
+	br	main
+done:	halt
+
+buffer:	ds	256		; line buffer
+
+	extern	read_string, write_string
+	entry	main

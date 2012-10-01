@@ -386,12 +386,14 @@ sub skip1 {
 	do { $debug = 1; next} if m/^#debug$/;
 	do { $debug = $1 ; next} if m/#debug=(\d+)/;
     }
+    $_ = "" unless defined $_;
 }
 
 sub skip {
     while (<>) {
 	last unless m/^#/;
     }
+    $_ = "" unless defined $_;
 }
 
 my $inputline = "";
@@ -430,13 +432,13 @@ my $entry = 0;    # entry point
 my $base = 0;      # base location
 
 $base = 16 + int(rand()*985); # $base should be between 16 and 1000
-print "base=$base\n";
+print "base=$base\n" if $debug;
 
 my $n;     # the first field in the current line
 
 my $SXX = <>;
 die "illegal executable module format\n" unless $SXX =~ m/^%SXX([-+])E/;
-$sxx_format = $1;
+$sxx_format = $1; # "+" with CALLS, "-" without
 
 # get the text length
 &skip1();
@@ -444,7 +446,7 @@ $sxx_format = $1;
 die "missing text length\n" unless defined $n;
 &check_numeric($n);
 $textlen = $n;
-print "textlen=$textlen\n";
+print "textlen=$textlen\n" if $debug;
 die "illegal text length\n" if $textlen <= 0 or $textlen > $MEMSZ-1000;
 
 # get the entry point (if it exists)
@@ -454,7 +456,7 @@ die "missing entry point\n" unless defined $n; # might be '%', however
 if ($n ne "\%") {
     &check_numeric($n);
     $entry = $n + $base;
-    print "entry=$entry\n";
+    print "entry=$entry\n" if $debug;
     &skip();
     ($n) = split;
 }
@@ -464,23 +466,23 @@ my $loc = 0;   # location counter
 while (1) {
     &skip();
     ($n) = split;
-    last if $n eq "\%";
     die "illegal executable module format\n" unless defined $n;
+    last if $n eq "\%";
     if ($n =~ s/^://) {
 	&check_numeric($n);
-	print "BSS $n\n";
+	print "BSS $n\n" if $debug;
 	$loc += $n;
     } else {
 	&check_numeric($n);
 	my $lloc = $base + $loc++;
-	print "mem[$lloc]=$n\n";
+	print "mem[$lloc]=$n\n" if $debug;
 	$mem[$lloc] = $n;
     }
 }
 
 die "text length does not match text contents\n" unless $loc == $textlen;
 
-print "$_\n";
+print "$_\n" if $debug;
 # process the relocation dictionary entries
 while (1) {
     &skip();
@@ -489,7 +491,7 @@ while (1) {
     &check_numeric($n);
     die "illegal relocation entry\n" unless $n >= 0 and $n < $textlen;
     my $lloc = $base + $n;
-    print "relocating memory at $lloc\n";
+    print "relocating memory at $lloc\n" if $debug;
     $mem[$lloc] += $base;
 }
 
@@ -531,7 +533,9 @@ sub xxxor {
     return (!($a && $b) && ($a || $b)) ? 1 : 0;
 }
 
-print "executing ...\n";
+print "executing ...\n" if $debug;
+
+open STDIN, "< /dev/tty" if scalar @ARGV == 0;
 
 $haltflag = 0;
 $$SP = $MEMSZ;

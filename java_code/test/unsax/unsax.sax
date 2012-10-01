@@ -1,0 +1,1119 @@
+;;	Program unsax.pl
+;;	Compiled Thu Dec 26 17:45:34 2002
+;---->  // unsax.pl -- program to disassemble the contents of memory
+;---->  
+;---->  program unsax
+	entry	L0000
+	extern	read_string, write_string
+FP	equ	1
+FT:	dw	"FT"
+;---->  
+;---->    var integer array mntable[45]		// opcode menmonic table
+L0001:
+	ds	45
+;---->    var boolean array optable[45]		// does this opcode require an operand?
+L0002:
+	ds	45
+;---->    var integer mncount = 0		// opcode count
+L0003:
+;---->    var integer start			// starting address to disassemble
+	dw	0
+L0004:
+;---->    var integer finish			// ending address
+	ds	1
+L0005:
+;---->    var integer i				// address to unsax
+	ds	1
+L0006:
+;---->    var integer val			// value at address i
+	ds	1
+L0007:
+;---->  
+;---->    // install the string pointed to by ptr into the mnemonic table
+;---->    // and the associated 'op' boolean (op=true if the operation requires
+;---->    // an operand, op=false otherwise)
+;---->    procedure mninstall(integer array ptr, boolean op)
+	ds	1
+	br	L0009
+L0008:
+	push	FP
+	push	SP
+	pop	FP
+	rot
+;---->      begin
+L0010:
+;	[Proc]=> MNINSTALL
+L0012:
+;---->        mntable[mncount] := ##ptr
+	pushv	L0001
+	push	L0003
+	add
+	push	FP
+	pushx	4
+;---->        optable[mncount] := op
+	pops
+	pushv	L0002
+	push	L0003
+	add
+	push	FP
+	pushx	3
+;---->        mncount := mncount + 1
+	pops
+	pushv	L0003
+	push	L0003
+	pushv	1
+;---->      end
+	add
+	pops
+L0013:
+L0011:
+	drop
+	pop	FP
+	retn	2
+L0009:
+;---->  
+;---->    // print the string pointed to by str
+;---->    procedure print(integer array str)
+	br	L0015
+L0014:
+	push	FP
+	push	SP
+	pop	FP
+	rot
+;---->      begin
+L0016:
+;	[Proc]=> PRINT
+L0018:
+;---->        writec array str
+	push	FP
+	pushx	3
+	call	write_string
+;---->      end
+L0019:
+L0017:
+	drop
+	pop	FP
+	retn	1
+L0015:
+;---->  
+;---->    // install all the opcodes along with whether they require operands
+;---->    procedure mnemonic_init
+	br	L0021
+;---->      begin
+L0020:
+	push	FP
+	push	SP
+	pop	FP
+	rot
+L0022:
+;	[Proc]=> MNEMONIC_INIT
+L0024:
+;---->        call mninstall("BKPT",false)
+	br	L0027
+L0026:
+;	[string]=> "BKPT"
+	dw	66
+	dw	75
+	dw	80
+	dw	84
+	dw	0
+L0027:
+	pushv	L0026
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("PUSH",true)
+	br	L0029
+L0028:
+;	[string]=> "PUSH"
+	dw	80
+	dw	85
+	dw	83
+	dw	72
+	dw	0
+L0029:
+	pushv	L0028
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("PUSHV",true)
+	br	L0031
+L0030:
+;	[string]=> "PUSHV"
+	dw	80
+	dw	85
+	dw	83
+	dw	72
+	dw	86
+	dw	0
+L0031:
+	pushv	L0030
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("PUSHS",false)
+	br	L0033
+L0032:
+;	[string]=> "PUSHS"
+	dw	80
+	dw	85
+	dw	83
+	dw	72
+	dw	83
+	dw	0
+L0033:
+	pushv	L0032
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("PUSHX",true)
+	br	L0035
+L0034:
+;	[string]=> "PUSHX"
+	dw	80
+	dw	85
+	dw	83
+	dw	72
+	dw	88
+	dw	0
+L0035:
+	pushv	L0034
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("POP",true)
+	br	L0037
+L0036:
+;	[string]=> "POP"
+	dw	80
+	dw	79
+	dw	80
+	dw	0
+L0037:
+	pushv	L0036
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("POPS",false)
+	br	L0039
+L0038:
+;	[string]=> "POPS"
+	dw	80
+	dw	79
+	dw	80
+	dw	83
+	dw	0
+L0039:
+	pushv	L0038
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("POPX",true)
+	br	L0041
+L0040:
+;	[string]=> "POPX"
+	dw	80
+	dw	79
+	dw	80
+	dw	88
+	dw	0
+L0041:
+	pushv	L0040
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("DUPL",false)
+	br	L0043
+L0042:
+;	[string]=> "DUPL"
+	dw	68
+	dw	85
+	dw	80
+	dw	76
+	dw	0
+L0043:
+	pushv	L0042
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("SWAP",false)
+	br	L0045
+L0044:
+;	[string]=> "SWAP"
+	dw	83
+	dw	87
+	dw	65
+	dw	80
+	dw	0
+L0045:
+	pushv	L0044
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("OVER",false)
+	br	L0047
+L0046:
+;	[string]=> "OVER"
+	dw	79
+	dw	86
+	dw	69
+	dw	82
+	dw	0
+L0047:
+	pushv	L0046
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("DROP",false)
+	br	L0049
+L0048:
+;	[string]=> "DROP"
+	dw	68
+	dw	82
+	dw	79
+	dw	80
+	dw	0
+L0049:
+	pushv	L0048
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("ROT",false)
+	br	L0051
+L0050:
+;	[string]=> "ROT"
+	dw	82
+	dw	79
+	dw	84
+	dw	0
+L0051:
+	pushv	L0050
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TSTLT",false)
+	br	L0053
+L0052:
+;	[string]=> "TSTLT"
+	dw	84
+	dw	83
+	dw	84
+	dw	76
+	dw	84
+	dw	0
+L0053:
+	pushv	L0052
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TSTLE",false)
+	br	L0055
+L0054:
+;	[string]=> "TSTLE"
+	dw	84
+	dw	83
+	dw	84
+	dw	76
+	dw	69
+	dw	0
+L0055:
+	pushv	L0054
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TSTGT",false)
+	br	L0057
+L0056:
+;	[string]=> "TSTGT"
+	dw	84
+	dw	83
+	dw	84
+	dw	71
+	dw	84
+	dw	0
+L0057:
+	pushv	L0056
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TSTGE",false)
+	br	L0059
+L0058:
+;	[string]=> "TSTGE"
+	dw	84
+	dw	83
+	dw	84
+	dw	71
+	dw	69
+	dw	0
+L0059:
+	pushv	L0058
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TSTEQ",false)
+	br	L0061
+L0060:
+;	[string]=> "TSTEQ"
+	dw	84
+	dw	83
+	dw	84
+	dw	69
+	dw	81
+	dw	0
+L0061:
+	pushv	L0060
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TSTNE",false)
+	br	L0063
+L0062:
+;	[string]=> "TSTNE"
+	dw	84
+	dw	83
+	dw	84
+	dw	78
+	dw	69
+	dw	0
+L0063:
+	pushv	L0062
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("BNE",true)
+	br	L0065
+L0064:
+;	[string]=> "BNE"
+	dw	66
+	dw	78
+	dw	69
+	dw	0
+L0065:
+	pushv	L0064
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("BEQ",true)
+	br	L0067
+L0066:
+;	[string]=> "BEQ"
+	dw	66
+	dw	69
+	dw	81
+	dw	0
+L0067:
+	pushv	L0066
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("BR",true)
+	br	L0069
+L0068:
+;	[string]=> "BR"
+	dw	66
+	dw	82
+	dw	0
+L0069:
+	pushv	L0068
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("CALL",true)
+	br	L0071
+L0070:
+;	[string]=> "CALL"
+	dw	67
+	dw	65
+	dw	76
+	dw	76
+	dw	0
+L0071:
+	pushv	L0070
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("CALLS",false)
+	br	L0073
+L0072:
+;	[string]=> "CALLS"
+	dw	67
+	dw	65
+	dw	76
+	dw	76
+	dw	83
+	dw	0
+L0073:
+	pushv	L0072
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("RETURN",false)
+	br	L0075
+L0074:
+;	[string]=> "RETURN"
+	dw	82
+	dw	69
+	dw	84
+	dw	85
+	dw	82
+	dw	78
+	dw	0
+L0075:
+	pushv	L0074
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("RETN",true)
+	br	L0077
+L0076:
+;	[string]=> "RETN"
+	dw	82
+	dw	69
+	dw	84
+	dw	78
+	dw	0
+L0077:
+	pushv	L0076
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("HALT",false)
+	br	L0079
+L0078:
+;	[string]=> "HALT"
+	dw	72
+	dw	65
+	dw	76
+	dw	84
+	dw	0
+L0079:
+	pushv	L0078
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("ADD",false)
+	br	L0081
+L0080:
+;	[string]=> "ADD"
+	dw	65
+	dw	68
+	dw	68
+	dw	0
+L0081:
+	pushv	L0080
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("SUB",false)
+	br	L0083
+L0082:
+;	[string]=> "SUB"
+	dw	83
+	dw	85
+	dw	66
+	dw	0
+L0083:
+	pushv	L0082
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("MUL",false)
+	br	L0085
+L0084:
+;	[string]=> "MUL"
+	dw	77
+	dw	85
+	dw	76
+	dw	0
+L0085:
+	pushv	L0084
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("DIV",false)
+	br	L0087
+L0086:
+;	[string]=> "DIV"
+	dw	68
+	dw	73
+	dw	86
+	dw	0
+L0087:
+	pushv	L0086
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("MOD",false)
+	br	L0089
+L0088:
+;	[string]=> "MOD"
+	dw	77
+	dw	79
+	dw	68
+	dw	0
+L0089:
+	pushv	L0088
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("OR",false)
+	br	L0091
+L0090:
+;	[string]=> "OR"
+	dw	79
+	dw	82
+	dw	0
+L0091:
+	pushv	L0090
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("AND",false)
+	br	L0093
+L0092:
+;	[string]=> "AND"
+	dw	65
+	dw	78
+	dw	68
+	dw	0
+L0093:
+	pushv	L0092
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("XOR",false)
+	br	L0095
+L0094:
+;	[string]=> "XOR"
+	dw	88
+	dw	79
+	dw	82
+	dw	0
+L0095:
+	pushv	L0094
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("NOT",false)
+	br	L0097
+L0096:
+;	[string]=> "NOT"
+	dw	78
+	dw	79
+	dw	84
+	dw	0
+L0097:
+	pushv	L0096
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("NEG",false)
+	br	L0099
+L0098:
+;	[string]=> "NEG"
+	dw	78
+	dw	69
+	dw	71
+	dw	0
+L0099:
+	pushv	L0098
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("ADDX",true)
+	br	L0101
+L0100:
+;	[string]=> "ADDX"
+	dw	65
+	dw	68
+	dw	68
+	dw	88
+	dw	0
+L0101:
+	pushv	L0100
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("ADDSP",true)
+	br	L0103
+L0102:
+;	[string]=> "ADDSP"
+	dw	65
+	dw	68
+	dw	68
+	dw	83
+	dw	80
+	dw	0
+L0103:
+	pushv	L0102
+	pushv	1
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("READ",false)
+	br	L0105
+L0104:
+;	[string]=> "READ"
+	dw	82
+	dw	69
+	dw	65
+	dw	68
+	dw	0
+L0105:
+	pushv	L0104
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("PRINT",false)
+	br	L0107
+L0106:
+;	[string]=> "PRINT"
+	dw	80
+	dw	82
+	dw	73
+	dw	78
+	dw	84
+	dw	0
+L0107:
+	pushv	L0106
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("READC",false)
+	br	L0109
+L0108:
+;	[string]=> "READC"
+	dw	82
+	dw	69
+	dw	65
+	dw	68
+	dw	67
+	dw	0
+L0109:
+	pushv	L0108
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("PRINTC",false)
+	br	L0111
+L0110:
+;	[string]=> "PRINTC"
+	dw	80
+	dw	82
+	dw	73
+	dw	78
+	dw	84
+	dw	67
+	dw	0
+L0111:
+	pushv	L0110
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TRON",false)
+	br	L0113
+L0112:
+;	[string]=> "TRON"
+	dw	84
+	dw	82
+	dw	79
+	dw	78
+	dw	0
+L0113:
+	pushv	L0112
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("TROFF",false)
+	br	L0115
+L0114:
+;	[string]=> "TROFF"
+	dw	84
+	dw	82
+	dw	79
+	dw	70
+	dw	70
+	dw	0
+L0115:
+	pushv	L0114
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->        call mninstall("DUMP",false)
+	br	L0117
+L0116:
+;	[string]=> "DUMP"
+	dw	68
+	dw	85
+	dw	77
+	dw	80
+	dw	0
+L0117:
+	pushv	L0116
+	pushv	0
+	push	FP
+	indir
+	call	L0008
+;---->      end
+L0025:
+L0023:
+	drop
+	pop	FP
+	return
+L0021:
+;---->  
+;---->    // print the value of x with leading 0s in a field of width 4
+;---->    procedure print4(integer x)
+	br	L0119
+L0118:
+	push	FP
+	push	SP
+	pop	FP
+	rot
+;---->      var integer xx
+;---->      begin
+	addsp	-1
+L0120:
+;	[Proc]=> PRINT4
+L0122:
+;---->        xx := 1000
+	push	FP
+	addx	-1
+	pushv	1000
+;---->        if x < 0 then
+	pops
+	push	FP
+	pushx	3
+	pushv	0
+	sub
+	tstlt
+	bf	L0124
+;---->  	writec '-'
+	pushv	45
+;---->  	x := -x
+	printc
+	push	FP
+	addx	3
+	push	FP
+	pushx	3
+	neg
+;---->        endif
+	pops
+L0124:
+L0125:
+;---->        while x < xx do
+L0126:
+	push	FP
+	pushx	3
+	push	FP
+	pushx	-1
+	sub
+	tstlt
+	bf	L0127
+;---->  	writec '0'
+	pushv	48
+;---->  	xx := xx/10
+	printc
+	push	FP
+	addx	-1
+	push	FP
+	pushx	-1
+	pushv	10
+	div
+;---->        endwhile
+	pops
+	br	L0126
+L0127:
+;---->        write x
+	push	FP
+	pushx	3
+;---->      end
+	print
+L0123:
+L0121:
+	push	FP
+	pop	SP
+	drop
+	pop	FP
+	retn	1
+L0119:
+;---->  
+;---->    // print the value of x, along with a sax comment if it's ASCII
+;---->    procedure printval(integer x)
+	br	L0129
+L0128:
+	push	FP
+	push	SP
+	pop	FP
+	rot
+;---->      begin
+L0130:
+;	[Proc]=> PRINTVAL
+L0132:
+;---->        write val
+	push	L0007
+;---->        if x >= 32 and x < 127 then
+	print
+	push	FP
+	pushx	3
+	pushv	32
+	sub
+	tstge
+	push	FP
+	pushx	3
+	pushv	127
+	sub
+	tstlt
+	and
+	bf	L0134
+;---->  	writec "\t; '"
+	br	L0136
+L0135:
+;	[string]=> "?"
+	dw	9
+	dw	59
+	dw	32
+	dw	39
+	dw	0
+L0136:
+	pushv	L0135
+	call	write_string
+;---->  	writec x
+	push	FP
+	pushx	3
+;---->  	writec '\''
+	printc
+	pushv	39
+;---->        endif
+	printc
+L0134:
+L0137:
+;---->      end
+L0133:
+L0131:
+	drop
+	pop	FP
+	retn	1
+L0129:
+;---->  
+;---->    begin
+L0000:
+;	[Prog]=> UNSAX
+L0138:
+;---->      call mnemonic_init
+;---->      writec "Starting address: "
+	push	FP
+	call	L0020
+	br	L0141
+L0140:
+;	[string]=> "Starting address: "
+	dw	83
+	dw	116
+	dw	97
+	dw	114
+	dw	116
+	dw	105
+	dw	110
+	dw	103
+	dw	32
+	dw	97
+	dw	100
+	dw	100
+	dw	114
+	dw	101
+	dw	115
+	dw	115
+	dw	58
+	dw	32
+	dw	0
+L0141:
+	pushv	L0140
+	call	write_string
+;---->      read start
+	pushv	L0004
+	read
+	pops
+;---->      writec "Ending address: "
+	br	L0143
+L0142:
+;	[string]=> "Ending address: "
+	dw	69
+	dw	110
+	dw	100
+	dw	105
+	dw	110
+	dw	103
+	dw	32
+	dw	97
+	dw	100
+	dw	100
+	dw	114
+	dw	101
+	dw	115
+	dw	115
+	dw	58
+	dw	32
+	dw	0
+L0143:
+	pushv	L0142
+	call	write_string
+;---->      read finish
+	pushv	L0005
+	read
+	pops
+;---->      i := start
+	pushv	L0006
+	push	L0004
+;---->      while i <= finish do
+	pops
+L0144:
+	push	L0006
+	push	L0005
+	sub
+	tstle
+	bf	L0145
+;---->        call print4(i)
+	push	L0006
+	push	FP
+	call	L0118
+;---->        writec ":\t"
+	br	L0147
+L0146:
+;	[string]=> ":?"
+	dw	58
+	dw	9
+	dw	0
+L0147:
+	pushv	L0146
+	call	write_string
+;---->        val := @(i)
+	pushv	L0007
+	push	L0006
+	indir
+;---->        if val >= 0 and val < mncount then
+	pops
+	push	L0007
+	pushv	0
+	sub
+	tstge
+	push	L0007
+	push	L0003
+	sub
+	tstlt
+	and
+	bf	L0148
+;---->  	call print(array @(mntable[val]))
+	pushv	L0001
+	push	L0007
+	add
+	indir
+	push	FP
+	call	L0014
+;---->  	if optable[val] then
+	pushv	L0002
+	push	L0007
+	add
+	indir
+	bf	L0149
+;---->  	  i := i+1
+	pushv	L0006
+	push	L0006
+	pushv	1
+;---->  	  writec '\t'
+	add
+	pops
+	pushv	9
+;---->  	  val := @(i)
+	printc
+	pushv	L0007
+	push	L0006
+	indir
+;---->  	  call printval(val)
+	pops
+	push	L0007
+	push	FP
+	call	L0128
+;---->  	endif
+L0149:
+L0150:
+;---->        else
+	br	L0151
+L0148:
+;---->  	call print("DW\t")
+	br	L0153
+L0152:
+;	[string]=> "DW?"
+	dw	68
+	dw	87
+	dw	9
+	dw	0
+L0153:
+	pushv	L0152
+	push	FP
+	call	L0014
+;---->  	call printval(val)
+	push	L0007
+	push	FP
+	call	L0128
+;---->        endif
+L0151:
+;---->        writec '\n'
+	pushv	10
+;---->        i := i+1
+	printc
+	pushv	L0006
+	push	L0006
+	pushv	1
+;---->      endwhile
+	add
+	pops
+	br	L0144
+L0145:
+;---->    end
+L0139:
+	halt

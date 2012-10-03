@@ -9,7 +9,7 @@ public class Header {
     public int length;   // length of program
     public int entry;    // how far off the offset to start PC
     public boolean oldStyle;  // program is `New Style' is type is `%SXX+E'
-    public final int DEBUG = 0;
+    public final int DEBUG = 1;
 
     public Header(Scanner sc) {
         this.sc = sc;
@@ -23,7 +23,7 @@ public class Header {
 
         if (sc.hasNextLine()) {
             this.type = sc.nextLine().substring(0,6);
-            if (DEBUG == 1) { System.out.println("Type: " + this.type); }
+            //if (DEBUG == 1) { System.out.println("Type: " + this.type); }
             // read the FUCKING manual next time
             if (Pattern.matches("^%SXX[+-]E", this.type)) {
                 this.oldStyle = (this.type.charAt(4) == '-') ? true : false;

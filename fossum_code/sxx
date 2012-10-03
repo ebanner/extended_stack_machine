@@ -5,7 +5,7 @@ use strict;
 # add the keyboard to the end of the file list
 push @ARGV, "-";
 
-my $MEMSZ = 16384;
+my $MEMSZ = 16000;
 my @mem = (0) x $MEMSZ;
 
 # internal registers
@@ -431,7 +431,7 @@ my $textlen = 0;  # text length
 my $entry = 0;    # entry point
 my $base = 0;      # base location
 
-$base = 16 + int(rand()*985); # $base should be between 16 and 1000
+$base = 16; #+ int(rand()*985); # $base should be between 16 and 1000
 print "base=$base\n" if $debug;
 
 my $n;     # the first field in the current line
@@ -503,6 +503,13 @@ sub doOP {
     $opcode++ if $opcode > 22 and $sxx_format eq "-";
     die "Illegal OP code\n" unless $opcode >= 0 and $opcode < $OPTABSZ;
     &{$optab[$opcode]}();
+
+    # print out the stack #
+    my $pointer = $MEMSZ;
+    while ($pointer-- > 15990) {
+        printf "%2d| %2s%s\n", $pointer, &getmem($pointer), $pointer == $$SP ? " <-- SP" : "";
+    }
+    # print out the stack #
 }
   
 sub push {

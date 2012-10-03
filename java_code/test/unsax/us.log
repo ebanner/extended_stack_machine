@@ -1,0 +1,3751 @@
+textlen=1278
+entry=1125
+mem[77]=70
+mem[78]=84
+BSS 45
+BSS 45
+mem[169]=0
+BSS 1
+BSS 1
+BSS 1
+BSS 1
+mem[174]=21
+mem[175]=139
+mem[176]=1
+mem[177]=1
+mem[178]=1
+mem[179]=0
+mem[180]=5
+mem[181]=1
+mem[182]=12
+mem[183]=2
+mem[184]=2
+mem[185]=1
+mem[186]=92
+mem[187]=27
+mem[188]=1
+mem[189]=1
+mem[190]=4
+mem[191]=4
+mem[192]=6
+mem[193]=2
+mem[194]=47
+mem[195]=1
+mem[196]=92
+mem[197]=27
+mem[198]=1
+mem[199]=1
+mem[200]=4
+mem[201]=3
+mem[202]=6
+mem[203]=2
+mem[204]=92
+mem[205]=1
+mem[206]=92
+mem[207]=2
+mem[208]=1
+mem[209]=27
+mem[210]=6
+mem[211]=11
+mem[212]=5
+mem[213]=1
+mem[214]=25
+mem[215]=2
+mem[216]=21
+mem[217]=159
+mem[218]=1
+mem[219]=1
+mem[220]=1
+mem[221]=0
+mem[222]=5
+mem[223]=1
+mem[224]=12
+mem[225]=1
+mem[226]=1
+mem[227]=4
+mem[228]=3
+mem[229]=22
+mem[230]=1263
+mem[231]=11
+mem[232]=5
+mem[233]=1
+mem[234]=25
+mem[235]=1
+mem[236]=21
+mem[237]=909
+mem[238]=1
+mem[239]=1
+mem[240]=1
+mem[241]=0
+mem[242]=5
+mem[243]=1
+mem[244]=12
+mem[245]=21
+mem[246]=175
+mem[247]=66
+mem[248]=75
+mem[249]=80
+mem[250]=84
+mem[251]=0
+mem[252]=2
+mem[253]=170
+mem[254]=2
+mem[255]=0
+mem[256]=1
+mem[257]=1
+mem[258]=3
+mem[259]=22
+mem[260]=99
+mem[261]=21
+mem[262]=191
+mem[263]=80
+mem[264]=85
+mem[265]=83
+mem[266]=72
+mem[267]=0
+mem[268]=2
+mem[269]=186
+mem[270]=2
+mem[271]=1
+mem[272]=1
+mem[273]=1
+mem[274]=3
+mem[275]=22
+mem[276]=99
+mem[277]=21
+mem[278]=208
+mem[279]=80
+mem[280]=85
+mem[281]=83
+mem[282]=72
+mem[283]=86
+mem[284]=0
+mem[285]=2
+mem[286]=202
+mem[287]=2
+mem[288]=1
+mem[289]=1
+mem[290]=1
+mem[291]=3
+mem[292]=22
+mem[293]=99
+mem[294]=21
+mem[295]=225
+mem[296]=80
+mem[297]=85
+mem[298]=83
+mem[299]=72
+mem[300]=83
+mem[301]=0
+mem[302]=2
+mem[303]=219
+mem[304]=2
+mem[305]=0
+mem[306]=1
+mem[307]=1
+mem[308]=3
+mem[309]=22
+mem[310]=99
+mem[311]=21
+mem[312]=242
+mem[313]=80
+mem[314]=85
+mem[315]=83
+mem[316]=72
+mem[317]=88
+mem[318]=0
+mem[319]=2
+mem[320]=236
+mem[321]=2
+mem[322]=1
+mem[323]=1
+mem[324]=1
+mem[325]=3
+mem[326]=22
+mem[327]=99
+mem[328]=21
+mem[329]=257
+mem[330]=80
+mem[331]=79
+mem[332]=80
+mem[333]=0
+mem[334]=2
+mem[335]=253
+mem[336]=2
+mem[337]=1
+mem[338]=1
+mem[339]=1
+mem[340]=3
+mem[341]=22
+mem[342]=99
+mem[343]=21
+mem[344]=273
+mem[345]=80
+mem[346]=79
+mem[347]=80
+mem[348]=83
+mem[349]=0
+mem[350]=2
+mem[351]=268
+mem[352]=2
+mem[353]=0
+mem[354]=1
+mem[355]=1
+mem[356]=3
+mem[357]=22
+mem[358]=99
+mem[359]=21
+mem[360]=289
+mem[361]=80
+mem[362]=79
+mem[363]=80
+mem[364]=88
+mem[365]=0
+mem[366]=2
+mem[367]=284
+mem[368]=2
+mem[369]=1
+mem[370]=1
+mem[371]=1
+mem[372]=3
+mem[373]=22
+mem[374]=99
+mem[375]=21
+mem[376]=305
+mem[377]=68
+mem[378]=85
+mem[379]=80
+mem[380]=76
+mem[381]=0
+mem[382]=2
+mem[383]=300
+mem[384]=2
+mem[385]=0
+mem[386]=1
+mem[387]=1
+mem[388]=3
+mem[389]=22
+mem[390]=99
+mem[391]=21
+mem[392]=321
+mem[393]=83
+mem[394]=87
+mem[395]=65
+mem[396]=80
+mem[397]=0
+mem[398]=2
+mem[399]=316
+mem[400]=2
+mem[401]=0
+mem[402]=1
+mem[403]=1
+mem[404]=3
+mem[405]=22
+mem[406]=99
+mem[407]=21
+mem[408]=337
+mem[409]=79
+mem[410]=86
+mem[411]=69
+mem[412]=82
+mem[413]=0
+mem[414]=2
+mem[415]=332
+mem[416]=2
+mem[417]=0
+mem[418]=1
+mem[419]=1
+mem[420]=3
+mem[421]=22
+mem[422]=99
+mem[423]=21
+mem[424]=353
+mem[425]=68
+mem[426]=82
+mem[427]=79
+mem[428]=80
+mem[429]=0
+mem[430]=2
+mem[431]=348
+mem[432]=2
+mem[433]=0
+mem[434]=1
+mem[435]=1
+mem[436]=3
+mem[437]=22
+mem[438]=99
+mem[439]=21
+mem[440]=368
+mem[441]=82
+mem[442]=79
+mem[443]=84
+mem[444]=0
+mem[445]=2
+mem[446]=364
+mem[447]=2
+mem[448]=0
+mem[449]=1
+mem[450]=1
+mem[451]=3
+mem[452]=22
+mem[453]=99
+mem[454]=21
+mem[455]=385
+mem[456]=84
+mem[457]=83
+mem[458]=84
+mem[459]=76
+mem[460]=84
+mem[461]=0
+mem[462]=2
+mem[463]=379
+mem[464]=2
+mem[465]=0
+mem[466]=1
+mem[467]=1
+mem[468]=3
+mem[469]=22
+mem[470]=99
+mem[471]=21
+mem[472]=402
+mem[473]=84
+mem[474]=83
+mem[475]=84
+mem[476]=76
+mem[477]=69
+mem[478]=0
+mem[479]=2
+mem[480]=396
+mem[481]=2
+mem[482]=0
+mem[483]=1
+mem[484]=1
+mem[485]=3
+mem[486]=22
+mem[487]=99
+mem[488]=21
+mem[489]=419
+mem[490]=84
+mem[491]=83
+mem[492]=84
+mem[493]=71
+mem[494]=84
+mem[495]=0
+mem[496]=2
+mem[497]=413
+mem[498]=2
+mem[499]=0
+mem[500]=1
+mem[501]=1
+mem[502]=3
+mem[503]=22
+mem[504]=99
+mem[505]=21
+mem[506]=436
+mem[507]=84
+mem[508]=83
+mem[509]=84
+mem[510]=71
+mem[511]=69
+mem[512]=0
+mem[513]=2
+mem[514]=430
+mem[515]=2
+mem[516]=0
+mem[517]=1
+mem[518]=1
+mem[519]=3
+mem[520]=22
+mem[521]=99
+mem[522]=21
+mem[523]=453
+mem[524]=84
+mem[525]=83
+mem[526]=84
+mem[527]=69
+mem[528]=81
+mem[529]=0
+mem[530]=2
+mem[531]=447
+mem[532]=2
+mem[533]=0
+mem[534]=1
+mem[535]=1
+mem[536]=3
+mem[537]=22
+mem[538]=99
+mem[539]=21
+mem[540]=470
+mem[541]=84
+mem[542]=83
+mem[543]=84
+mem[544]=78
+mem[545]=69
+mem[546]=0
+mem[547]=2
+mem[548]=464
+mem[549]=2
+mem[550]=0
+mem[551]=1
+mem[552]=1
+mem[553]=3
+mem[554]=22
+mem[555]=99
+mem[556]=21
+mem[557]=485
+mem[558]=66
+mem[559]=78
+mem[560]=69
+mem[561]=0
+mem[562]=2
+mem[563]=481
+mem[564]=2
+mem[565]=1
+mem[566]=1
+mem[567]=1
+mem[568]=3
+mem[569]=22
+mem[570]=99
+mem[571]=21
+mem[572]=500
+mem[573]=66
+mem[574]=69
+mem[575]=81
+mem[576]=0
+mem[577]=2
+mem[578]=496
+mem[579]=2
+mem[580]=1
+mem[581]=1
+mem[582]=1
+mem[583]=3
+mem[584]=22
+mem[585]=99
+mem[586]=21
+mem[587]=514
+mem[588]=66
+mem[589]=82
+mem[590]=0
+mem[591]=2
+mem[592]=511
+mem[593]=2
+mem[594]=1
+mem[595]=1
+mem[596]=1
+mem[597]=3
+mem[598]=22
+mem[599]=99
+mem[600]=21
+mem[601]=530
+mem[602]=67
+mem[603]=65
+mem[604]=76
+mem[605]=76
+mem[606]=0
+mem[607]=2
+mem[608]=525
+mem[609]=2
+mem[610]=1
+mem[611]=1
+mem[612]=1
+mem[613]=3
+mem[614]=22
+mem[615]=99
+mem[616]=21
+mem[617]=547
+mem[618]=67
+mem[619]=65
+mem[620]=76
+mem[621]=76
+mem[622]=83
+mem[623]=0
+mem[624]=2
+mem[625]=541
+mem[626]=2
+mem[627]=0
+mem[628]=1
+mem[629]=1
+mem[630]=3
+mem[631]=22
+mem[632]=99
+mem[633]=21
+mem[634]=565
+mem[635]=82
+mem[636]=69
+mem[637]=84
+mem[638]=85
+mem[639]=82
+mem[640]=78
+mem[641]=0
+mem[642]=2
+mem[643]=558
+mem[644]=2
+mem[645]=0
+mem[646]=1
+mem[647]=1
+mem[648]=3
+mem[649]=22
+mem[650]=99
+mem[651]=21
+mem[652]=581
+mem[653]=82
+mem[654]=69
+mem[655]=84
+mem[656]=78
+mem[657]=0
+mem[658]=2
+mem[659]=576
+mem[660]=2
+mem[661]=1
+mem[662]=1
+mem[663]=1
+mem[664]=3
+mem[665]=22
+mem[666]=99
+mem[667]=21
+mem[668]=597
+mem[669]=72
+mem[670]=65
+mem[671]=76
+mem[672]=84
+mem[673]=0
+mem[674]=2
+mem[675]=592
+mem[676]=2
+mem[677]=0
+mem[678]=1
+mem[679]=1
+mem[680]=3
+mem[681]=22
+mem[682]=99
+mem[683]=21
+mem[684]=612
+mem[685]=65
+mem[686]=68
+mem[687]=68
+mem[688]=0
+mem[689]=2
+mem[690]=608
+mem[691]=2
+mem[692]=0
+mem[693]=1
+mem[694]=1
+mem[695]=3
+mem[696]=22
+mem[697]=99
+mem[698]=21
+mem[699]=627
+mem[700]=83
+mem[701]=85
+mem[702]=66
+mem[703]=0
+mem[704]=2
+mem[705]=623
+mem[706]=2
+mem[707]=0
+mem[708]=1
+mem[709]=1
+mem[710]=3
+mem[711]=22
+mem[712]=99
+mem[713]=21
+mem[714]=642
+mem[715]=77
+mem[716]=85
+mem[717]=76
+mem[718]=0
+mem[719]=2
+mem[720]=638
+mem[721]=2
+mem[722]=0
+mem[723]=1
+mem[724]=1
+mem[725]=3
+mem[726]=22
+mem[727]=99
+mem[728]=21
+mem[729]=657
+mem[730]=68
+mem[731]=73
+mem[732]=86
+mem[733]=0
+mem[734]=2
+mem[735]=653
+mem[736]=2
+mem[737]=0
+mem[738]=1
+mem[739]=1
+mem[740]=3
+mem[741]=22
+mem[742]=99
+mem[743]=21
+mem[744]=672
+mem[745]=77
+mem[746]=79
+mem[747]=68
+mem[748]=0
+mem[749]=2
+mem[750]=668
+mem[751]=2
+mem[752]=0
+mem[753]=1
+mem[754]=1
+mem[755]=3
+mem[756]=22
+mem[757]=99
+mem[758]=21
+mem[759]=686
+mem[760]=79
+mem[761]=82
+mem[762]=0
+mem[763]=2
+mem[764]=683
+mem[765]=2
+mem[766]=0
+mem[767]=1
+mem[768]=1
+mem[769]=3
+mem[770]=22
+mem[771]=99
+mem[772]=21
+mem[773]=701
+mem[774]=65
+mem[775]=78
+mem[776]=68
+mem[777]=0
+mem[778]=2
+mem[779]=697
+mem[780]=2
+mem[781]=0
+mem[782]=1
+mem[783]=1
+mem[784]=3
+mem[785]=22
+mem[786]=99
+mem[787]=21
+mem[788]=716
+mem[789]=88
+mem[790]=79
+mem[791]=82
+mem[792]=0
+mem[793]=2
+mem[794]=712
+mem[795]=2
+mem[796]=0
+mem[797]=1
+mem[798]=1
+mem[799]=3
+mem[800]=22
+mem[801]=99
+mem[802]=21
+mem[803]=731
+mem[804]=78
+mem[805]=79
+mem[806]=84
+mem[807]=0
+mem[808]=2
+mem[809]=727
+mem[810]=2
+mem[811]=0
+mem[812]=1
+mem[813]=1
+mem[814]=3
+mem[815]=22
+mem[816]=99
+mem[817]=21
+mem[818]=746
+mem[819]=78
+mem[820]=69
+mem[821]=71
+mem[822]=0
+mem[823]=2
+mem[824]=742
+mem[825]=2
+mem[826]=0
+mem[827]=1
+mem[828]=1
+mem[829]=3
+mem[830]=22
+mem[831]=99
+mem[832]=21
+mem[833]=762
+mem[834]=65
+mem[835]=68
+mem[836]=68
+mem[837]=88
+mem[838]=0
+mem[839]=2
+mem[840]=757
+mem[841]=2
+mem[842]=1
+mem[843]=1
+mem[844]=1
+mem[845]=3
+mem[846]=22
+mem[847]=99
+mem[848]=21
+mem[849]=779
+mem[850]=65
+mem[851]=68
+mem[852]=68
+mem[853]=83
+mem[854]=80
+mem[855]=0
+mem[856]=2
+mem[857]=773
+mem[858]=2
+mem[859]=1
+mem[860]=1
+mem[861]=1
+mem[862]=3
+mem[863]=22
+mem[864]=99
+mem[865]=21
+mem[866]=795
+mem[867]=82
+mem[868]=69
+mem[869]=65
+mem[870]=68
+mem[871]=0
+mem[872]=2
+mem[873]=790
+mem[874]=2
+mem[875]=0
+mem[876]=1
+mem[877]=1
+mem[878]=3
+mem[879]=22
+mem[880]=99
+mem[881]=21
+mem[882]=812
+mem[883]=80
+mem[884]=82
+mem[885]=73
+mem[886]=78
+mem[887]=84
+mem[888]=0
+mem[889]=2
+mem[890]=806
+mem[891]=2
+mem[892]=0
+mem[893]=1
+mem[894]=1
+mem[895]=3
+mem[896]=22
+mem[897]=99
+mem[898]=21
+mem[899]=829
+mem[900]=82
+mem[901]=69
+mem[902]=65
+mem[903]=68
+mem[904]=67
+mem[905]=0
+mem[906]=2
+mem[907]=823
+mem[908]=2
+mem[909]=0
+mem[910]=1
+mem[911]=1
+mem[912]=3
+mem[913]=22
+mem[914]=99
+mem[915]=21
+mem[916]=847
+mem[917]=80
+mem[918]=82
+mem[919]=73
+mem[920]=78
+mem[921]=84
+mem[922]=67
+mem[923]=0
+mem[924]=2
+mem[925]=840
+mem[926]=2
+mem[927]=0
+mem[928]=1
+mem[929]=1
+mem[930]=3
+mem[931]=22
+mem[932]=99
+mem[933]=21
+mem[934]=863
+mem[935]=84
+mem[936]=82
+mem[937]=79
+mem[938]=78
+mem[939]=0
+mem[940]=2
+mem[941]=858
+mem[942]=2
+mem[943]=0
+mem[944]=1
+mem[945]=1
+mem[946]=3
+mem[947]=22
+mem[948]=99
+mem[949]=21
+mem[950]=880
+mem[951]=84
+mem[952]=82
+mem[953]=79
+mem[954]=70
+mem[955]=70
+mem[956]=0
+mem[957]=2
+mem[958]=874
+mem[959]=2
+mem[960]=0
+mem[961]=1
+mem[962]=1
+mem[963]=3
+mem[964]=22
+mem[965]=99
+mem[966]=21
+mem[967]=896
+mem[968]=68
+mem[969]=85
+mem[970]=77
+mem[971]=80
+mem[972]=0
+mem[973]=2
+mem[974]=891
+mem[975]=2
+mem[976]=0
+mem[977]=1
+mem[978]=1
+mem[979]=3
+mem[980]=22
+mem[981]=99
+mem[982]=11
+mem[983]=5
+mem[984]=1
+mem[985]=24
+mem[986]=21
+mem[987]=993
+mem[988]=1
+mem[989]=1
+mem[990]=1
+mem[991]=0
+mem[992]=5
+mem[993]=1
+mem[994]=12
+mem[995]=38
+mem[996]=-1
+mem[997]=1
+mem[998]=1
+mem[999]=37
+mem[1000]=-1
+mem[1001]=2
+mem[1002]=1000
+mem[1003]=6
+mem[1004]=1
+mem[1005]=1
+mem[1006]=4
+mem[1007]=3
+mem[1008]=2
+mem[1009]=0
+mem[1010]=28
+mem[1011]=13
+mem[1012]=20
+mem[1013]=950
+mem[1014]=2
+mem[1015]=45
+mem[1016]=42
+mem[1017]=1
+mem[1018]=1
+mem[1019]=37
+mem[1020]=3
+mem[1021]=1
+mem[1022]=1
+mem[1023]=4
+mem[1024]=3
+mem[1025]=36
+mem[1026]=6
+mem[1027]=1
+mem[1028]=1
+mem[1029]=4
+mem[1030]=3
+mem[1031]=1
+mem[1032]=1
+mem[1033]=4
+mem[1034]=-1
+mem[1035]=28
+mem[1036]=13
+mem[1037]=20
+mem[1038]=979
+mem[1039]=2
+mem[1040]=48
+mem[1041]=42
+mem[1042]=1
+mem[1043]=1
+mem[1044]=37
+mem[1045]=-1
+mem[1046]=1
+mem[1047]=1
+mem[1048]=4
+mem[1049]=-1
+mem[1050]=2
+mem[1051]=10
+mem[1052]=30
+mem[1053]=6
+mem[1054]=21
+mem[1055]=950
+mem[1056]=1
+mem[1057]=1
+mem[1058]=4
+mem[1059]=3
+mem[1060]=40
+mem[1061]=1
+mem[1062]=1
+mem[1063]=5
+mem[1064]=0
+mem[1065]=11
+mem[1066]=5
+mem[1067]=1
+mem[1068]=25
+mem[1069]=1
+mem[1070]=21
+mem[1071]=1048
+mem[1072]=1
+mem[1073]=1
+mem[1074]=1
+mem[1075]=0
+mem[1076]=5
+mem[1077]=1
+mem[1078]=12
+mem[1079]=1
+mem[1080]=96
+mem[1081]=40
+mem[1082]=1
+mem[1083]=1
+mem[1084]=4
+mem[1085]=3
+mem[1086]=2
+mem[1087]=32
+mem[1088]=28
+mem[1089]=16
+mem[1090]=1
+mem[1091]=1
+mem[1092]=4
+mem[1093]=3
+mem[1094]=2
+mem[1095]=127
+mem[1096]=28
+mem[1097]=13
+mem[1098]=33
+mem[1099]=20
+mem[1100]=1043
+mem[1101]=21
+mem[1102]=1031
+mem[1103]=9
+mem[1104]=59
+mem[1105]=32
+mem[1106]=39
+mem[1107]=0
+mem[1108]=2
+mem[1109]=1026
+mem[1110]=22
+mem[1111]=1263
+mem[1112]=1
+mem[1113]=1
+mem[1114]=4
+mem[1115]=3
+mem[1116]=42
+mem[1117]=2
+mem[1118]=39
+mem[1119]=42
+mem[1120]=11
+mem[1121]=5
+mem[1122]=1
+mem[1123]=25
+mem[1124]=1
+mem[1125]=1
+mem[1126]=1
+mem[1127]=22
+mem[1128]=161
+mem[1129]=21
+mem[1130]=1073
+mem[1131]=83
+mem[1132]=116
+mem[1133]=97
+mem[1134]=114
+mem[1135]=116
+mem[1136]=105
+mem[1137]=110
+mem[1138]=103
+mem[1139]=32
+mem[1140]=97
+mem[1141]=100
+mem[1142]=100
+mem[1143]=114
+mem[1144]=101
+mem[1145]=115
+mem[1146]=115
+mem[1147]=58
+mem[1148]=32
+mem[1149]=0
+mem[1150]=2
+mem[1151]=1054
+mem[1152]=22
+mem[1153]=1263
+mem[1154]=2
+mem[1155]=93
+mem[1156]=39
+mem[1157]=6
+mem[1158]=21
+mem[1159]=1100
+mem[1160]=69
+mem[1161]=110
+mem[1162]=100
+mem[1163]=105
+mem[1164]=110
+mem[1165]=103
+mem[1166]=32
+mem[1167]=97
+mem[1168]=100
+mem[1169]=100
+mem[1170]=114
+mem[1171]=101
+mem[1172]=115
+mem[1173]=115
+mem[1174]=58
+mem[1175]=32
+mem[1176]=0
+mem[1177]=2
+mem[1178]=1083
+mem[1179]=22
+mem[1180]=1263
+mem[1181]=2
+mem[1182]=94
+mem[1183]=39
+mem[1184]=6
+mem[1185]=2
+mem[1186]=95
+mem[1187]=1
+mem[1188]=93
+mem[1189]=6
+mem[1190]=1
+mem[1191]=95
+mem[1192]=1
+mem[1193]=94
+mem[1194]=28
+mem[1195]=14
+mem[1196]=20
+mem[1197]=1231
+mem[1198]=1
+mem[1199]=95
+mem[1200]=1
+mem[1201]=1
+mem[1202]=22
+mem[1203]=911
+mem[1204]=21
+mem[1205]=1132
+mem[1206]=58
+mem[1207]=9
+mem[1208]=0
+mem[1209]=2
+mem[1210]=1129
+mem[1211]=22
+mem[1212]=1263
+mem[1213]=2
+mem[1214]=96
+mem[1215]=1
+mem[1216]=95
+mem[1217]=3
+mem[1218]=6
+mem[1219]=1
+mem[1220]=96
+mem[1221]=2
+mem[1222]=0
+mem[1223]=28
+mem[1224]=16
+mem[1225]=1
+mem[1226]=96
+mem[1227]=1
+mem[1228]=92
+mem[1229]=28
+mem[1230]=13
+mem[1231]=33
+mem[1232]=20
+mem[1233]=1200
+mem[1234]=2
+mem[1235]=2
+mem[1236]=1
+mem[1237]=96
+mem[1238]=27
+mem[1239]=3
+mem[1240]=1
+mem[1241]=1
+mem[1242]=22
+mem[1243]=141
+mem[1244]=2
+mem[1245]=47
+mem[1246]=1
+mem[1247]=96
+mem[1248]=27
+mem[1249]=3
+mem[1250]=20
+mem[1251]=1198
+mem[1252]=2
+mem[1253]=95
+mem[1254]=1
+mem[1255]=95
+mem[1256]=2
+mem[1257]=1
+mem[1258]=27
+mem[1259]=6
+mem[1260]=2
+mem[1261]=9
+mem[1262]=42
+mem[1263]=2
+mem[1264]=96
+mem[1265]=1
+mem[1266]=95
+mem[1267]=3
+mem[1268]=6
+mem[1269]=1
+mem[1270]=96
+mem[1271]=1
+mem[1272]=1
+mem[1273]=22
+mem[1274]=995
+mem[1275]=21
+mem[1276]=1218
+mem[1277]=21
+mem[1278]=1206
+mem[1279]=68
+mem[1280]=87
+mem[1281]=9
+mem[1282]=0
+mem[1283]=2
+mem[1284]=1202
+mem[1285]=1
+mem[1286]=1
+mem[1287]=22
+mem[1288]=141
+mem[1289]=1
+mem[1290]=96
+mem[1291]=1
+mem[1292]=1
+mem[1293]=22
+mem[1294]=995
+mem[1295]=2
+mem[1296]=10
+mem[1297]=42
+mem[1298]=2
+mem[1299]=95
+mem[1300]=1
+mem[1301]=95
+mem[1302]=2
+mem[1303]=1
+mem[1304]=27
+mem[1305]=6
+mem[1306]=21
+mem[1307]=1113
+mem[1308]=26
+mem[1309]=9
+mem[1310]=41
+mem[1311]=8
+mem[1312]=2
+mem[1313]=-1
+mem[1314]=28
+mem[1315]=20
+mem[1316]=1253
+mem[1317]=10
+mem[1318]=10
+mem[1319]=6
+mem[1320]=2
+mem[1321]=10
+mem[1322]=28
+mem[1323]=20
+mem[1324]=1258
+mem[1325]=2
+mem[1326]=1
+mem[1327]=27
+mem[1328]=21
+mem[1329]=1233
+mem[1330]=11
+mem[1331]=2
+mem[1332]=0
+mem[1333]=6
+mem[1334]=24
+mem[1335]=2
+mem[1336]=0
+mem[1337]=7
+mem[1338]=1
+mem[1339]=24
+mem[1340]=9
+mem[1341]=8
+mem[1342]=3
+mem[1343]=8
+mem[1344]=20
+mem[1345]=1275
+mem[1346]=42
+mem[1347]=2
+mem[1348]=1
+mem[1349]=27
+mem[1350]=21
+mem[1351]=1264
+mem[1352]=38
+mem[1353]=2
+mem[1354]=24
+% relocation dictionary
+
+relocating memory at 175
+relocating memory at 184
+relocating memory at 186
+relocating memory at 194
+relocating memory at 196
+relocating memory at 204
+relocating memory at 206
+relocating memory at 217
+relocating memory at 230
+relocating memory at 237
+relocating memory at 246
+relocating memory at 253
+relocating memory at 260
+relocating memory at 262
+relocating memory at 269
+relocating memory at 276
+relocating memory at 278
+relocating memory at 286
+relocating memory at 293
+relocating memory at 295
+relocating memory at 303
+relocating memory at 310
+relocating memory at 312
+relocating memory at 320
+relocating memory at 327
+relocating memory at 329
+relocating memory at 335
+relocating memory at 342
+relocating memory at 344
+relocating memory at 351
+relocating memory at 358
+relocating memory at 360
+relocating memory at 367
+relocating memory at 374
+relocating memory at 376
+relocating memory at 383
+relocating memory at 390
+relocating memory at 392
+relocating memory at 399
+relocating memory at 406
+relocating memory at 408
+relocating memory at 415
+relocating memory at 422
+relocating memory at 424
+relocating memory at 431
+relocating memory at 438
+relocating memory at 440
+relocating memory at 446
+relocating memory at 453
+relocating memory at 455
+relocating memory at 463
+relocating memory at 470
+relocating memory at 472
+relocating memory at 480
+relocating memory at 487
+relocating memory at 489
+relocating memory at 497
+relocating memory at 504
+relocating memory at 506
+relocating memory at 514
+relocating memory at 521
+relocating memory at 523
+relocating memory at 531
+relocating memory at 538
+relocating memory at 540
+relocating memory at 548
+relocating memory at 555
+relocating memory at 557
+relocating memory at 563
+relocating memory at 570
+relocating memory at 572
+relocating memory at 578
+relocating memory at 585
+relocating memory at 587
+relocating memory at 592
+relocating memory at 599
+relocating memory at 601
+relocating memory at 608
+relocating memory at 615
+relocating memory at 617
+relocating memory at 625
+relocating memory at 632
+relocating memory at 634
+relocating memory at 643
+relocating memory at 650
+relocating memory at 652
+relocating memory at 659
+relocating memory at 666
+relocating memory at 668
+relocating memory at 675
+relocating memory at 682
+relocating memory at 684
+relocating memory at 690
+relocating memory at 697
+relocating memory at 699
+relocating memory at 705
+relocating memory at 712
+relocating memory at 714
+relocating memory at 720
+relocating memory at 727
+relocating memory at 729
+relocating memory at 735
+relocating memory at 742
+relocating memory at 744
+relocating memory at 750
+relocating memory at 757
+relocating memory at 759
+relocating memory at 764
+relocating memory at 771
+relocating memory at 773
+relocating memory at 779
+relocating memory at 786
+relocating memory at 788
+relocating memory at 794
+relocating memory at 801
+relocating memory at 803
+relocating memory at 809
+relocating memory at 816
+relocating memory at 818
+relocating memory at 824
+relocating memory at 831
+relocating memory at 833
+relocating memory at 840
+relocating memory at 847
+relocating memory at 849
+relocating memory at 857
+relocating memory at 864
+relocating memory at 866
+relocating memory at 873
+relocating memory at 880
+relocating memory at 882
+relocating memory at 890
+relocating memory at 897
+relocating memory at 899
+relocating memory at 907
+relocating memory at 914
+relocating memory at 916
+relocating memory at 925
+relocating memory at 932
+relocating memory at 934
+relocating memory at 941
+relocating memory at 948
+relocating memory at 950
+relocating memory at 958
+relocating memory at 965
+relocating memory at 967
+relocating memory at 974
+relocating memory at 981
+relocating memory at 987
+relocating memory at 1013
+relocating memory at 1038
+relocating memory at 1055
+relocating memory at 1071
+relocating memory at 1080
+relocating memory at 1100
+relocating memory at 1102
+relocating memory at 1109
+relocating memory at 1111
+relocating memory at 1128
+relocating memory at 1130
+relocating memory at 1151
+relocating memory at 1153
+relocating memory at 1155
+relocating memory at 1159
+relocating memory at 1178
+relocating memory at 1180
+relocating memory at 1182
+relocating memory at 1186
+relocating memory at 1188
+relocating memory at 1191
+relocating memory at 1193
+relocating memory at 1197
+relocating memory at 1199
+relocating memory at 1203
+relocating memory at 1205
+relocating memory at 1210
+relocating memory at 1212
+relocating memory at 1214
+relocating memory at 1216
+relocating memory at 1220
+relocating memory at 1226
+relocating memory at 1228
+relocating memory at 1233
+relocating memory at 1235
+relocating memory at 1237
+relocating memory at 1243
+relocating memory at 1245
+relocating memory at 1247
+relocating memory at 1251
+relocating memory at 1253
+relocating memory at 1255
+relocating memory at 1264
+relocating memory at 1266
+relocating memory at 1270
+relocating memory at 1274
+relocating memory at 1276
+relocating memory at 1278
+relocating memory at 1284
+relocating memory at 1288
+relocating memory at 1290
+relocating memory at 1294
+relocating memory at 1299
+relocating memory at 1301
+relocating memory at 1307
+relocating memory at 1316
+relocating memory at 1324
+relocating memory at 1329
+relocating memory at 1345
+relocating memory at 1351
+executing ...
+PUSH 1
+CALL 238
+PUSH 1
+PUSH 0
+POP 1
+ROT
+BR 252
+PUSHV 247
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 268
+PUSHV 263
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 285
+PUSHV 279
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 302
+PUSHV 296
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 319
+PUSHV 313
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 334
+PUSHV 330
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 350
+PUSHV 345
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 366
+PUSHV 361
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 382
+PUSHV 377
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 398
+PUSHV 393
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 414
+PUSHV 409
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 430
+PUSHV 425
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 445
+PUSHV 441
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 462
+PUSHV 456
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 479
+PUSHV 473
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 496
+PUSHV 490
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 513
+PUSHV 507
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 530
+PUSHV 524
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 547
+PUSHV 541
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 562
+PUSHV 558
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 577
+PUSHV 573
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 591
+PUSHV 588
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 607
+PUSHV 602
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 624
+PUSHV 618
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 642
+PUSHV 635
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 658
+PUSHV 653
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 674
+PUSHV 669
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 689
+PUSHV 685
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 704
+PUSHV 700
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 719
+PUSHV 715
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 734
+PUSHV 730
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 749
+PUSHV 745
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 763
+PUSHV 760
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 778
+PUSHV 774
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 793
+PUSHV 789
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 808
+PUSHV 804
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 823
+PUSHV 819
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 839
+PUSHV 834
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 856
+PUSHV 850
+PUSHV 1
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 872
+PUSHV 867
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 889
+PUSHV 883
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 906
+PUSHV 900
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 924
+PUSHV 917
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 940
+PUSHV 935
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 957
+PUSHV 951
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+BR 973
+PUSHV 968
+PUSHV 0
+PUSH 1
+PUSHS
+CALL 176
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSHV 79
+PUSH 169
+ADD
+PUSH 1
+PUSHX 4
+POPS
+PUSHV 124
+PUSH 169
+ADD
+PUSH 1
+PUSHX 3
+POPS
+PUSHV 169
+PUSH 169
+PUSHV 1
+ADD
+POPS
+DROP
+POP 1
+RETN 2
+DROP
+POP 1
+RETURN
+BR 1150
+PUSHV 1131
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [83]
+SPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [116]
+tPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [97]
+aPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [114]
+rPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [116]
+tPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [105]
+iPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [110]
+nPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [103]
+gPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [32]
+ PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [97]
+aPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [100]
+dPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [100]
+dPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [114]
+rPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [101]
+ePUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [115]
+sPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [115]
+sPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [58]
+:PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [32]
+ PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+PUSHV 170
+READ [50]
+POPS
+BR 1177
+PUSHV 1160
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [69]
+EPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [110]
+nPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [100]
+dPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [105]
+iPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [110]
+nPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [103]
+gPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [32]
+ PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [97]
+aPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [100]
+dPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [100]
+dPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [114]
+rPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [101]
+ePUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [115]
+sPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [115]
+sPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [58]
+:PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [32]
+ PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+PUSHV 171
+READ [55]
+POPS
+PUSHV 172
+PUSH 170
+POPS
+PUSH 172
+PUSH 171
+SUB
+TSTLE
+BEQ 1308
+PUSH 172
+PUSH 1
+CALL 988
+PUSH 1
+PUSH 0
+POP 1
+ROT
+ADDSP -1
+PUSH 1
+ADDX -1
+PUSHV 1000
+POPS
+PUSH 1
+PUSHX 3
+PUSHV 0
+SUB
+TSTLT
+BEQ 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSHV 48
+PRINTC [48]
+0PUSH 1
+ADDX -1
+PUSH 1
+PUSHX -1
+PUSHV 10
+DIV
+POPS
+BR 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSHV 48
+PRINTC [48]
+0PUSH 1
+ADDX -1
+PUSH 1
+PUSHX -1
+PUSHV 10
+DIV
+POPS
+BR 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSH 1
+PUSHX 3
+PRINT [50]
+50PUSH 1
+POP 0
+DROP
+POP 1
+RETN 1
+BR 1209
+PUSHV 1206
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [58]
+:PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [9]
+	PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+PUSHV 173
+PUSH 172
+PUSHS
+POPS
+PUSH 173
+PUSHV 0
+SUB
+TSTGE
+PUSH 173
+PUSH 169
+SUB
+TSTLT
+AND
+BEQ 1277
+PUSHV 79
+PUSH 173
+ADD
+PUSHS
+PUSH 1
+CALL 218
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSH 1
+PUSHX 3
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [66]
+BPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [75]
+KPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [80]
+PPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [84]
+TPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+DROP
+POP 1
+RETN 1
+PUSHV 124
+PUSH 173
+ADD
+PUSHS
+BEQ 1275
+PUSHV 172
+PUSH 172
+PUSHV 1
+ADD
+POPS
+PUSHV 9
+PRINTC [9]
+	PUSHV 173
+PUSH 172
+PUSHS
+POPS
+PUSH 173
+PUSH 1
+CALL 1072
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSH 173
+PRINT [0]
+0PUSH 1
+PUSHX 3
+PUSHV 32
+SUB
+TSTGE
+PUSH 1
+PUSHX 3
+PUSHV 127
+SUB
+TSTLT
+AND
+BEQ 1120
+DROP
+POP 1
+RETN 1
+BR 1295
+PUSHV 10
+PRINTC [10]
+
+PUSHV 172
+PUSH 172
+PUSHV 1
+ADD
+POPS
+BR 1190
+PUSH 172
+PUSH 171
+SUB
+TSTLE
+BEQ 1308
+PUSH 172
+PUSH 1
+CALL 988
+PUSH 1
+PUSH 0
+POP 1
+ROT
+ADDSP -1
+PUSH 1
+ADDX -1
+PUSHV 1000
+POPS
+PUSH 1
+PUSHX 3
+PUSHV 0
+SUB
+TSTLT
+BEQ 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSHV 48
+PRINTC [48]
+0PUSH 1
+ADDX -1
+PUSH 1
+PUSHX -1
+PUSHV 10
+DIV
+POPS
+BR 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSHV 48
+PRINTC [48]
+0PUSH 1
+ADDX -1
+PUSH 1
+PUSHX -1
+PUSHV 10
+DIV
+POPS
+BR 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSH 1
+PUSHX 3
+PRINT [52]
+52PUSH 1
+POP 0
+DROP
+POP 1
+RETN 1
+BR 1209
+PUSHV 1206
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [58]
+:PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [9]
+	PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+PUSHV 173
+PUSH 172
+PUSHS
+POPS
+PUSH 173
+PUSHV 0
+SUB
+TSTGE
+PUSH 173
+PUSH 169
+SUB
+TSTLT
+AND
+BEQ 1277
+PUSHV 79
+PUSH 173
+ADD
+PUSHS
+PUSH 1
+CALL 218
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSH 1
+PUSHX 3
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [66]
+BPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [75]
+KPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [80]
+PPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [84]
+TPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+DROP
+POP 1
+RETN 1
+PUSHV 124
+PUSH 173
+ADD
+PUSHS
+BEQ 1275
+PUSHV 172
+PUSH 172
+PUSHV 1
+ADD
+POPS
+PUSHV 9
+PRINTC [9]
+	PUSHV 173
+PUSH 172
+PUSHS
+POPS
+PUSH 173
+PUSH 1
+CALL 1072
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSH 173
+PRINT [0]
+0PUSH 1
+PUSHX 3
+PUSHV 32
+SUB
+TSTGE
+PUSH 1
+PUSHX 3
+PUSHV 127
+SUB
+TSTLT
+AND
+BEQ 1120
+DROP
+POP 1
+RETN 1
+BR 1295
+PUSHV 10
+PRINTC [10]
+
+PUSHV 172
+PUSH 172
+PUSHV 1
+ADD
+POPS
+BR 1190
+PUSH 172
+PUSH 171
+SUB
+TSTLE
+BEQ 1308
+PUSH 172
+PUSH 1
+CALL 988
+PUSH 1
+PUSH 0
+POP 1
+ROT
+ADDSP -1
+PUSH 1
+ADDX -1
+PUSHV 1000
+POPS
+PUSH 1
+PUSHX 3
+PUSHV 0
+SUB
+TSTLT
+BEQ 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSHV 48
+PRINTC [48]
+0PUSH 1
+ADDX -1
+PUSH 1
+PUSHX -1
+PUSHV 10
+DIV
+POPS
+BR 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSHV 48
+PRINTC [48]
+0PUSH 1
+ADDX -1
+PUSH 1
+PUSHX -1
+PUSHV 10
+DIV
+POPS
+BR 1027
+PUSH 1
+PUSHX 3
+PUSH 1
+PUSHX -1
+SUB
+TSTLT
+BEQ 1056
+PUSH 1
+PUSHX 3
+PRINT [54]
+54PUSH 1
+POP 0
+DROP
+POP 1
+RETN 1
+BR 1209
+PUSHV 1206
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [58]
+:PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [9]
+	PUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+PUSHV 173
+PUSH 172
+PUSHS
+POPS
+PUSH 173
+PUSHV 0
+SUB
+TSTGE
+PUSH 173
+PUSH 169
+SUB
+TSTLT
+AND
+BEQ 1277
+PUSHV 79
+PUSH 173
+ADD
+PUSHS
+PUSH 1
+CALL 218
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSH 1
+PUSHX 3
+CALL 1340
+SWAP
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [66]
+BPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [75]
+KPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [80]
+PPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+PRINTC [84]
+TPUSHV 1
+ADD
+BR 1341
+DUPL
+PUSHS
+DUPL
+BEQ 1352
+ADDSP 2
+RETURN
+DROP
+POP 1
+RETN 1
+PUSHV 124
+PUSH 173
+ADD
+PUSHS
+BEQ 1275
+PUSHV 172
+PUSH 172
+PUSHV 1
+ADD
+POPS
+PUSHV 9
+PRINTC [9]
+	PUSHV 173
+PUSH 172
+PUSHS
+POPS
+PUSH 173
+PUSH 1
+CALL 1072
+PUSH 1
+PUSH 0
+POP 1
+ROT
+PUSH 173
+PRINT [0]
+0PUSH 1
+PUSHX 3
+PUSHV 32
+SUB
+TSTGE
+PUSH 1
+PUSHX 3
+PUSHV 127
+SUB
+TSTLT
+AND
+BEQ 1120
+DROP
+POP 1
+RETN 1
+BR 1295
+PUSHV 10
+PRINTC [10]
+
+PUSHV 172
+PUSH 172
+PUSHV 1
+ADD
+POPS
+BR 1190
+PUSH 172
+PUSH 171
+SUB
+TSTLE
+BEQ 1308
+HALT

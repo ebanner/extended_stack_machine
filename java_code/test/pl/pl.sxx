@@ -432,5 +432,3 @@
 354
 360
 % end of executable module
-# PUBLIC read_string 318 file=/usr/local/lib/pl440/reads.out
-# PUBLIC write_string 349 file=/usr/local/lib/pl440/writes.out

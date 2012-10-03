@@ -37,17 +37,20 @@ public class Read {
         String m = "";
         try {
             in.useDelimiter("");
-            while (in.hasNext(whiteSpace))
+            while (in.hasNext(whiteSpace)) {
                 in.next(whiteSpace);
-            if (in.hasNext(sign))
+            }
+            if (in.hasNext(sign)) {
                 m = in.next(sign);
+            }
             if (in.hasNext(digit)) {
                 in.useDelimiter(nonDigit);
                 if (in.hasNext(digits)) {
                     String s = m + in.next(digits);
                     n = Integer.parseInt(s);
-                } else
+                } else {
                     throw new InputMismatchException();
+                }
             } else {
                 throw new InputMismatchException();
             }

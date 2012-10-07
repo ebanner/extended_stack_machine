@@ -23,7 +23,6 @@ public class StackMachine {
     public static boolean TRACE;  // TRACE mode not implemented
     public static Scanner in = new Scanner(System.in);  // READ and REAC
     public static boolean oldStyle;  // support legacy opcode numbers
-    public static int DEBUG = 0;
 
     /**
      * Execute the executable file on the Stack Machine.
@@ -34,12 +33,10 @@ public class StackMachine {
     public void run(String file) throws IOException {
         // base address starts somewhere between 15 and 1000 exclusive
         int baseAddr = new Random().nextInt(984) + 16;
-        if (DEBUG == 1) {  System.out.println("Base address: " + baseAddr); }
 
         // insert opcodes and data into the stack machine and perform
         // relocation process
         int entryPoint = initializeMemory(baseAddr, file);
-        if (DEBUG == 1) { System.out.println("Entry point: " + entryPoint); }
         int PC = entryPoint;
         
         while (true) { // execute opcodes
@@ -80,7 +77,6 @@ public class StackMachine {
             System.err.println("  " + header.length);
             System.exit(1);
         }
-        if (DEBUG == 1) { System.out.println("Length: " + header.length); }
         // ################ END PARSE HEADER #################
         
         // ############ BEGIN INSERTING OPCODES ##############
@@ -141,11 +137,9 @@ public class StackMachine {
                                                                                 
         if (Pattern.matches(number, instr)) {
             // we now know that we have a digit
-            if (DEBUG == 1) { System.out.println("mem["+nextFreeAddr+"]="+instr); }
             mem.putContents(nextFreeAddr, Integer.parseInt(instr));
             nextFreeAddr++;
         } else if (Pattern.matches(colonInstruction, instr)) {
-            if (DEBUG == 1) { System.out.println("BSS "+instr.split(":")[1]); }
             nextFreeAddr += Integer.parseInt(instr.split(":")[1]);
         } else {
             System.err.println("ERROR: Not a valid line:");
@@ -167,7 +161,6 @@ public class StackMachine {
             System.exit(1);
         } else {
             int addr = Integer.parseInt(address) + baseAddr;
-            if (DEBUG == 1) { System.out.println("relocating memory at " + addr); }
             mem.putContents(addr, mem.getContents(addr)+baseAddr);
         }
     }
@@ -204,72 +197,60 @@ public class StackMachine {
                 break;
             case PUSH:   // 1
                 /* push(*addr); */
-                if (DEBUG == 1) { System.out.println("PUSH " + addr); }
                 mem.push(mem.getContents(addr));
                 break;
             case PUSHV:  // 2
                 /* push(value); */
-                if (DEBUG == 1) { System.out.println("PUSHV " + value); }
                 mem.push(value);
                 break;
             case PUSHS:  // 3
                 /* push(*pop()); */
-                if (DEBUG == 1) { System.out.println("PUSHS"); }
                 num = mem.pop();
                 mem.push(mem.getContents(num));
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
-                if (DEBUG == 1) { System.out.println("PUSHX " + addr); }
                 num = mem.pop()+addr;
                 mem.push(mem.getContents(num));
                 break;
             case POP:    // 5
                 /* *addr=pop(); */
-                if (DEBUG == 1) { System.out.println("POP " + addr); }
                 temp = mem.pop();
                 mem.putContents(addr, temp);
                 break;
             case POPS:   // 6
                 /* temp=pop(); *pop()=temp; */
-                if (DEBUG == 1) { System.out.println("POPS"); }
                 temp = mem.pop();
                 num = mem.pop();
                 mem.putContents(num, temp);
                 break;
             case POPX:   // 7
                 /* temp=pop(); *(pop()+addr)=temp; */
-                if (DEBUG == 1) { System.out.println("POPX " + addr); }
                 temp = mem.pop();
                 num = mem.pop()+addr;
                 mem.putContents(num, temp);
                 break;
             case DUPL:   // 8
                 /* push(*SP); */
-                if (DEBUG == 1) { System.out.println("DUPL"); }
                 mem.push(mem.getContents(mem.getSP()));
                 break;
             case SWAP:   // 9
                 /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
-                if (DEBUG == 1) { System.out.println("SWAP"); }
                 temp = mem.getContents(mem.getSP());
                 mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+1));
                 mem.putContents(mem.getSP()+1, temp);
                 break;
             case OVER:   // 10
                 /* push(*(SP+1)); */
-                if (DEBUG == 1) { System.out.println("OVER"); }
                 mem.push(mem.getContents(mem.getSP()+1));
                 break;
             case DROP:   // 11
                 /* SP++; */
-                if (DEBUG == 1) { System.out.println("DROP"); }
                 mem.setSP(mem.getSP()+1);
                 //mem.getSP()++;
                 break;
             case ROT:    // 12
                 /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
-                if (DEBUG == 1) { System.out.println("ROT"); }
                 temp = mem.getContents(mem.getSP());
                 mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+2));
                 mem.putContents(mem.getSP()+2, mem.getContents(mem.getSP()+1));
@@ -277,113 +258,93 @@ public class StackMachine {
                 break;
             case TSTLT:  // 13
                 /* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
-                if (DEBUG == 1) { System.out.println("TSTLT"); }
                 temp = mem.pop();
                 mem.push( (temp < 0) ? 1 : 0 );
                 break;
             case TSTLE:  // 14
                 /* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
-                if (DEBUG == 1) { System.out.println("TSTLE"); }
                 temp = mem.pop();
                 mem.push( (temp <= 0) ? 1 : 0 );
                 break;
             case TSTGT:  // 15
                 /* temp=pop(); push((temp>0)?1:0); */
-                if (DEBUG == 1) { System.out.println("TSTGT"); }
                 temp = mem.pop();
                 mem.push( (temp > 0) ? 1 : 0 );
                 break;
             case TSTGE:  // 16
                 /* temp=pop(); push((temp>=0)?1:0); */
-                if (DEBUG == 1) { System.out.println("TSTGE"); }
                 temp = mem.pop();
                 mem.push( (temp >= 0) ? 1 : 0 );
                 break;
             case TSTEQ:  // 17
                 /* temp=pop(); push((temp==0)?1:0); */
-                if (DEBUG == 1) { System.out.println("TSTEQ"); }
                 temp = mem.pop();
                 mem.push( (temp == 0) ? 1 : 0);
                 break;
             case TSTNE:  // 18
                 /* temp=pop(); push((temp!=0)?1:0); */
-                if (DEBUG == 1) { System.out.println("TSTNE"); }
                 temp = mem.pop();
                 mem.push( (temp != 0) ? 1 : 0 );
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
-                if (DEBUG == 1) { System.out.println("BNE " + addr); }
                 if (mem.pop() != 0) {
                     PC = addr;
                 }
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
-                if (DEBUG == 1) { System.out.println("BEQ " + addr); }
                 if (mem.pop() == 0) {
                     PC = addr;
                 }
                 break;
             case BR:     // 21
                 /* PC=addr; */
-                if (DEBUG == 1) { System.out.println("BR " + addr); }
                 PC = addr;
                 break;
             case CALL:   // 22
                 /* push(PC); PC=addr; */
-                if (DEBUG == 1) { System.out.println("CALL " + addr); }
                 mem.push(PC);
                 PC = addr;
                 break;
             case CALLS:  // 23
                 /* temp=pop(); push(PC); PC=temp; */
-                if (DEBUG == 1) { System.out.println("CALLS"); }
                 temp = mem.pop();
                 mem.push(PC);
                 PC = temp;
                 break;
             case RETURN: // 24
                 /* PC=pop(); */
-                if (DEBUG == 1) { System.out.println("RETURN"); }
                 PC = mem.pop();
                 break;
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
-                if (DEBUG == 1) { System.out.println("RETN " + value); }
                 temp = mem.pop();
-                //if (DEBUG == 1) { System.out.println("RETN:temp = " + temp); }
                 mem.setSP(mem.getSP()+value);
                 //mem.getSP() += value;
                 PC = temp;
-                //if (DEBUG == 1) { printDebug(opcode, length, PC, temp); }
                 break;
             case HALT:   // 26
                 /* halt program execution */
-                if (DEBUG == 1) { System.out.println("HALT"); }
                 System.exit(0);
                 break;
             case ADD:    // 27
                 /* temp=pop(); push( pop() + temp ); */
-                if (DEBUG == 1) { System.out.println("ADD"); }
                 temp = mem.pop();
                 mem.push(mem.pop()+temp);
                 break;
             case SUB:    // 28
                 /* temp=pop(); push( pop() - temp ); */
-                if (DEBUG == 1) { System.out.println("SUB"); }
                 temp = mem.pop();
                 mem.push(mem.pop()-temp);
                 break;
             case MUL:    // 29
                 /* temp=pop(); push( pop() * temp ); */
-                if (DEBUG == 1) { System.out.println("MUL"); }
                 temp = mem.pop();
                 mem.push(mem.pop() * temp);
                 break;
             case DIV:    // 30
                 /* temp=pop(); push( pop() / temp ); */
-                if (DEBUG == 1) { System.out.println("DIV"); }
                 temp = mem.pop();
                 try {
                     mem.push(mem.pop() / temp);
@@ -393,7 +354,6 @@ public class StackMachine {
                 break;
             case MOD:    // 31
                 /* temp=pop(); push( pop() % temp ); */
-                if (DEBUG == 1) { System.out.println("DIV"); }
                 temp = mem.pop();
                 try {
                     mem.push(mem.pop() % temp);
@@ -403,79 +363,65 @@ public class StackMachine {
                 break;
             case OR:     // 32
                 /* temp=pop(); push( pop() || temp ); */
-                if (DEBUG == 1) { System.out.println("OR"); }
                 temp = mem.pop();
                 mem.push( (mem.pop() != 0 || temp != 0) ? 1 : 0 );
                 break;
             case AND:    // 33
                 /* temp=pop(); push( pop() && temp ); */
-                if (DEBUG == 1) { System.out.println("AND"); }
                 temp = mem.pop();
                 mem.push( (mem.pop() != 0 && temp != 0) ? 1 : 0 );
                 break;
             case XOR:    // 34
                 /* temp=pop(); push( pop() xor temp ); [see below] */
-                if (DEBUG == 1) { System.out.println("XOR"); }
                 temp = mem.pop();
                 mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
                 break;
             case NOT:    // 35
                 /* push( !pop() ); */
-                if (DEBUG == 1) { System.out.println("NOT"); }
                 mem.push( !(mem.pop() != 0) ? 1 : 0 );
                 break;
             case NEG:    // 36
                 /* push( -pop() ); */
-                if (DEBUG == 1) { System.out.println("NEG"); }
                 mem.push( (-1)*mem.pop());
                 break;
             case ADDX:   // 37
                 /* push( pop()+addr ); */
-                if (DEBUG == 1) { System.out.println("ADDX " + addr); }
                 mem.push(mem.pop() + addr);
                 break;
             case ADDSP:  // 38
                 /* SP += value; */
-                if (DEBUG == 1) { System.out.println("ADDSP " + value); }
                 mem.setSP(mem.getSP()+value);
                 //mem.getSP() += value;
                 break;
             case READ:   // 39
                 temp = Read.READ(in);
-                if (DEBUG == 1) { System.out.println("READ ["+temp+"]"); }
                 mem.push(temp);
                 break;
             case PRINT:  // 40
                 /* print pop() in %d format */
                 temp = mem.pop();
-                if (DEBUG == 1) { System.out.println("PRINT ["+temp+"]"); }
                 System.out.print(temp);
                 break;
             case READC:  // 41
                 /* read temp in %c format; push(temp); */
                 temp = Read.READC(in);
-                if (DEBUG == 1) { System.out.println("READC ["+temp+"]"); }
                 mem.push(temp);
                 break;
             case PRINTC: // 42
                 /* print pop() in %c format */
                 temp = mem.pop();
-                if (DEBUG == 1) { System.out.println("PRINTC ["+temp+"]"); }
                 System.out.print((char)temp);
                 break;
             case TRON:   // 43
                 /* turn on trace feature */
-                if (DEBUG == 1) { System.out.println("TRON"); }
                 TRACE = true;
                 break;
             case TROFF:  // 44
                 /* turn off trace feature */
-                if (DEBUG == 1) { System.out.println("TROFF"); }
                 TRACE = false;
                 break;
             case DUMP:   // 45
                 /* temp=pop(); dump memory from pop() to temp; */
-                if (DEBUG == 1) { System.out.println("DUMP"); }
                 temp = mem.pop();
                 dump(mem.pop(), temp);
                 break;
@@ -538,13 +484,6 @@ public class StackMachine {
         return requiresParameter;
     }
 
-    private static void printInstructions(int length, int PC) {
-        for (int pointer = 16+length-1; pointer >= 16; pointer--)
-            System.out.format("%2d| %2s%s\n", pointer, mem.getContents(pointer), 
-                    (pointer == PC) ? " <-- PC" : "");
-        System.out.println();
-    }
-
     private static boolean isCommentOrBlankLine(String line) {
         if (line.isEmpty() || line.charAt(0) == '#')
             return true;
@@ -555,14 +494,6 @@ public class StackMachine {
     private static void errorAndExit(String error) {
         System.err.println(error);
         System.exit(1);
-    }
-
-    private static void printDebug(int opcode, int length, int PC, int temp) {
-        System.out.println("About to execute opcode: " + opcode);
-        mem.reveal();
-        System.out.println("\nInstructions:");
-        printInstructions(length, PC-1);
-        System.out.format("PC: %d  temp: %d%n%n", PC-1, temp); 
     }
 
 

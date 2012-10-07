@@ -19,10 +19,15 @@ import java.util.NoSuchElementException;
 public class StackMachine {
 
     // memory consists of stack at high memory and opcodes/data at low memory
-    public static final Memory mem = new Memory(16000);
+    public static Memory mem;
     public static boolean TRACE;  // TRACE mode not implemented
-    public static Scanner in = new Scanner(System.in);  // READ and REAC
+    public static Scanner in;  // for READ and READC opcodes
     public static boolean oldStyle;  // support legacy opcode numbers
+
+    public StackMachine() {
+        mem = new Memory(16384);
+        in = new Scanner(System.in);
+    }
 
     /**
      * Execute the executable file on the Stack Machine.
@@ -457,8 +462,6 @@ public class StackMachine {
      *
      */
     public static boolean opcodeRequiresParameter(int opcode) {
-        // informs the caller whether the current opcode needs to look at the
-        // next location in memory for an argument to the instruction
         boolean requiresParameter;
 
         switch (opcode) {
@@ -554,4 +557,5 @@ public class StackMachine {
         String file = args[0];
         new StackMachine().run(file);
     }
+
 }

@@ -75,7 +75,5 @@ public class Memory {
                     (pointer == getSP()) ? " <-- SP" : "");
         }
     }
-    public static void main(String[] args) {
-        System.out.println("Hello, world!");
-    }
+
 }

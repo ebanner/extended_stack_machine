@@ -24,7 +24,7 @@ public class Driver {
     // system
     public static boolean oldStyle;
     public static int length;  // this is only around for DEBUGging purposes
-    public static int DEBUG = 1;
+    public static int DEBUG = 0;
 
     public static void main(String[] args) throws IOException {
         // main loads the SXX machine code into memory and executes it
@@ -241,32 +241,33 @@ public class Driver {
             case DUPL:   // 8
                 /* push(*SP); */
                 if (DEBUG == 1) { System.out.println("DUPL"); }
-                stack.push(stack.getContents(stack.SP));
+                stack.push(stack.getContents(stack.getSP()));
                 break;
             case SWAP:   // 9
                 /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
                 if (DEBUG == 1) { System.out.println("SWAP"); }
-                temp = stack.getContents(stack.SP);
-                stack.putContents(stack.SP, stack.getContents(stack.SP+1));
-                stack.putContents(stack.SP+1, temp);
+                temp = stack.getContents(stack.getSP());
+                stack.putContents(stack.getSP(), stack.getContents(stack.getSP()+1));
+                stack.putContents(stack.getSP()+1, temp);
                 break;
             case OVER:   // 10
                 /* push(*(SP+1)); */
                 if (DEBUG == 1) { System.out.println("OVER"); }
-                stack.push(stack.getContents(stack.SP+1));
+                stack.push(stack.getContents(stack.getSP()+1));
                 break;
             case DROP:   // 11
                 /* SP++; */
                 if (DEBUG == 1) { System.out.println("DROP"); }
-                stack.SP++;
+                stack.setSP(stack.getSP()+1);
+                //stack.getSP()++;
                 break;
             case ROT:    // 12
                 /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
                 if (DEBUG == 1) { System.out.println("ROT"); }
-                temp = stack.getContents(stack.SP);
-                stack.putContents(stack.SP, stack.getContents(stack.SP+2));
-                stack.putContents(stack.SP+2, stack.getContents(stack.SP+1));
-                stack.putContents(stack.SP+1, temp);
+                temp = stack.getContents(stack.getSP());
+                stack.putContents(stack.getSP(), stack.getContents(stack.getSP()+2));
+                stack.putContents(stack.getSP()+2, stack.getContents(stack.getSP()+1));
+                stack.putContents(stack.getSP()+1, temp);
                 break;
             case TSTLT:  // 13
                 /* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
@@ -346,7 +347,8 @@ public class Driver {
                 if (DEBUG == 1) { System.out.println("RETN " + value); }
                 temp = stack.pop();
                 //if (DEBUG == 1) { System.out.println("RETN:temp = " + temp); }
-                stack.SP += value;
+                stack.setSP(stack.getSP()+value);
+                //stack.getSP() += value;
                 PC = temp;
                 //if (DEBUG == 1) { printDebug(opcode, length, PC, temp); }
                 break;
@@ -434,7 +436,8 @@ public class Driver {
             case ADDSP:  // 38
                 /* SP += value; */
                 if (DEBUG == 1) { System.out.println("ADDSP " + value); }
-                stack.SP += value;
+                stack.setSP(stack.getSP()+value);
+                //stack.getSP() += value;
                 break;
             case READ:   // 39
                 temp = Read.READ(in);
@@ -483,8 +486,8 @@ public class Driver {
         }
 
         // update SP 
-        stack.putContents(0, stack.SP);
-        stack.reveal();
+        //stack.putContents(0, stack.getSP());
+        //stack.reveal();
 
         // return the new PC
         return PC;

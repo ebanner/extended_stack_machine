@@ -15,31 +15,34 @@ import java.util.EmptyStackException;
 public class Stack {
 
     public int[] stack;
-    public int SP;  
+    //public int SP;  
     public int height;
 
     public Stack(int height) {
         /* create the stack with specified height */
         this.stack = new int[height];
-        /* point SP to one position above the stack */
-        this.SP = this.stack.length;
         this.height = height;
+        /* point SP to one position above the stack */
+        setSP(this.stack.length);
+        //this.SP = this.stack.length;
     }
 
     public void push(int val) {
-        if (SP <= 0) {  /* full stack */
+        if (getSP() <= 0) {  /* full stack */
             System.err.println("Can't push another value--full stack.");
             System.exit(1);
         } else {
-            this.stack[--this.SP] = val;
+            setSP(getSP()-1);
+            this.stack[getSP()] = val;
         }
     }
 
     public int pop() {
-        if (this.SP >= this.height) {  /* empty stack */
+        if (getSP() >= this.height) {  /* empty stack */
             throw new EmptyStackException();  
         } else {
-            return this.stack[this.SP++];
+            setSP(getSP()+1);
+            return this.stack[getSP()-1];
         }
     }
 
@@ -65,6 +68,14 @@ public class Stack {
         this.stack[addr] = value;
     }
 
+    public int getSP() {
+        return getContents(0);
+    }
+
+    public void setSP(int num) {
+        putContents(0, num);
+    }
+
     public void reveal() { 
         /* prints out the stack much like how our brains imagine what a stack
          * looks like */
@@ -73,7 +84,7 @@ public class Stack {
              * all the way down to SP -- also print out an arrow to where SP
              * points */
             System.out.format("%2d| %2s%s\n", pointer, this.stack[pointer], 
-                    (pointer == this.SP) ? " <-- SP" : "");
+                    (pointer == getSP()) ? " <-- SP" : "");
         }
     }
     public static void main(String[] args) {

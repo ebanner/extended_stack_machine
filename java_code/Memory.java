@@ -3,7 +3,6 @@ import java.util.EmptyStackException;
 public class Memory {
 
     public int[] mem;
-    //public int SP;  
     public int memorySize;
 
     public Memory(int memorySize) {
@@ -12,7 +11,6 @@ public class Memory {
         this.memorySize = memorySize;
         /* point SP to one position above the mem */
         setSP(this.mem.length);
-        //this.SP = this.mem.length;
     }
 
     public void push(int val) {

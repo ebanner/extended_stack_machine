@@ -23,7 +23,7 @@ public class Header {
 
         if (sc.hasNextLine()) {
             this.type = sc.nextLine().substring(0,6);
-            //if (DEBUG == 1) { System.out.println("Type: " + this.type); }
+            if (DEBUG == 1) { System.out.println("Type: " + this.type); }
             // read the FUCKING manual next time
             if (Pattern.matches("^%SXX[+-]E", this.type)) {
                 this.oldStyle = (this.type.charAt(4) == '-') ? true : false;

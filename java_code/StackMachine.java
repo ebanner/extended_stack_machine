@@ -10,29 +10,23 @@ import java.util.NoSuchElementException;
 
 // TODO: Figure out why unsax.sxx isn't working.
 
-public class Driver {
+public class StackMachine {
 
-    // this is *the* master stack in the stack machine emulator
-    public static final Stack stack = new Stack(16000);
-    // values used to help compute the values of instructions
-    public static int temp, t1, t2;
+    // memory consists of stack at high memory and opcodes/data at low memory
+    public static final Memory mem = new Memory(16000);
     // TRACE mode can either be ON of OFF
     public static boolean TRACE;
     // Scanner on STDIN is used for READ and READC commands
     public static Scanner in = null;
-    // if oldStyle is true, then we are using the legacy opcode numbering
-    // system
-    public static boolean oldStyle;
-    public static int length;  // this is only around for DEBUGging purposes
+    public static boolean oldStyle;  // support legacy opcode numbers
     public static int DEBUG = 0;
 
-    public static void main(String[] args) throws IOException {
+    public void run(String file) throws IOException {
         // main loads the SXX machine code into memory and executes it
 
         // base address starts somewhere between 15 and 1000 exclusive
         //int baseAddr = new Random().nextInt(984) + 16;
         int baseAddr = 16;
-        String file = args[0];
         if (DEBUG == 1) {  System.out.println("Base address: " + baseAddr); }
 
         // insert opcodes and data into the stack machine and perform
@@ -71,14 +65,13 @@ public class Driver {
         oldStyle = header.oldStyle;
 
         if (0 > header.length || 
-                header.length > stack.height-baseAddr) {
+                header.length > mem.memorySize-baseAddr) {
             // make sure the length is in range
             System.err.println("Illegal length: Out of range");
             System.err.println("  " + header.length);
             System.exit(1);
         }
-        length = header.length;  // make header global for DEBUGging
-        if (DEBUG == 1) { System.out.println("Length: " + length); }
+        if (DEBUG == 1) { System.out.println("Length: " + header.length); }
         // ################ END PARSE HEADER #################
         
         // ############ BEGIN INSERTING OPCODES ##############
@@ -139,7 +132,7 @@ public class Driver {
         if (Pattern.matches(number, instr)) {
             // we now know that we have a digit
             if (DEBUG == 1) { System.out.println("mem["+nextFreeAddr+"]="+instr); }
-            stack.putContents(nextFreeAddr, Integer.parseInt(instr));
+            mem.putContents(nextFreeAddr, Integer.parseInt(instr));
             nextFreeAddr++;
         } else if (Pattern.matches(colonInstruction, instr)) {
             if (DEBUG == 1) { System.out.println("BSS "+instr.split(":")[1]); }
@@ -165,28 +158,25 @@ public class Driver {
         } else {
             int addr = Integer.parseInt(address) + baseAddr;
             if (DEBUG == 1) { System.out.println("relocating memory at " + addr); }
-            stack.putContents(addr, stack.getContents(addr)+baseAddr);
+            mem.putContents(addr, mem.getContents(addr)+baseAddr);
         }
     }
 
     public static int executeInstruction(int PC) {
-        int opcode = stack.getContents(PC);
+        int opcode = mem.getContents(PC);
         PC++;  // increment PC immediately
         if (oldStyle == true && opcode > 22) {
             // support legacy opcode numbering convention
             opcode++;
         }
         
-        // for DEBUGGING!
-        //printDebug(opcode, length, PC, temp);  
-        
-        int addr, value, num; 
+        int addr, value, num, temp; 
         addr = value = num = 0;
 
         if (instructionRequiresParameter(opcode)) {
             // if it's an instruction that needs an `addr' or `value'
             // parameter, save that argument
-            addr = value = stack.getContents(PC);
+            addr = value = mem.getContents(PC);
             PC++;  // increment PC again
         }
 
@@ -199,123 +189,123 @@ public class Driver {
             case PUSH:   // 1
                 /* push(*addr); */
                 if (DEBUG == 1) { System.out.println("PUSH " + addr); }
-                stack.push(stack.getContents(addr));
+                mem.push(mem.getContents(addr));
                 break;
             case PUSHV:  // 2
                 /* push(value); */
                 if (DEBUG == 1) { System.out.println("PUSHV " + value); }
-                stack.push(value);
+                mem.push(value);
                 break;
             case PUSHS:  // 3
                 /* push(*pop()); */
                 if (DEBUG == 1) { System.out.println("PUSHS"); }
-                num = stack.pop();
-                stack.push(stack.getContents(num));
+                num = mem.pop();
+                mem.push(mem.getContents(num));
                 break;
             case PUSHX:  // 4
                 /* push(*(pop()+addr)); */
                 if (DEBUG == 1) { System.out.println("PUSHX " + addr); }
-                num = stack.pop()+addr;
-                stack.push(stack.getContents(num));
+                num = mem.pop()+addr;
+                mem.push(mem.getContents(num));
                 break;
             case POP:    // 5
                 /* *addr=pop(); */
                 if (DEBUG == 1) { System.out.println("POP " + addr); }
-                temp = stack.pop();
-                stack.putContents(addr, temp);
+                temp = mem.pop();
+                mem.putContents(addr, temp);
                 break;
             case POPS:   // 6
                 /* temp=pop(); *pop()=temp; */
                 if (DEBUG == 1) { System.out.println("POPS"); }
-                temp = stack.pop();
-                num = stack.pop();
-                stack.putContents(num, temp);
+                temp = mem.pop();
+                num = mem.pop();
+                mem.putContents(num, temp);
                 break;
             case POPX:   // 7
                 /* temp=pop(); *(pop()+addr)=temp; */
                 if (DEBUG == 1) { System.out.println("POPX " + addr); }
-                temp = stack.pop();
-                num = stack.pop()+addr;
-                stack.putContents(num, temp);
+                temp = mem.pop();
+                num = mem.pop()+addr;
+                mem.putContents(num, temp);
                 break;
             case DUPL:   // 8
                 /* push(*SP); */
                 if (DEBUG == 1) { System.out.println("DUPL"); }
-                stack.push(stack.getContents(stack.getSP()));
+                mem.push(mem.getContents(mem.getSP()));
                 break;
             case SWAP:   // 9
                 /* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
                 if (DEBUG == 1) { System.out.println("SWAP"); }
-                temp = stack.getContents(stack.getSP());
-                stack.putContents(stack.getSP(), stack.getContents(stack.getSP()+1));
-                stack.putContents(stack.getSP()+1, temp);
+                temp = mem.getContents(mem.getSP());
+                mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+1));
+                mem.putContents(mem.getSP()+1, temp);
                 break;
             case OVER:   // 10
                 /* push(*(SP+1)); */
                 if (DEBUG == 1) { System.out.println("OVER"); }
-                stack.push(stack.getContents(stack.getSP()+1));
+                mem.push(mem.getContents(mem.getSP()+1));
                 break;
             case DROP:   // 11
                 /* SP++; */
                 if (DEBUG == 1) { System.out.println("DROP"); }
-                stack.setSP(stack.getSP()+1);
-                //stack.getSP()++;
+                mem.setSP(mem.getSP()+1);
+                //mem.getSP()++;
                 break;
             case ROT:    // 12
                 /* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
                 if (DEBUG == 1) { System.out.println("ROT"); }
-                temp = stack.getContents(stack.getSP());
-                stack.putContents(stack.getSP(), stack.getContents(stack.getSP()+2));
-                stack.putContents(stack.getSP()+2, stack.getContents(stack.getSP()+1));
-                stack.putContents(stack.getSP()+1, temp);
+                temp = mem.getContents(mem.getSP());
+                mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+2));
+                mem.putContents(mem.getSP()+2, mem.getContents(mem.getSP()+1));
+                mem.putContents(mem.getSP()+1, temp);
                 break;
             case TSTLT:  // 13
                 /* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
                 if (DEBUG == 1) { System.out.println("TSTLT"); }
-                temp = stack.pop();
-                stack.push( (temp < 0) ? 1 : 0 );
+                temp = mem.pop();
+                mem.push( (temp < 0) ? 1 : 0 );
                 break;
             case TSTLE:  // 14
                 /* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
                 if (DEBUG == 1) { System.out.println("TSTLE"); }
-                temp = stack.pop();
-                stack.push( (temp <= 0) ? 1 : 0 );
+                temp = mem.pop();
+                mem.push( (temp <= 0) ? 1 : 0 );
                 break;
             case TSTGT:  // 15
                 /* temp=pop(); push((temp>0)?1:0); */
                 if (DEBUG == 1) { System.out.println("TSTGT"); }
-                temp = stack.pop();
-                stack.push( (temp > 0) ? 1 : 0 );
+                temp = mem.pop();
+                mem.push( (temp > 0) ? 1 : 0 );
                 break;
             case TSTGE:  // 16
                 /* temp=pop(); push((temp>=0)?1:0); */
                 if (DEBUG == 1) { System.out.println("TSTGE"); }
-                temp = stack.pop();
-                stack.push( (temp >= 0) ? 1 : 0 );
+                temp = mem.pop();
+                mem.push( (temp >= 0) ? 1 : 0 );
                 break;
             case TSTEQ:  // 17
                 /* temp=pop(); push((temp==0)?1:0); */
                 if (DEBUG == 1) { System.out.println("TSTEQ"); }
-                temp = stack.pop();
-                stack.push( (temp == 0) ? 1 : 0);
+                temp = mem.pop();
+                mem.push( (temp == 0) ? 1 : 0);
                 break;
             case TSTNE:  // 18
                 /* temp=pop(); push((temp!=0)?1:0); */
                 if (DEBUG == 1) { System.out.println("TSTNE"); }
-                temp = stack.pop();
-                stack.push( (temp != 0) ? 1 : 0 );
+                temp = mem.pop();
+                mem.push( (temp != 0) ? 1 : 0 );
                 break;
             case BNE:    // 19
                 /* if (pop()!=0) PC=addr; */
                 if (DEBUG == 1) { System.out.println("BNE " + addr); }
-                if (stack.pop() != 0) {
+                if (mem.pop() != 0) {
                     PC = addr;
                 }
                 break;
             case BEQ:    // 20
                 /* if (pop()==0) PC=addr; */
                 if (DEBUG == 1) { System.out.println("BEQ " + addr); }
-                if (stack.pop() == 0) {
+                if (mem.pop() == 0) {
                     PC = addr;
                 }
                 break;
@@ -327,35 +317,35 @@ public class Driver {
             case CALL:   // 22
                 /* push(PC); PC=addr; */
                 if (DEBUG == 1) { System.out.println("CALL " + addr); }
-                stack.push(PC);
+                mem.push(PC);
                 PC = addr;
                 break;
             case CALLS:  // 23
                 /* temp=pop(); push(PC); PC=temp; */
                 if (DEBUG == 1) { System.out.println("CALLS"); }
-                temp = stack.pop();
-                stack.push(PC);
+                temp = mem.pop();
+                mem.push(PC);
                 PC = temp;
                 break;
             case RETURN: // 24
                 /* PC=pop(); */
                 if (DEBUG == 1) { System.out.println("RETURN"); }
-                PC = stack.pop();
+                PC = mem.pop();
                 break;
             case RETN:   // 25
                 /* temp=pop(); SP += value; PC=temp; */
                 if (DEBUG == 1) { System.out.println("RETN " + value); }
-                temp = stack.pop();
+                temp = mem.pop();
                 //if (DEBUG == 1) { System.out.println("RETN:temp = " + temp); }
-                stack.setSP(stack.getSP()+value);
-                //stack.getSP() += value;
+                mem.setSP(mem.getSP()+value);
+                //mem.getSP() += value;
                 PC = temp;
                 //if (DEBUG == 1) { printDebug(opcode, length, PC, temp); }
                 break;
             case HALT:   // 26
                 /* halt program execution */
                 //System.out.println("Halting program execution");
-                //stack.reveal();
+                //mem.reveal();
                 //System.out.format("%nPC: %d  temp: %d%n", PC-1, temp);
                 if (DEBUG == 1) { System.out.println("HALT"); }
                 System.exit(0);
@@ -363,27 +353,27 @@ public class Driver {
             case ADD:    // 27
                 /* temp=pop(); push( pop() + temp ); */
                 if (DEBUG == 1) { System.out.println("ADD"); }
-                temp = stack.pop();
-                stack.push(stack.pop()+temp);
+                temp = mem.pop();
+                mem.push(mem.pop()+temp);
                 break;
             case SUB:    // 28
                 /* temp=pop(); push( pop() - temp ); */
                 if (DEBUG == 1) { System.out.println("SUB"); }
-                temp = stack.pop();
-                stack.push(stack.pop()-temp);
+                temp = mem.pop();
+                mem.push(mem.pop()-temp);
                 break;
             case MUL:    // 29
                 /* temp=pop(); push( pop() * temp ); */
                 if (DEBUG == 1) { System.out.println("MUL"); }
-                temp = stack.pop();
-                stack.push(stack.pop() * temp);
+                temp = mem.pop();
+                mem.push(mem.pop() * temp);
                 break;
             case DIV:    // 30
                 /* temp=pop(); push( pop() / temp ); */
                 if (DEBUG == 1) { System.out.println("DIV"); }
-                temp = stack.pop();
+                temp = mem.pop();
                 try {
-                    stack.push(stack.pop() / temp);
+                    mem.push(mem.pop() / temp);
                 } catch (ArithmeticException e) {
                     errorAndExit("ERROR: Attempt to divide by zero");
                 }
@@ -391,9 +381,9 @@ public class Driver {
             case MOD:    // 31
                 /* temp=pop(); push( pop() % temp ); */
                 if (DEBUG == 1) { System.out.println("DIV"); }
-                temp = stack.pop();
+                temp = mem.pop();
                 try {
-                    stack.push(stack.pop() % temp);
+                    mem.push(mem.pop() % temp);
                 } catch (ArithmeticException e) {
                     errorAndExit("ERROR: Attempt to mod by zero");
                 }
@@ -401,52 +391,52 @@ public class Driver {
             case OR:     // 32
                 /* temp=pop(); push( pop() || temp ); */
                 if (DEBUG == 1) { System.out.println("OR"); }
-                temp = stack.pop();
-                stack.push( (stack.pop() != 0 || temp != 0) ? 1 : 0 );
+                temp = mem.pop();
+                mem.push( (mem.pop() != 0 || temp != 0) ? 1 : 0 );
                 break;
             case AND:    // 33
                 /* temp=pop(); push( pop() && temp ); */
                 if (DEBUG == 1) { System.out.println("AND"); }
-                temp = stack.pop();
-                stack.push( (stack.pop() != 0 && temp != 0) ? 1 : 0 );
+                temp = mem.pop();
+                mem.push( (mem.pop() != 0 && temp != 0) ? 1 : 0 );
                 break;
             case XOR:    // 34
                 /* temp=pop(); push( pop() xor temp ); [see below] */
                 if (DEBUG == 1) { System.out.println("XOR"); }
-                temp = stack.pop();
-                stack.push( (stack.pop() != 0 ^ temp != 0) ? 1 : 0 );
-                //stack.push( (!(t1 != 0 && t2 != 0) 
+                temp = mem.pop();
+                mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
+                //mem.push( (!(t1 != 0 && t2 != 0) 
                 //            && (t1 != 0 || t2 != 0)) ? 1 : 0 );
                 break;
             case NOT:    // 35
                 /* push( !pop() ); */
                 if (DEBUG == 1) { System.out.println("NOT"); }
-                stack.push( !(stack.pop() != 0) ? 1 : 0 );
+                mem.push( !(mem.pop() != 0) ? 1 : 0 );
                 break;
             case NEG:    // 36
                 /* push( -pop() ); */
                 if (DEBUG == 1) { System.out.println("NEG"); }
-                stack.push( (-1)*stack.pop());
+                mem.push( (-1)*mem.pop());
                 break;
             case ADDX:   // 37
                 /* push( pop()+addr ); */
                 if (DEBUG == 1) { System.out.println("ADDX " + addr); }
-                stack.push(stack.pop() + addr);
+                mem.push(mem.pop() + addr);
                 break;
             case ADDSP:  // 38
                 /* SP += value; */
                 if (DEBUG == 1) { System.out.println("ADDSP " + value); }
-                stack.setSP(stack.getSP()+value);
-                //stack.getSP() += value;
+                mem.setSP(mem.getSP()+value);
+                //mem.getSP() += value;
                 break;
             case READ:   // 39
                 temp = Read.READ(in);
                 if (DEBUG == 1) { System.out.println("READ ["+temp+"]"); }
-                stack.push(temp);
+                mem.push(temp);
                 break;
             case PRINT:  // 40
                 /* print pop() in %d format */
-                temp = stack.pop();
+                temp = mem.pop();
                 if (DEBUG == 1) { System.out.println("PRINT ["+temp+"]"); }
                 System.out.print(temp);
                 break;
@@ -454,11 +444,11 @@ public class Driver {
                 /* read temp in %c format; push(temp); */
                 temp = Read.READC(in);
                 if (DEBUG == 1) { System.out.println("READC ["+temp+"]"); }
-                stack.push(temp);
+                mem.push(temp);
                 break;
             case PRINTC: // 42
                 /* print pop() in %c format */
-                temp = stack.pop();
+                temp = mem.pop();
                 if (DEBUG == 1) { System.out.println("PRINTC ["+temp+"]"); }
                 System.out.print((char)temp);
                 break;
@@ -475,8 +465,8 @@ public class Driver {
             case DUMP:   // 45
                 /* temp=pop(); dump memory from pop() to temp; */
                 if (DEBUG == 1) { System.out.println("DUMP"); }
-                temp = stack.pop();
-                dump(stack.pop(), temp);
+                temp = mem.pop();
+                dump(mem.pop(), temp);
                 break;
             default:
                 //if (DEBUG == 1) { printDebug(opcode, length, PC, temp); }
@@ -485,10 +475,7 @@ public class Driver {
                 System.exit(1);
         }
 
-        // update SP 
-        //stack.putContents(0, stack.getSP());
-        //stack.reveal();
-
+        //mem.reveal();
         // return the new PC
         return PC;
     }
@@ -500,19 +487,12 @@ public class Driver {
     public static void dump(int pop, int temp) {
         // dumps memory in descending order
         // pop MUST be greater than or equal to temp
-        if (pop < temp || 0 > pop || pop > stack.height-1
-                || 0 > temp || temp > stack.height-1) {
+        if (pop < temp || 0 > pop || pop > mem.memorySize-1
+                || 0 > temp || temp > mem.memorySize-1) {
             errorAndExit("ERROR: Illegal dump range");
         }
         for (; pop >= temp; pop--)
-            System.out.println(stack.getContents(pop));
-    }
-
-    public static void putTestValuesOnStack() {
-        for (int i = 25; i < 45; i++)
-            stack.push(i-4);
-        //stack.putContents(31, 49);
-        //stack.putContents(30, 30);
+            System.out.println(mem.getContents(pop));
     }
 
     public static boolean instructionRequiresParameter(int opcode) {
@@ -545,7 +525,7 @@ public class Driver {
 
     public static void printInstructions(int length, int PC) {
         for (int pointer = 16+length-1; pointer >= 16; pointer--)
-            System.out.format("%2d| %2s%s\n", pointer, stack.getContents(pointer), 
+            System.out.format("%2d| %2s%s\n", pointer, mem.getContents(pointer), 
                     (pointer == PC) ? " <-- PC" : "");
         System.out.println();
     }
@@ -564,11 +544,12 @@ public class Driver {
 
     public static void printDebug(int opcode, int length, int PC, int temp) {
         System.out.println("About to execute opcode: " + opcode);
-        stack.reveal();
+        mem.reveal();
         System.out.println("\nInstructions:");
         printInstructions(length, PC-1);
         System.out.format("PC: %d  temp: %d%n%n", PC-1, temp); 
     }
+
 
     /* mneumonics and their opcodes */
     public static final int BKPT   =   0;
@@ -621,4 +602,11 @@ public class Driver {
     public static final int TRON   =  43;
     public static final int TROFF  =  44;
     public static final int DUMP   =  45;
+
+
+    public static void main(String[] args) throws IOException {
+        String file = args[0];
+        new StackMachine().run(file);
+    }
 }
+

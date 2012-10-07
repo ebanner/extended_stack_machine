@@ -8,46 +8,56 @@ import java.util.Random;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-// TODO: Figure out why unsax.sxx isn't working.
+// TODO: Refactor code to make it more easily understandable.
 
+/**
+ * Implementation of Dr Fossum's Stack Machine.
+ *
+ * @author Edward M. Banner
+ *
+ */
 public class StackMachine {
 
     // memory consists of stack at high memory and opcodes/data at low memory
     public static final Memory mem = new Memory(16000);
-    // TRACE mode can either be ON of OFF
-    public static boolean TRACE;
-    // Scanner on STDIN is used for READ and READC commands
-    public static Scanner in = null;
+    public static boolean TRACE;  // TRACE mode not implemented
+    public static Scanner in = new Scanner(System.in);  // READ and REAC
     public static boolean oldStyle;  // support legacy opcode numbers
     public static int DEBUG = 0;
 
+    /**
+     * Execute the executable file on the Stack Machine.
+     *
+     * @param file the executable file
+     *
+     */
     public void run(String file) throws IOException {
-        // main loads the SXX machine code into memory and executes it
-
         // base address starts somewhere between 15 and 1000 exclusive
-        //int baseAddr = new Random().nextInt(984) + 16;
-        int baseAddr = 16;
+        int baseAddr = new Random().nextInt(984) + 16;
         if (DEBUG == 1) {  System.out.println("Base address: " + baseAddr); }
 
         // insert opcodes and data into the stack machine and perform
         // relocation process
-        int entryPoint = initializeStack(baseAddr, file);
+        int entryPoint = initializeMemory(baseAddr, file);
         if (DEBUG == 1) { System.out.println("Entry point: " + entryPoint); }
         int PC = entryPoint;
         
-        // open up a scanner to read future input
-        in = new Scanner(System.in); 
         while (true) { // execute opcodes
-            PC = executeInstruction(PC);
+            PC = executeOpcode(PC);
         }
     }
 
-    public static int initializeStack(int nextFreeAddr, String file) {
-        // This method [1] parses the header of the SXX program and then 
-        // [2] loads opcodes and data into memory.
-        // The return value is the entry point provided by the SXX header.
-        
-        int baseAddr = nextFreeAddr;  // keep the base address around
+    /**
+     * Parses the header of the SXX executable and loads the opcodes and data
+     * into memory.
+     *
+     * @param baseAddr address where the first opcode is inserted
+     * @param file     SXX executable
+     *
+     */
+    public static int initializeMemory(int baseAddr, String file) {
+
+        int nextFreeAddr = baseAddr;  // keep the base address around
         Scanner sc = null;
         try {  // open up a new scanner on the source file
             sc = new Scanner(new BufferedReader(new FileReader(file)));
@@ -64,9 +74,8 @@ public class StackMachine {
         // the header will tell us if we're using old style opcode numbering
         oldStyle = header.oldStyle;
 
-        if (0 > header.length || 
+        if (0 > header.length || // make sure the length is in range
                 header.length > mem.memorySize-baseAddr) {
-            // make sure the length is in range
             System.err.println("Illegal length: Out of range");
             System.err.println("  " + header.length);
             System.exit(1);
@@ -79,6 +88,7 @@ public class StackMachine {
         // keep track of how many words have been inserted into memory
         int words = 0; 
         int currFreeAddr;
+        // insert opcodes until you reach the relocation section
         while (sc.hasNextLine() && words <= header.length) {
             // read the next opcode and trim off whitespace
             opcode = sc.nextLine().trim();
@@ -119,7 +129,7 @@ public class StackMachine {
             if (sc != null)
                 sc.close();
         }
-        return baseAddr + header.entry;
+        return baseAddr + header.entry;  // actual entry point into memory
     }
     
     public static int insertOpcode(int nextFreeAddr, String instr) {
@@ -162,28 +172,34 @@ public class StackMachine {
         }
     }
 
-    public static int executeInstruction(int PC) {
+    /**
+     * Execute the opcode pointed at by PC.
+     *
+     * @param PC the program counter
+     *
+     */
+    public static int executeOpcode(int PC) {
         int opcode = mem.getContents(PC);
         PC++;  // increment PC immediately
         if (oldStyle == true && opcode > 22) {
-            // support legacy opcode numbering convention
-            opcode++;
+            opcode++; // support legacy opcode numbering convention
         }
         
+        // values to be used in opcode computations
         int addr, value, num, temp; 
         addr = value = num = 0;
 
-        if (instructionRequiresParameter(opcode)) {
+        if (opcodeRequiresParameter(opcode)) {
             // if it's an instruction that needs an `addr' or `value'
             // parameter, save that argument
             addr = value = mem.getContents(PC);
             PC++;  // increment PC again
         }
 
-        switch(opcode) {
+        switch(opcode) {  // find out the opcode and execute it
             case BKPT:   // 0
                 /* unconditionally enter the sxx debugger */
-                System.err.println("Unimplemented operation");
+                System.err.println("BKPT not implemented");
                 System.exit(1);
                 break;
             case PUSH:   // 1
@@ -344,9 +360,6 @@ public class StackMachine {
                 break;
             case HALT:   // 26
                 /* halt program execution */
-                //System.out.println("Halting program execution");
-                //mem.reveal();
-                //System.out.format("%nPC: %d  temp: %d%n", PC-1, temp);
                 if (DEBUG == 1) { System.out.println("HALT"); }
                 System.exit(0);
                 break;
@@ -405,8 +418,6 @@ public class StackMachine {
                 if (DEBUG == 1) { System.out.println("XOR"); }
                 temp = mem.pop();
                 mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
-                //mem.push( (!(t1 != 0 && t2 != 0) 
-                //            && (t1 != 0 || t2 != 0)) ? 1 : 0 );
                 break;
             case NOT:    // 35
                 /* push( !pop() ); */
@@ -469,24 +480,22 @@ public class StackMachine {
                 dump(mem.pop(), temp);
                 break;
             default:
-                //if (DEBUG == 1) { printDebug(opcode, length, PC, temp); }
                 System.err.println("ERROR: Invalid opcode");
                 System.err.println("  " + opcode);
                 System.exit(1);
         }
 
-        //mem.reveal();
-        // return the new PC
-        return PC;
+        return PC; // return the new PC
     }
 
-    public void updateSP(int num) {
-
-    }
-
+    /**
+     * Dump memory from pop to temp.
+     *
+     * @param pop  beginning address
+     * @param temp ending address
+     *
+     */
     public static void dump(int pop, int temp) {
-        // dumps memory in descending order
-        // pop MUST be greater than or equal to temp
         if (pop < temp || 0 > pop || pop > mem.memorySize-1
                 || 0 > temp || temp > mem.memorySize-1) {
             errorAndExit("ERROR: Illegal dump range");
@@ -495,7 +504,13 @@ public class StackMachine {
             System.out.println(mem.getContents(pop));
     }
 
-    public static boolean instructionRequiresParameter(int opcode) {
+    /**
+     * Returns true if opcode requires a parameter.
+     *
+     * @ param opcode the opcode
+     *
+     */
+    public static boolean opcodeRequiresParameter(int opcode) {
         // informs the caller whether the current opcode needs to look at the
         // next location in memory for an argument to the instruction
         boolean requiresParameter;
@@ -523,26 +538,26 @@ public class StackMachine {
         return requiresParameter;
     }
 
-    public static void printInstructions(int length, int PC) {
+    private static void printInstructions(int length, int PC) {
         for (int pointer = 16+length-1; pointer >= 16; pointer--)
             System.out.format("%2d| %2s%s\n", pointer, mem.getContents(pointer), 
                     (pointer == PC) ? " <-- PC" : "");
         System.out.println();
     }
 
-    public static boolean isCommentOrBlankLine(String line) {
+    private static boolean isCommentOrBlankLine(String line) {
         if (line.isEmpty() || line.charAt(0) == '#')
             return true;
         else
             return false;
     }
 
-    public static void errorAndExit(String error) {
+    private static void errorAndExit(String error) {
         System.err.println(error);
         System.exit(1);
     }
 
-    public static void printDebug(int opcode, int length, int PC, int temp) {
+    private static void printDebug(int opcode, int length, int PC, int temp) {
         System.out.println("About to execute opcode: " + opcode);
         mem.reveal();
         System.out.println("\nInstructions:");
@@ -609,4 +624,3 @@ public class StackMachine {
         new StackMachine().run(file);
     }
 }
-

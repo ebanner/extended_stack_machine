@@ -2,16 +2,19 @@ import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
-// This development code is used to test a possible way to read individual
-// characters and integers from a Scanner.  The program will read three
-// characters, then an integer (with possible leading whitespace), then
-// three more characters.  The integer may be followed immediately by any
-// non-digit characters, so that an input line of
-//     ab1234de
-// will read the three characters 'a', 'b', and '1',
-// then the integer '234', then the three characters 'd', 'e', and a newline.
-// Note that newlines (and, more generally, any whitespace) are included
-// in the individual character matches.
+/** 
+ * This development code is used to test a possible way to read individual
+ * characters and integers from a Scanner.  The program will read three
+ * characters, then an integer (with possible leading whitespace), then three
+ * more characters.  The integer may be followed immediately by any non-digit
+ * characters, so that an input line of ab1234de will read the three characters
+ * 'a', 'b', and '1', then the integer '234', then the three characters 'd',
+ * 'e', and a newline.  Note that newlines (and, more generally, any
+ * whitespace) are included in the individual character matches.
+ *
+ * @author Dr. Timothy V. Fossum
+ *
+ */
 public class Read {
 
     public static Pattern anyCh = Pattern.compile(".", Pattern.DOTALL);

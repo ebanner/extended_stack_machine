@@ -8,8 +8,6 @@ import java.util.Random;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 
-// TODO: Refactor code to make it more easily understandable.
-
 /**
  * Implementation of Dr Fossum's Stack Machine.
  *

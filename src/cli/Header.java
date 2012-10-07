@@ -1,5 +1,6 @@
+package cli;
+
 import java.util.Scanner;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Header {
@@ -18,8 +19,6 @@ public class Header {
     public Scanner parseHeader() {
         // this method endows this Header object with all of its instance
         // variables by parsing the header of the source code file
-
-        String line;
 
         if (sc.hasNextLine()) {
             this.type = sc.nextLine().substring(0,6);

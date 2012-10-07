@@ -1,0 +1,22 @@
+; test the read_string and write_string routines
+; reads input from terminal and prints it back, line by line
+; the first time prepended by ">", and the second time by ">>"
+
+	EXTERN	read_string, write_string
+
+	dw	">>"
+buffer:	ds	256		; line buffer
+
+main:	pushv	buffer
+	call	read_string	; read the string
+	push	buffer		; check for null string (indicating EOF)
+	beq	@1
+	pushv	buffer-1
+	call	write_string	; print the string
+	; do it again
+	pushv	buffer-2
+	call	write_string	; print the string
+	br	main
+@1:	halt
+
+	ENTRY	main

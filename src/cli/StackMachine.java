@@ -1,12 +1,11 @@
+package cli;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.util.regex.Pattern;
 import java.util.Random;
-import java.util.InputMismatchException;
-import java.util.NoSuchElementException;
 
 /**
  * Implementation of Dr Fossum's Stack Machine.

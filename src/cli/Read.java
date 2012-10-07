@@ -1,3 +1,5 @@
+package cli;
+
 import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.InputMismatchException;

@@ -1,0 +1,27 @@
+    1:       0                  ; test the read_string and write_string routines
+    2:       0                  ; reads input from terminal and prints it back, line by line
+    3:       0                  ;
+    4:       0  2           15R main:	pushv	buffer
+    5:       2 22            0E 	call	read_string	; read the string
+    6:       4  1           15R 	push	buffer		; check for null string (indicating EOF)
+    7:       6 20           14R 	beq	done
+    8:       8  2           15R 	pushv	buffer
+    9:      10 22            0E 	call	write_string	; print the string
+   10:      12 21            0R 	br	main
+   11:      14 26               done:	halt
+   12:      15                  
+   13:      15             256  buffer:	ds	256		; line buffer
+   14:     271                  
+   15:     271                  	extern	read_string, write_string
+   16:     271               0R 	entry	main
+  EOF:     271                  
+
+Cross Reference List
+--------------------
+Symbol                               Value   Line Numbers
+------                               -----   ------------
+buffer                                  15R|     4      6      8     13*
+done                                    14R|     7     11*
+main                                     0R|     4*    10     16 
+read_string                         EXTERN |     5     15*
+write_string                        EXTERN |     9     15*

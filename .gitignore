@@ -1,2 +1,4 @@
 *.class
-InLineComments
+.settings
+.classpath
+bin/

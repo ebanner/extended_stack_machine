@@ -20,7 +20,7 @@ public class StackMachine {
     public static boolean TRACE;  // TRACE mode not implemented
     public static Scanner in;  // for READ and REAC opcodes
     public static boolean oldStyle;  // support legacy opcode numbers
-    public static int DEBUG = 0;
+    public static int DEBUG = 1;
 
     public StackMachine() {
         mem = new Memory(16384);

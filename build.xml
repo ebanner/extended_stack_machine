@@ -47,9 +47,9 @@
             <classpath refid="esm.classpath"/>
         </java>
     </target>
-    <target name="GUI (2)">
+    <target name="GUI">
         <java classname="gui.GUI" failonerror="true" fork="yes">
-            <arg line="test/oddeven/oddeven.sxx"/>
+            <!-- arg line="test/oddeven/oddeven.sxx"/ -->
             <classpath refid="esm.classpath"/>
         </java>
     </target>

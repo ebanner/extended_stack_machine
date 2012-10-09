@@ -5,23 +5,31 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JPanel;
 import javax.swing.JMenu;
+import javax.swing.JToolBar;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
 import javax.swing.JTextPane;
 import javax.swing.JTextArea;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import cli.Header;
 import cli.Memory;
@@ -37,6 +45,7 @@ public class GUI extends JFrame implements ActionListener {
 	public static Scanner in;  // for READ and REAC opcodes
 	public static boolean oldStyle;  // support legacy opcode numbers
 	public static int DEBUG = 0;
+	public static int PC = 0;
 
 	private static JTable table;
 	private static JTextArea outputTextArea;
@@ -51,10 +60,22 @@ public class GUI extends JFrame implements ActionListener {
 	private static JPanel northPanel;
 	private static JTextPane leftTextPane;
 	private static JScrollPane sPane;
+	private static MessageConsole mc;
+	private static String inputLine;
+	private static Pattern digit;
+	private static Pattern character;
+	private static Matcher m;
+	private static JTable stackTable;
+	private JScrollPane stackScrollPane;
+	private JScrollPane instrScrollPane;
+	private String instructions;
 
 	public GUI() {
 		mem = new Memory(16384);
-		in = new Scanner(System.in);
+		inputLine = "";
+		instructions = "";
+		digit = Pattern.compile("^[-+]?\\d+");
+		character = Pattern.compile("^.");
 	}
 
 	public void sitAndWait() {	
@@ -63,14 +84,8 @@ public class GUI extends JFrame implements ActionListener {
 		setSize(480, 360);
 		setTitle("Stack Machine eXtended");
 		getContentPane().setLayout(new BorderLayout());
-
-		String columnNames[] = { "Address", "Contents" };
-		Object[][] data = new Object[16384][2];
-		for (int row = 0; row < 16384; row++) {
-			data[row][0] = new Integer(row);
-			data[row][1] = new Integer(0);
-		}
-
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
@@ -87,8 +102,42 @@ public class GUI extends JFrame implements ActionListener {
 
 		helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
+		
+		JToolBar toolBar = new JToolBar();
+		getContentPane().add(toolBar, BorderLayout.NORTH);
 
-		table = new JTable(data, columnNames);
+		/*
+		JButton btnLoad = new JButton("Load");
+		toolBar.add(btnLoad);
+
+		JButton btnNewButton = new JButton("Re-Init");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
+		toolBar.add(btnNewButton);
+
+		JButton btnRun = new JButton("Run");
+		toolBar.add(btnRun);
+
+		JButton btnPause = new JButton("Pause");
+		toolBar.add(btnPause);
+		*/
+		
+		JButton btnSingleStep = new JButton("Single Step");
+		toolBar.add(btnSingleStep);
+		btnSingleStep.addActionListener(this);		 
+
+		String columnNames[] = { "Address", "Contents" };
+		Object[][] data = new Object[16384][2];
+		for (int row = 0; row < 16384; row++) {
+			data[row][0] = row;
+			data[row][1] = new Integer(0);
+		}
+
+		DefaultTableModel myModel = new DefaultTableModel(data, columnNames);
+		table = new JTable(myModel);
+		table.setDefaultRenderer(Object.class, new MyMemoryTableCellRenderer(this));
 		table.setPreferredScrollableViewportSize(new Dimension(150, 70));
 		table.setFillsViewportHeight(true);
 		//Create the scroll pane and add the table to it.
@@ -105,10 +154,26 @@ public class GUI extends JFrame implements ActionListener {
 
 		// northeast panel
 		northPanel = new JPanel();
-		northPanel.setLayout(null);
+		northPanel.setLayout(new BorderLayout());
 		eastPanel.add(northPanel);
 		
-		leftTextPane = new JTextPane();
+		String cNames[] = { "Address", "Contents" };
+		Object[][] d = new Object[16384][2];
+		for (int row = 0; row < 16384; row++) {
+			d[row][0] = new Integer(16384-row-1);
+			d[row][1] = new Integer(0);
+		}
+		
+		DefaultTableModel myStackModel = new DefaultTableModel(d, cNames);
+		stackTable = new JTable(myStackModel);
+		table.setDefaultRenderer(Object.class, new MyStackTableCellRenderer(this));
+		stackTable.setPreferredScrollableViewportSize(new Dimension(150, 70));
+		stackTable.setFillsViewportHeight(true);
+		//Create the scroll pane and add the table to it.
+		stackScrollPane = new JScrollPane(stackTable);
+		//Add the scroll pane to this panel.
+		northPanel.add(stackScrollPane, BorderLayout.WEST);
+		
 		int SP = 0;
 		int pc = 0;
 		int ENTRY = 0;
@@ -116,15 +181,13 @@ public class GUI extends JFrame implements ActionListener {
 		int BASE = 0;
 		String display = "SP: " + SP + "\n" + "PC: " + pc + "\n" +
 				"Entry: " + ENTRY + "\n" + "Base: " + 0;
-
-		leftTextPane.setText(display);
-		leftTextPane.setBounds(12, 12, 114, 132);
-		northPanel.add(leftTextPane);
-
+		
 		rightTextArea = new JTextArea();
-		rightTextArea.setText(display);
-		rightTextArea.setBounds(151, 12, 137, 132);
-		northPanel.add(rightTextArea);
+		//rightTextArea.setText(display);
+		//rightTextArea.setBounds(151, 12, 137, 132);
+		//northPanel.add(rightTextArea, BorderLayout.CENTER);
+		instrScrollPane = new JScrollPane(rightTextArea);
+		northPanel.add(instrScrollPane, BorderLayout.CENTER);
 
 		// southeast panel
 		southPanel = new JPanel();
@@ -139,7 +202,7 @@ public class GUI extends JFrame implements ActionListener {
 		//Add the scroll pane to this panel.
 		southPanel.add(sPane, BorderLayout.CENTER);
 		outputTextArea.setColumns(10);
-		MessageConsole mc = new MessageConsole(outputTextArea);
+		mc = new MessageConsole(outputTextArea);
 		mc.redirectOut();
 		
 		setVisible(true);
@@ -158,39 +221,16 @@ public class GUI extends JFrame implements ActionListener {
 		// relocation process
 		int entryPoint = initializeMemory(baseAddr, file);
 		if (DEBUG == 1) { System.out.println("Entry point: " + entryPoint); }
+		
 		int PC = entryPoint;
-
-		while (true) { // execute opcodes
+	}
+	
+	public void runASingleInstruction() {
 			try {
 				PC = executeOpcode(PC);
-			} catch (HaltException e) { 
-				break;
-			}
-		}
-
-		/*
-		JToolBar toolBar = new JToolBar();
-		getContentPane().add(toolBar, BorderLayout.NORTH);
-
-		JButton btnLoad = new JButton("Load");
-		toolBar.add(btnLoad);
-
-		JButton btnNewButton = new JButton("Re-Init");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
-		toolBar.add(btnNewButton);
-
-		JButton btnRun = new JButton("Run");
-		toolBar.add(btnRun);
-
-		JButton btnPause = new JButton("Pause");
-		toolBar.add(btnPause);
-
-		JButton btnSingleStep = new JButton("Single Step");
-		toolBar.add(btnSingleStep);
-		 */
+			} catch (Exception e) { }
+		
+		rightTextArea.setText(instructions);
 	}
 
 	/**
@@ -290,6 +330,7 @@ public class GUI extends JFrame implements ActionListener {
 			if (DEBUG == 1) { System.out.println("mem["+nextFreeAddr+"]="+instr); }
 			mem.putContents(nextFreeAddr, Integer.parseInt(instr));
 			table.setValueAt(new Integer(mem.getContents(nextFreeAddr)), nextFreeAddr, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(nextFreeAddr)), -nextFreeAddr+16383, 1);
 			nextFreeAddr++;
 		} else if (Pattern.matches(colonInstruction, instr)) {
 			if (DEBUG == 1) { System.out.println("BSS "+instr.split(":")[1]); }
@@ -317,6 +358,7 @@ public class GUI extends JFrame implements ActionListener {
 			if (DEBUG == 1) { System.out.println("relocating memory at " + addr); }
 			mem.putContents(addr, mem.getContents(addr)+baseAddr);
 			table.setValueAt(new Integer(mem.getContents(addr)), addr, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(addr)), -addr+16383, 1);
 		}
 	}
 
@@ -348,104 +390,144 @@ public class GUI extends JFrame implements ActionListener {
 		case BKPT:   // 0
 			/* unconditionally enter the sxx debugger */
 			System.err.println("BKPT not implemented");
+			instructions += "BKPT not implemented\n";
+			//rightTextArea.setText(instructions);
 			System.exit(1);
 			break;
 		case PUSH:   // 1
 			/* push(*addr); */
 			if (DEBUG == 1) { System.out.println("PUSH " + addr); }
+			instructions += "PUSH " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(addr));
 			break;
 		case PUSHV:  // 2
 			/* push(value); */
 			if (DEBUG == 1) { System.out.println("PUSHV " + value); }
+			instructions += "PUSHV " + value + "\n";
+			//rightTextArea.setText(instructions);
 			mem.push(value);
 			break;
 		case PUSHS:  // 3
 			/* push(*pop()); */
 			if (DEBUG == 1) { System.out.println("PUSHS"); }
+			instructions += "PUSHS\n";
+			//rightTextArea.setText(instructions);
 			num = mem.pop();
 			mem.push(mem.getContents(num));
 			break;
 		case PUSHX:  // 4
 			/* push(*(pop()+addr)); */
 			if (DEBUG == 1) { System.out.println("PUSHX " + addr); }
+			instructions += "PUSHX\n";
+			//rightTextArea.setText(instructions);
 			num = mem.pop()+addr;
 			mem.push(mem.getContents(num));
 			break;
 		case POP:    // 5
 			/* *addr=pop(); */
 			if (DEBUG == 1) { System.out.println("POP " + addr); }
+			instructions += "POP " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.putContents(addr, temp);
 			table.setValueAt(new Integer(mem.getContents(addr)), addr, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(addr)), -addr+16383, 1);
 			break;
 		case POPS:   // 6
 			/* temp=pop(); *pop()=temp; */
 			if (DEBUG == 1) { System.out.println("POPS"); }
+			instructions += "POPS\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			num = mem.pop();
 			mem.putContents(num, temp);
 			table.setValueAt(new Integer(mem.getContents(num)), num, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(num)), -num+16383, 1);
 			break;
 		case POPX:   // 7
 			/* temp=pop(); *(pop()+addr)=temp; */
 			if (DEBUG == 1) { System.out.println("POPX " + addr); }
+			instructions += "POPX " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			num = mem.pop()+addr;
 			mem.putContents(num, temp);
 			table.setValueAt(new Integer(mem.getContents(num)), num, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(num)), -num+16383, 1);
 			break;
 		case DUPL:   // 8
 			/* push(*SP); */
 			if (DEBUG == 1) { System.out.println("DUPL"); }
+			instructions += "DUPL\n";
+			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(mem.getSP()));
 			break;
 		case SWAP:   // 9
 			/* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
 			if (DEBUG == 1) { System.out.println("SWAP"); }
+			instructions += "SWAP\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.getContents(mem.getSP());
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+1));
 			table.setValueAt(new Integer(mem.getContents(mem.getSP())), mem.getSP(), 1);
+			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP())), -mem.getSP()+16383, 1);
 			mem.putContents(mem.getSP()+1, temp);
 			table.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), mem.getSP()+1, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), -mem.getSP()+1+16383, 1);
 			break;
 		case OVER:   // 10
 			/* push(*(SP+1)); */
 			if (DEBUG == 1) { System.out.println("OVER"); }
+			instructions += "OVER\n";
+			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(mem.getSP()+1));
 			break;
 		case DROP:   // 11
 			/* SP++; */
 			if (DEBUG == 1) { System.out.println("DROP"); }
+			instructions += "DROP\n";
+			//rightTextArea.setText(instructions);
 			mem.setSP(mem.getSP()+1);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
-			//mem.getSP()++;
+			stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
 			break;
 		case ROT:    // 12
 			/* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
 			if (DEBUG == 1) { System.out.println("ROT"); }
+			instructions += "ROT\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.getContents(mem.getSP());
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+2));
 			table.setValueAt(new Integer(mem.getContents(mem.getSP())), mem.getSP(), 1);
+			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP())), -mem.getSP()+16383, 1);
 			mem.putContents(mem.getSP()+2, mem.getContents(mem.getSP()+1));
 			table.setValueAt(new Integer(mem.getContents(mem.getSP()+2)), mem.getSP()+2, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP()+2)), -mem.getSP()+2+16383, 1);
 			mem.putContents(mem.getSP()+1, temp);
 			table.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), mem.getSP()+1, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), -mem.getSP()+1+16383, 1);
 			break;
 		case TSTLT:  // 13
 			/* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTLT"); }
+			instructions += "TSTLT\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp < 0) ? 1 : 0 );
 			break;
 		case TSTLE:  // 14
 			/* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTLE"); }
+			instructions += "TSTLE\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp <= 0) ? 1 : 0 );
 			break;
 		case TSTGT:  // 15
 			/* temp=pop(); push((temp>0)?1:0); */
+			instructions += "TSTGT\n";
+			//rightTextArea.setText(instructions);
 			if (DEBUG == 1) { System.out.println("TSTGT"); }
 			temp = mem.pop();
 			mem.push( (temp > 0) ? 1 : 0 );
@@ -453,24 +535,32 @@ public class GUI extends JFrame implements ActionListener {
 		case TSTGE:  // 16
 			/* temp=pop(); push((temp>=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTGE"); }
+			instructions += "TSTGE\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp >= 0) ? 1 : 0 );
 			break;
 		case TSTEQ:  // 17
 			/* temp=pop(); push((temp==0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTEQ"); }
+			instructions += "TSTEQ\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp == 0) ? 1 : 0);
 			break;
 		case TSTNE:  // 18
 			/* temp=pop(); push((temp!=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTNE"); }
+			instructions += "TSTNE\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp != 0) ? 1 : 0 );
 			break;
 		case BNE:    // 19
 			/* if (pop()!=0) PC=addr; */
 			if (DEBUG == 1) { System.out.println("BNE " + addr); }
+			instructions += "BNE " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			if (mem.pop() != 0) {
 				PC = addr;
 			}
@@ -478,6 +568,8 @@ public class GUI extends JFrame implements ActionListener {
 		case BEQ:    // 20
 			/* if (pop()==0) PC=addr; */
 			if (DEBUG == 1) { System.out.println("BEQ " + addr); }
+			instructions += "BEQ " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			if (mem.pop() == 0) {
 				PC = addr;
 			}
@@ -485,17 +577,23 @@ public class GUI extends JFrame implements ActionListener {
 		case BR:     // 21
 			/* PC=addr; */
 			if (DEBUG == 1) { System.out.println("BR " + addr); }
+			instructions += "BR " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			PC = addr;
 			break;
 		case CALL:   // 22
 			/* push(PC); PC=addr; */
 			if (DEBUG == 1) { System.out.println("CALL " + addr); }
+			instructions += "CALL " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			mem.push(PC);
 			PC = addr;
 			break;
 		case CALLS:  // 23
 			/* temp=pop(); push(PC); PC=temp; */
 			if (DEBUG == 1) { System.out.println("CALLS"); }
+			instructions += "CALLS\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(PC);
 			PC = temp;
@@ -503,15 +601,20 @@ public class GUI extends JFrame implements ActionListener {
 		case RETURN: // 24
 			/* PC=pop(); */
 			if (DEBUG == 1) { System.out.println("RETURN"); }
+			instructions += "RETURN\n";
+			//rightTextArea.setText(instructions);
 			PC = mem.pop();
 			break;
 		case RETN:   // 25
 			/* temp=pop(); SP += value; PC=temp; */
 			if (DEBUG == 1) { System.out.println("RETN " + value); }
+			instructions += "RETURN " + value + "\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			//if (DEBUG == 1) { System.out.println("RETN:temp = " + temp); }
 			mem.setSP(mem.getSP()+value);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
+			stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
 			//mem.getSP() += value;
 			PC = temp;
 			//if (DEBUG == 1) { printDebug(opcode, length, PC, temp); }
@@ -519,30 +622,39 @@ public class GUI extends JFrame implements ActionListener {
 		case HALT:   // 26
 			/* halt program execution */
 			if (DEBUG == 1) { System.out.println("HALT"); }
-			//System.exit(0);
+			instructions += "HALT\n";
+			//rightTextArea.setText(instructions);
 			throw new HaltException();
 			//break;
 		case ADD:    // 27
 			/* temp=pop(); push( pop() + temp ); */
 			if (DEBUG == 1) { System.out.println("ADD"); }
+			instructions += "ADD\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop()+temp);
 			break;
 		case SUB:    // 28
 			/* temp=pop(); push( pop() - temp ); */
 			if (DEBUG == 1) { System.out.println("SUB"); }
+			instructions += "SUB\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop()-temp);
 			break;
 		case MUL:    // 29
 			/* temp=pop(); push( pop() * temp ); */
 			if (DEBUG == 1) { System.out.println("MUL"); }
+			instructions += "MUL\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop() * temp);
 			break;
 		case DIV:    // 30
 			/* temp=pop(); push( pop() / temp ); */
 			if (DEBUG == 1) { System.out.println("DIV"); }
+			instructions += "DIV\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			try {
 				mem.push(mem.pop() / temp);
@@ -553,6 +665,8 @@ public class GUI extends JFrame implements ActionListener {
 		case MOD:    // 31
 			/* temp=pop(); push( pop() % temp ); */
 			if (DEBUG == 1) { System.out.println("DIV"); }
+			instructions += "MOD\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			try {
 				mem.push(mem.pop() % temp);
@@ -563,79 +677,139 @@ public class GUI extends JFrame implements ActionListener {
 		case OR:     // 32
 			/* temp=pop(); push( pop() || temp ); */
 			if (DEBUG == 1) { System.out.println("OR"); }
+			instructions += "OR\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 || temp != 0) ? 1 : 0 );
 			break;
 		case AND:    // 33
 			/* temp=pop(); push( pop() && temp ); */
 			if (DEBUG == 1) { System.out.println("AND"); }
+			instructions += "AND\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 && temp != 0) ? 1 : 0 );
 			break;
 		case XOR:    // 34
 			/* temp=pop(); push( pop() xor temp ); [see below] */
 			if (DEBUG == 1) { System.out.println("XOR"); }
+			instructions += "XOR\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
 			break;
 		case NOT:    // 35
 			/* push( !pop() ); */
 			if (DEBUG == 1) { System.out.println("NOT"); }
+			instructions += "NOT\n";
+			//rightTextArea.setText(instructions);
 			mem.push( !(mem.pop() != 0) ? 1 : 0 );
 			break;
 		case NEG:    // 36
 			/* push( -pop() ); */
 			if (DEBUG == 1) { System.out.println("NEG"); }
+			instructions += "NEG\n";
+			//rightTextArea.setText(instructions);
 			mem.push( (-1)*mem.pop());
 			break;
 		case ADDX:   // 37
 			/* push( pop()+addr ); */
 			if (DEBUG == 1) { System.out.println("ADDX " + addr); }
+			instructions += "ADDX " + addr + "\n";
+			//rightTextArea.setText(instructions);
 			mem.push(mem.pop() + addr);
 			break;
 		case ADDSP:  // 38
 			/* SP += value; */
 			if (DEBUG == 1) { System.out.println("ADDSP " + value); }
+			instructions += "ADDSP " + value + "\n";
+			//rightTextArea.setText(instructions);
 			mem.setSP(mem.getSP()+value);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
-			//mem.getSP() += value;
+			stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
 			break;
 		case READ:   // 39
-			temp = Read.READ(in);
+			inputLine = inputLine.replaceAll("^\\s*", "");
+			while (inputLine.equals("")) {
+				inputLine = JOptionPane.showInputDialog(null, "SXX");
+				// user clicks ``cancel"
+				if (inputLine == null) {
+					throw new InputMismatchException();
+				}
+				inputLine += "\n";
+				// simulate the user actually typing this in
+				System.out.print(inputLine);
+				inputLine = inputLine.replaceAll("^\\s*", "");
+			}
+			m = digit.matcher(inputLine);
+			if (! m.find()) {
+				throw new InputMismatchException();
+			}
+			String digits = m.group();
+			temp = Integer.parseInt(digits);
 			if (DEBUG == 1) { System.out.println("READ ["+temp+"]"); }
+			instructions += "READ ["+temp+"]\n";
+			//rightTextArea.setText(instructions);
+			inputLine = inputLine.replaceAll("^[+-]?\\d+", "");
 			mem.push(temp);
 			break;
 		case PRINT:  // 40
 			/* print pop() in %d format */
 			temp = mem.pop();
 			if (DEBUG == 1) { System.out.println("PRINT ["+temp+"]"); }
+			instructions += "PRINT ["+temp+"]\n";
+			//rightTextArea.setText(instructions);
 			System.out.print(temp);
 			break;
 		case READC:  // 41
 			/* read temp in %c format; push(temp); */
-			temp = Read.READC(in);
+			if (inputLine.equals("")) {
+				// collect line from the user
+				inputLine = JOptionPane.showInputDialog(null, "SXX");			
+				// user clicks ``cancel"
+				if (inputLine == null) {
+					return -1;
+				}
+				// stick on a newline to mimic STDIN
+				inputLine += "\n";
+				System.out.print(inputLine);
+			}
+			// get the next character
+			temp = Read.READC(new Scanner(inputLine));
 			if (DEBUG == 1) { System.out.println("READC ["+temp+"]"); }
+			instructions += "READC ["+temp+"]\n";
+			//rightTextArea.setText(instructions);
 			mem.push(temp);
+			// the character is consumed
+			inputLine = inputLine.substring(1);
 			break;
 		case PRINTC: // 42
 			/* print pop() in %c format */
 			temp = mem.pop();
 			if (DEBUG == 1) { System.out.println("PRINTC ["+temp+"]"); }
+			instructions += "PRINTC ["+temp+"]\n";
+			//rightTextArea.setText(instructions);
 			System.out.print((char)temp);
 			break;
 		case TRON:   // 43
 			/* turn on trace feature */
 			if (DEBUG == 1) { System.out.println("TRON"); }
+			instructions += "TRON\n";
+			//rightTextArea.setText(instructions);
 			TRACE = true;
 			break;
 		case TROFF:  // 44
 			/* turn off trace feature */
 			if (DEBUG == 1) { System.out.println("TROFF"); }
+			instructions += "TROFF\n";
+			//rightTextArea.setText(instructions);
 			TRACE = false;
 			break;
 		case DUMP:   // 45
 			/* temp=pop(); dump memory from pop() to temp; */
 			if (DEBUG == 1) { System.out.println("DUMP"); }
+			instructions += "DUMP\n";
+			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			dump(mem.pop(), temp);
 			break;
@@ -648,6 +822,7 @@ public class GUI extends JFrame implements ActionListener {
 		// update values on the stack
 		for (int i = 16383; i >= mem.getSP(); i--) {
 			table.setValueAt(new Integer(mem.getContents(i)), i, 1);
+			stackTable.setValueAt(new Integer(mem.getContents(i)), -i+16383, 1);
 		}
 
 		return PC; // return the new PC
@@ -802,6 +977,10 @@ public class GUI extends JFrame implements ActionListener {
 				}
 				
 			}
+		} else if (e.getSource() instanceof JButton) {
+			JButton button = (JButton)e.getSource();
+			String name = button.getName();
+			
 		}
 	}
 

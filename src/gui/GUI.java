@@ -5,16 +5,20 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JPanel;
 import javax.swing.JMenu;
 import javax.swing.JToolBar;
+import javax.swing.JLabel;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -40,12 +44,12 @@ public class GUI extends JFrame implements ActionListener {
 	
 	public static GUI gui;
 
-	public static Memory mem;
-	public static boolean TRACE;  // TRACE mode not implemented
-	public static Scanner in;  // for READ and REAC opcodes
-	public static boolean oldStyle;  // support legacy opcode numbers
-	public static int DEBUG = 0;
-	public static int PC = 0;
+	public Memory mem;
+	public boolean TRACE;  // TRACE mode not implemented
+	public Scanner in;  // for READ and REAC opcodes
+	public boolean oldStyle;  // support legacy opcode numbers
+	public int DEBUG = 0;
+	public int PC = 0;
 
 	private static JTable table;
 	private static JTextArea outputTextArea;
@@ -58,30 +62,32 @@ public class GUI extends JFrame implements ActionListener {
 	private static JMenu helpMenu;
 	private static JPanel southPanel;
 	private static JPanel northPanel;
-	private static JTextPane leftTextPane;
 	private static JScrollPane sPane;
 	private static MessageConsole mc;
 	private static String inputLine;
 	private static Pattern digit;
-	private static Pattern character;
 	private static Matcher m;
 	private static JTable stackTable;
 	private JScrollPane stackScrollPane;
 	private JScrollPane instrScrollPane;
 	private String instructions;
+	private JMenu speedMenu;
+	private JRadioButtonMenuItem fullSpeedRadioButton;
+	private JRadioButtonMenuItem stepRadioButton;
+	private JButton runButton;
+	private JLabel PCLabel;
 
 	public GUI() {
 		mem = new Memory(16384);
 		inputLine = "";
 		instructions = "";
 		digit = Pattern.compile("^[-+]?\\d+");
-		character = Pattern.compile("^.");
 	}
 
 	public void sitAndWait() {	
 
 		// GUI stuff
-		setSize(480, 360);
+		setSize(480, 620);
 		setTitle("Stack Machine eXtended");
 		getContentPane().setLayout(new BorderLayout());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -99,9 +105,27 @@ public class GUI extends JFrame implements ActionListener {
 
 		simulatorMenu = new JMenu("Simulator");
 		menuBar.add(simulatorMenu);
+		
+		speedMenu = new JMenu("Speed");
+		simulatorMenu.add(speedMenu);
+		
+		fullSpeedRadioButton = new JRadioButtonMenuItem("Full Speed");
+		fullSpeedRadioButton.setName("Full Speed");
+		speedMenu.add(fullSpeedRadioButton);
+		fullSpeedRadioButton.addActionListener(this);
+		
+		stepRadioButton = new JRadioButtonMenuItem("Step-by-Step");
+		stepRadioButton.setName("Step-by-Step");
+		speedMenu.add(stepRadioButton);
+		fullSpeedRadioButton.addActionListener(this);
 
 		helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
+		
+		menuBar.add(Box.createHorizontalGlue());
+		
+		PCLabel = new JLabel();
+		menuBar.add(PCLabel);
 		
 		JToolBar toolBar = new JToolBar();
 		getContentPane().add(toolBar, BorderLayout.NORTH);
@@ -116,15 +140,20 @@ public class GUI extends JFrame implements ActionListener {
 			}
 		});
 		toolBar.add(btnNewButton);
+		*/
+		
+		runButton = new JButton("Run");
+		runButton.setName("Run");
+		runButton.addActionListener(this);
+		toolBar.add(runButton);
 
-		JButton btnRun = new JButton("Run");
-		toolBar.add(btnRun);
-
+		/*
 		JButton btnPause = new JButton("Pause");
 		toolBar.add(btnPause);
 		*/
 		
 		JButton btnSingleStep = new JButton("Single Step");
+		btnSingleStep.setName("Single Step");
 		toolBar.add(btnSingleStep);
 		btnSingleStep.addActionListener(this);		 
 
@@ -138,7 +167,7 @@ public class GUI extends JFrame implements ActionListener {
 		DefaultTableModel myModel = new DefaultTableModel(data, columnNames);
 		table = new JTable(myModel);
 		table.setDefaultRenderer(Object.class, new MyMemoryTableCellRenderer(this));
-		table.setPreferredScrollableViewportSize(new Dimension(150, 70));
+		table.setPreferredScrollableViewportSize(new Dimension(160, 70));
 		table.setFillsViewportHeight(true);
 		//Create the scroll pane and add the table to it.
 		scrollPane = new JScrollPane(table);
@@ -166,7 +195,7 @@ public class GUI extends JFrame implements ActionListener {
 		
 		DefaultTableModel myStackModel = new DefaultTableModel(d, cNames);
 		stackTable = new JTable(myStackModel);
-		table.setDefaultRenderer(Object.class, new MyStackTableCellRenderer(this));
+		stackTable.setDefaultRenderer(Object.class, new MyStackTableCellRenderer(this));
 		stackTable.setPreferredScrollableViewportSize(new Dimension(150, 70));
 		stackTable.setFillsViewportHeight(true);
 		//Create the scroll pane and add the table to it.
@@ -174,18 +203,7 @@ public class GUI extends JFrame implements ActionListener {
 		//Add the scroll pane to this panel.
 		northPanel.add(stackScrollPane, BorderLayout.WEST);
 		
-		int SP = 0;
-		int pc = 0;
-		int ENTRY = 0;
-		int LENGTH = 0;
-		int BASE = 0;
-		String display = "SP: " + SP + "\n" + "PC: " + pc + "\n" +
-				"Entry: " + ENTRY + "\n" + "Base: " + 0;
-		
 		rightTextArea = new JTextArea();
-		//rightTextArea.setText(display);
-		//rightTextArea.setBounds(151, 12, 137, 132);
-		//northPanel.add(rightTextArea, BorderLayout.CENTER);
 		instrScrollPane = new JScrollPane(rightTextArea);
 		northPanel.add(instrScrollPane, BorderLayout.CENTER);
 
@@ -195,8 +213,6 @@ public class GUI extends JFrame implements ActionListener {
 		eastPanel.add(southPanel);
 
 		outputTextArea = new JTextArea();
-		//outputTextArea.setBounds(12, 12, 276, 123);
-		//southPanel.add(outputTextArea);
 		sPane = new JScrollPane(outputTextArea);
 
 		//Add the scroll pane to this panel.
@@ -206,7 +222,6 @@ public class GUI extends JFrame implements ActionListener {
 		mc.redirectOut();
 		
 		setVisible(true);
-		
 	}
 
 	public void run(String file) {
@@ -222,14 +237,32 @@ public class GUI extends JFrame implements ActionListener {
 		int entryPoint = initializeMemory(baseAddr, file);
 		if (DEBUG == 1) { System.out.println("Entry point: " + entryPoint); }
 		
-		int PC = entryPoint;
+		PC = entryPoint;
+		PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
 	}
 	
 	public void runASingleInstruction() {
 			try {
 				PC = executeOpcode(PC);
+				PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
+				table.repaint();
+				stackTable.repaint();
 			} catch (Exception e) { }
 		
+		rightTextArea.setText(instructions);
+	}
+	
+	public void runALLTheInstructions() {
+		while (true) {
+			try {
+				PC = executeOpcode(PC);
+				PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
+				table.repaint();
+				stackTable.repaint();
+			} catch (Exception e) { 
+				break;
+			}
+		}
 		rightTextArea.setText(instructions);
 	}
 
@@ -957,11 +990,6 @@ public class GUI extends JFrame implements ActionListener {
 	public static final int TROFF  =  44;
 	public static final int DUMP   =  45;
 
-	public static void main(String[] args) {
-		gui = new GUI();
-		gui.sitAndWait();
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
@@ -970,18 +998,31 @@ public class GUI extends JFrame implements ActionListener {
 			if (name.equals("Load File")) {
 				JFileChooser fc = new JFileChooser();
 				int returnVal = fc.showOpenDialog(null);
-
+				
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					String file = fc.getSelectedFile().getAbsolutePath();
-					gui.run(file);
+					run(file);
 				}
-				
 			}
 		} else if (e.getSource() instanceof JButton) {
 			JButton button = (JButton)e.getSource();
 			String name = button.getName();
+			System.out.println("stepRadioButton is selected: " + stepRadioButton.isSelected());
 			
+			if (name.equals("Single Step")) {
+				runASingleInstruction();
+			} else if (name.equals("Run")) {
+				if (stepRadioButton.isSelected()) {
+					runASingleInstruction();
+				} else if (fullSpeedRadioButton.isSelected()) {
+					runALLTheInstructions();
+				}
+			}	
 		}
+	}
+	
+	public static void main(String[] args) {
+		new GUI().sitAndWait();
 	}
 
 }

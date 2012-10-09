@@ -10,20 +10,18 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class MyMemoryTableCellRenderer extends DefaultTableCellRenderer {
 	
 	private GUI gui;
-	private boolean rightSideUp;
 	
 	public MyMemoryTableCellRenderer(GUI gui) {
 		super();
 		setOpaque(true);
 		this.gui = gui;
-		this.rightSideUp = rightSideUp;
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int col) {
 		
 		setFont(new Font("Dialog", Font.PLAIN, 12)); 
-		if (col == 0 && (Integer)value == gui.mem.getSP()) {
+		if (col == 0 && (Integer)value == gui.PC) {
 			setBackground(Color.YELLOW);
 			//setForeground(Color.BLACK);
 			setValue(value);

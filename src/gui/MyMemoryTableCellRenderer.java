@@ -9,9 +9,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 public class MyMemoryTableCellRenderer extends DefaultTableCellRenderer {
 	
-	private GUI gui;
+	private SM gui;
 	
-	public MyMemoryTableCellRenderer(GUI gui) {
+	public MyMemoryTableCellRenderer(SM gui) {
 		super();
 		setOpaque(true);
 		this.gui = gui;

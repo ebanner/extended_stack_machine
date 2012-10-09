@@ -20,7 +20,7 @@ public class StackMachine {
     public static boolean TRACE;  // TRACE mode not implemented
     public static Scanner in;  // for READ and REAC opcodes
     public static boolean oldStyle;  // support legacy opcode numbers
-    public static int DEBUG = 1;
+    public static int DEBUG = 0;
 
     public StackMachine() {
         mem = new Memory(16384);
@@ -364,7 +364,7 @@ public class StackMachine {
             case HALT:   // 26
                 /* halt program execution */
                 if (DEBUG == 1) { System.out.println("HALT"); }
-                mem.reveal();
+                //mem.reveal();
                 System.exit(0);
                 break;
             case ADD:    // 27

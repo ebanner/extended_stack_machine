@@ -35,21 +35,8 @@
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
-    <target name="StackMachine">
-        <java classname="cli.StackMachine" failonerror="true" fork="yes">
-            <arg line="test/oddeven/oddeven.sxx"/>
-            <classpath refid="esm.classpath"/>
-        </java>
-    </target>
-    <target name="GUI (1)">
-        <java classname="cli.StackMachine" failonerror="true" fork="yes">
-            <arg line="test/oddeven/oddeven.sxx"/>
-            <classpath refid="esm.classpath"/>
-        </java>
-    </target>
-    <target name="GUI">
-        <java classname="gui.GUI" failonerror="true" fork="yes">
-            <!-- arg line="test/oddeven/oddeven.sxx"/ -->
+    <target name="SM">
+        <java classname="gui.SM" failonerror="true" fork="yes">
             <classpath refid="esm.classpath"/>
         </java>
     </target>

@@ -9,9 +9,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 public class MyStackTableCellRenderer extends DefaultTableCellRenderer {
 
-	private GUI gui;
+	private SM gui;
 
-	public MyStackTableCellRenderer(GUI gui) {
+	public MyStackTableCellRenderer(SM gui) {
 		super();
 		setOpaque(true);
 		this.gui = gui;

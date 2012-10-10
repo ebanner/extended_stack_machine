@@ -71,7 +71,7 @@ public class SM extends JFrame implements ActionListener {
 	private static JTable stackTable;
 	private JScrollPane stackScrollPane;
 	private JScrollPane instrScrollPane;
-	private String instructions;
+	private StringBuilder instructions;
 	private String file;
 	private JMenu speedMenu;
 	private JRadioButtonMenuItem fullSpeedRadioButton;
@@ -90,8 +90,9 @@ public class SM extends JFrame implements ActionListener {
 	public SM() {
 		mem = new Memory(16384);
 		inputLine = "";
-		instructions = "";
+		instructions = new StringBuilder("");
 		digit = Pattern.compile("^[-+]?\\d+");
+		file = "";
 	}
 
 	public void sitAndWait() {	
@@ -175,6 +176,7 @@ public class SM extends JFrame implements ActionListener {
 
 		DefaultTableModel myModel = new DefaultTableModel(data, columnNames);
 		table = new JTable(myModel);
+		//table = new JTable(data, columnNames);
 		table.setDefaultRenderer(Object.class, new MyMemoryTableCellRenderer(this));
 		table.setPreferredScrollableViewportSize(new Dimension(160, 70));
 		table.setFillsViewportHeight(true);
@@ -204,6 +206,7 @@ public class SM extends JFrame implements ActionListener {
 		
 		DefaultTableModel myStackModel = new DefaultTableModel(d, cNames);
 		stackTable = new JTable(myStackModel);
+		//stackTable = new JTable(d, cNames);
 		stackTable.setDefaultRenderer(Object.class, new MyStackTableCellRenderer(this));
 		stackTable.setPreferredScrollableViewportSize(new Dimension(150, 70));
 		stackTable.setFillsViewportHeight(true);
@@ -257,21 +260,21 @@ public class SM extends JFrame implements ActionListener {
 				stackTable.repaint();
 			} catch (Exception e) { }
 		
-		rightTextArea.setText(instructions);
+		rightTextArea.setText(instructions.toString());
 	}
 	
 	public void runALLTheInstructions() {
 		while (true) {
 			try {
 				PC = executeOpcode(PC);
-				PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
-				table.repaint();
-				stackTable.repaint();
-			} catch (Exception e) { 
+				//PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
+			} catch (Exception e) {
 				break;
 			}
 		}
-		rightTextArea.setText(instructions);
+		table.repaint();
+		stackTable.repaint();
+		rightTextArea.setText(instructions.toString());
 	}
 
 	/**
@@ -280,7 +283,7 @@ public class SM extends JFrame implements ActionListener {
 	 *
 	 * @param baseAddr address where the first opcode is inserted
 	 * @param file     SXX executable
-	 *
+	 *16383
 	 */
 	public int initializeMemory(int baseAddr, String file) {
 
@@ -431,103 +434,104 @@ public class SM extends JFrame implements ActionListener {
 		case BKPT:   // 0
 			/* unconditionally enter the sxx debugger */
 			System.err.println("BKPT not implemented");
-			instructions += "BKPT not implemented\n";
+			instructions.append("BKPT not implemented\n");
 			//rightTextArea.setText(instructions);
 			System.exit(1);
 			break;
 		case PUSH:   // 1
 			/* push(*addr); */
 			if (DEBUG == 1) { System.out.println("PUSH " + addr); }
-			instructions += "PUSH " + addr + "\n";
+			instructions.append("PUSH " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(addr));
+			updateTables(mem.getSP());
 			break;
 		case PUSHV:  // 2
 			/* push(value); */
 			if (DEBUG == 1) { System.out.println("PUSHV " + value); }
-			instructions += "PUSHV " + value + "\n";
+			instructions.append("PUSHV " + value + "\n");
 			//rightTextArea.setText(instructions);
 			mem.push(value);
+			updateTables(mem.getSP());
 			break;
 		case PUSHS:  // 3
 			/* push(*pop()); */
 			if (DEBUG == 1) { System.out.println("PUSHS"); }
-			instructions += "PUSHS\n";
+			instructions.append("PUSHS\n");
 			//rightTextArea.setText(instructions);
 			num = mem.pop();
 			mem.push(mem.getContents(num));
+			updateTables(mem.getSP());
 			break;
 		case PUSHX:  // 4
 			/* push(*(pop()+addr)); */
 			if (DEBUG == 1) { System.out.println("PUSHX " + addr); }
-			instructions += "PUSHX\n";
+			instructions.append("PUSHX\n");
 			//rightTextArea.setText(instructions);
 			num = mem.pop()+addr;
 			mem.push(mem.getContents(num));
+			updateTables(mem.getSP());
 			break;
 		case POP:    // 5
 			/* *addr=pop(); */
 			if (DEBUG == 1) { System.out.println("POP " + addr); }
-			instructions += "POP " + addr + "\n";
+			instructions.append("POP " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.putContents(addr, temp);
-			table.setValueAt(new Integer(mem.getContents(addr)), addr, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(addr)), -addr+16383, 1);
+			updateTables(addr);
 			break;
 		case POPS:   // 6
 			/* temp=pop(); *pop()=temp; */
 			if (DEBUG == 1) { System.out.println("POPS"); }
-			instructions += "POPS\n";
+			instructions.append("POPS\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			num = mem.pop();
 			mem.putContents(num, temp);
-			table.setValueAt(new Integer(mem.getContents(num)), num, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(num)), -num+16383, 1);
+			updateTables(num);
 			break;
 		case POPX:   // 7
 			/* temp=pop(); *(pop()+addr)=temp; */
 			if (DEBUG == 1) { System.out.println("POPX " + addr); }
-			instructions += "POPX " + addr + "\n";
+			instructions.append("POPX " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			num = mem.pop()+addr;
 			mem.putContents(num, temp);
-			table.setValueAt(new Integer(mem.getContents(num)), num, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(num)), -num+16383, 1);
+			updateTables(num);
 			break;
 		case DUPL:   // 8
 			/* push(*SP); */
 			if (DEBUG == 1) { System.out.println("DUPL"); }
-			instructions += "DUPL\n";
+			instructions.append("DUPL\n");
 			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(mem.getSP()));
+			updateTables(mem.getSP());
 			break;
 		case SWAP:   // 9
 			/* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
 			if (DEBUG == 1) { System.out.println("SWAP"); }
-			instructions += "SWAP\n";
+			instructions.append("SWAP\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.getContents(mem.getSP());
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+1));
-			table.setValueAt(new Integer(mem.getContents(mem.getSP())), mem.getSP(), 1);
-			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP())), -mem.getSP()+16383, 1);
+			updateTables(mem.getSP());
 			mem.putContents(mem.getSP()+1, temp);
-			table.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), mem.getSP()+1, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), -mem.getSP()+1+16383, 1);
+			updateTables(mem.getSP()+1);
 			break;
 		case OVER:   // 10
 			/* push(*(SP+1)); */
 			if (DEBUG == 1) { System.out.println("OVER"); }
-			instructions += "OVER\n";
+			instructions.append("OVER\n");
 			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(mem.getSP()+1));
+			updateTables(mem.getSP());
 			break;
 		case DROP:   // 11
 			/* SP++; */
 			if (DEBUG == 1) { System.out.println("DROP"); }
-			instructions += "DROP\n";
+			instructions.append("DROP\n");
 			//rightTextArea.setText(instructions);
 			mem.setSP(mem.getSP()+1);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
@@ -536,71 +540,74 @@ public class SM extends JFrame implements ActionListener {
 		case ROT:    // 12
 			/* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
 			if (DEBUG == 1) { System.out.println("ROT"); }
-			instructions += "ROT\n";
+			instructions.append("ROT\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.getContents(mem.getSP());
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+2));
-			table.setValueAt(new Integer(mem.getContents(mem.getSP())), mem.getSP(), 1);
-			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP())), -mem.getSP()+16383, 1);
+			updateTables(mem.getSP());
 			mem.putContents(mem.getSP()+2, mem.getContents(mem.getSP()+1));
-			table.setValueAt(new Integer(mem.getContents(mem.getSP()+2)), mem.getSP()+2, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP()+2)), -mem.getSP()+2+16383, 1);
+			updateTables(mem.getSP()+2);
 			mem.putContents(mem.getSP()+1, temp);
-			table.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), mem.getSP()+1, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(mem.getSP()+1)), -mem.getSP()+1+16383, 1);
+			updateTables(mem.getSP()+1);
 			break;
 		case TSTLT:  // 13
 			/* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTLT"); }
-			instructions += "TSTLT\n";
+			instructions.append("TSTLT\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp < 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case TSTLE:  // 14
 			/* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTLE"); }
-			instructions += "TSTLE\n";
+			instructions.append("TSTLE\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp <= 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case TSTGT:  // 15
 			/* temp=pop(); push((temp>0)?1:0); */
-			instructions += "TSTGT\n";
+			instructions.append("TSTGT\n");
 			//rightTextArea.setText(instructions);
 			if (DEBUG == 1) { System.out.println("TSTGT"); }
 			temp = mem.pop();
 			mem.push( (temp > 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case TSTGE:  // 16
 			/* temp=pop(); push((temp>=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTGE"); }
-			instructions += "TSTGE\n";
+			instructions.append("TSTGE\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp >= 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case TSTEQ:  // 17
 			/* temp=pop(); push((temp==0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTEQ"); }
-			instructions += "TSTEQ\n";
+			instructions.append("TSTEQ\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp == 0) ? 1 : 0);
+			updateTables(mem.getSP());
 			break;
 		case TSTNE:  // 18
 			/* temp=pop(); push((temp!=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTNE"); }
-			instructions += "TSTNE\n";
+			instructions.append("TSTNE\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp != 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case BNE:    // 19
 			/* if (pop()!=0) PC=addr; */
 			if (DEBUG == 1) { System.out.println("BNE " + addr); }
-			instructions += "BNE " + addr + "\n";
+			instructions.append("BNE " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			if (mem.pop() != 0) {
 				PC = addr;
@@ -609,7 +616,7 @@ public class SM extends JFrame implements ActionListener {
 		case BEQ:    // 20
 			/* if (pop()==0) PC=addr; */
 			if (DEBUG == 1) { System.out.println("BEQ " + addr); }
-			instructions += "BEQ " + addr + "\n";
+			instructions.append("BEQ " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			if (mem.pop() == 0) {
 				PC = addr;
@@ -618,83 +625,86 @@ public class SM extends JFrame implements ActionListener {
 		case BR:     // 21
 			/* PC=addr; */
 			if (DEBUG == 1) { System.out.println("BR " + addr); }
-			instructions += "BR " + addr + "\n";
+			instructions.append("BR " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			PC = addr;
 			break;
 		case CALL:   // 22
 			/* push(PC); PC=addr; */
 			if (DEBUG == 1) { System.out.println("CALL " + addr); }
-			instructions += "CALL " + addr + "\n";
+			instructions.append("CALL " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			mem.push(PC);
 			PC = addr;
+			updateTables(mem.getSP());
 			break;
 		case CALLS:  // 23
 			/* temp=pop(); push(PC); PC=temp; */
 			if (DEBUG == 1) { System.out.println("CALLS"); }
-			instructions += "CALLS\n";
+			instructions.append("CALLS\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(PC);
 			PC = temp;
+			updateTables(mem.getSP());
 			break;
 		case RETURN: // 24
 			/* PC=pop(); */
 			if (DEBUG == 1) { System.out.println("RETURN"); }
-			instructions += "RETURN\n";
+			instructions.append("RETURN\n");
 			//rightTextArea.setText(instructions);
 			PC = mem.pop();
 			break;
 		case RETN:   // 25
 			/* temp=pop(); SP += value; PC=temp; */
 			if (DEBUG == 1) { System.out.println("RETN " + value); }
-			instructions += "RETURN " + value + "\n";
+			instructions.append("RETURN " + value + "\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			//if (DEBUG == 1) { System.out.println("RETN:temp = " + temp); }
 			mem.setSP(mem.getSP()+value);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
 			stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
-			//mem.getSP() += value;
 			PC = temp;
-			//if (DEBUG == 1) { printDebug(opcode, length, PC, temp); }
 			break;
 		case HALT:   // 26
 			/* halt program execution */
 			if (DEBUG == 1) { System.out.println("HALT"); }
-			instructions += "HALT\n";
+			instructions.append("HALT\n");
 			//rightTextArea.setText(instructions);
 			throw new HaltException();
 			//break;
 		case ADD:    // 27
 			/* temp=pop(); push( pop() + temp ); */
 			if (DEBUG == 1) { System.out.println("ADD"); }
-			instructions += "ADD\n";
+			instructions.append("ADD\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop()+temp);
+			updateTables(mem.getSP());
 			break;
 		case SUB:    // 28
 			/* temp=pop(); push( pop() - temp ); */
 			if (DEBUG == 1) { System.out.println("SUB"); }
-			instructions += "SUB\n";
+			instructions.append("SUB\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop()-temp);
+			updateTables(mem.getSP());
 			break;
 		case MUL:    // 29
 			/* temp=pop(); push( pop() * temp ); */
 			if (DEBUG == 1) { System.out.println("MUL"); }
-			instructions += "MUL\n";
+			instructions.append("MUL\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop() * temp);
+			updateTables(mem.getSP());
 			break;
 		case DIV:    // 30
 			/* temp=pop(); push( pop() / temp ); */
 			if (DEBUG == 1) { System.out.println("DIV"); }
-			instructions += "DIV\n";
+			instructions.append("DIV\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			try {
@@ -702,11 +712,12 @@ public class SM extends JFrame implements ActionListener {
 			} catch (ArithmeticException e) {
 				errorAndExit("ERROR: Attempt to divide by zero");
 			}
+			updateTables(mem.getSP());
 			break;
 		case MOD:    // 31
 			/* temp=pop(); push( pop() % temp ); */
 			if (DEBUG == 1) { System.out.println("DIV"); }
-			instructions += "MOD\n";
+			instructions.append("MOD\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			try {
@@ -714,56 +725,63 @@ public class SM extends JFrame implements ActionListener {
 			} catch (ArithmeticException e) {
 				errorAndExit("ERROR: Attempt to mod by zero");
 			}
+			updateTables(mem.getSP());
 			break;
 		case OR:     // 32
 			/* temp=pop(); push( pop() || temp ); */
 			if (DEBUG == 1) { System.out.println("OR"); }
-			instructions += "OR\n";
+			instructions.append("OR\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 || temp != 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case AND:    // 33
 			/* temp=pop(); push( pop() && temp ); */
 			if (DEBUG == 1) { System.out.println("AND"); }
-			instructions += "AND\n";
+			instructions.append("AND\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 && temp != 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case XOR:    // 34
 			/* temp=pop(); push( pop() xor temp ); [see below] */
 			if (DEBUG == 1) { System.out.println("XOR"); }
-			instructions += "XOR\n";
+			instructions.append("XOR\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case NOT:    // 35
 			/* push( !pop() ); */
 			if (DEBUG == 1) { System.out.println("NOT"); }
-			instructions += "NOT\n";
+			instructions.append("NOT\n");
 			//rightTextArea.setText(instructions);
 			mem.push( !(mem.pop() != 0) ? 1 : 0 );
+			updateTables(mem.getSP());
 			break;
 		case NEG:    // 36
 			/* push( -pop() ); */
 			if (DEBUG == 1) { System.out.println("NEG"); }
-			instructions += "NEG\n";
+			instructions.append("NEG\n");
 			//rightTextArea.setText(instructions);
 			mem.push( (-1)*mem.pop());
+			updateTables(mem.getSP());
 			break;
 		case ADDX:   // 37
 			/* push( pop()+addr ); */
 			if (DEBUG == 1) { System.out.println("ADDX " + addr); }
-			instructions += "ADDX " + addr + "\n";
+			instructions.append("ADDX " + addr + "\n");
 			//rightTextArea.setText(instructions);
 			mem.push(mem.pop() + addr);
+			updateTables(mem.getSP());
 			break;
 		case ADDSP:  // 38
 			/* SP += value; */
 			if (DEBUG == 1) { System.out.println("ADDSP " + value); }
-			instructions += "ADDSP " + value + "\n";
+			instructions.append("ADDSP " + value + "\n");
 			//rightTextArea.setText(instructions);
 			mem.setSP(mem.getSP()+value);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
@@ -789,16 +807,17 @@ public class SM extends JFrame implements ActionListener {
 			String digits = m.group();
 			temp = Integer.parseInt(digits);
 			if (DEBUG == 1) { System.out.println("READ ["+temp+"]"); }
-			instructions += "READ ["+temp+"]\n";
+			instructions.append("READ ["+temp+"]\n");
 			//rightTextArea.setText(instructions);
 			inputLine = inputLine.replaceAll("^[+-]?\\d+", "");
 			mem.push(temp);
+			updateTables(mem.getSP());
 			break;
 		case PRINT:  // 40
 			/* print pop() in %d format */
 			temp = mem.pop();
 			if (DEBUG == 1) { System.out.println("PRINT ["+temp+"]"); }
-			instructions += "PRINT ["+temp+"]\n";
+			instructions.append("PRINT ["+temp+"]\n");
 			//rightTextArea.setText(instructions);
 			System.out.print(temp);
 			break;
@@ -819,38 +838,39 @@ public class SM extends JFrame implements ActionListener {
 			// get the next character
 			temp = Read.READC(new Scanner(inputLine));
 			if (DEBUG == 1) { System.out.println("READC ["+temp+"]"); }
-			instructions += "READC ["+temp+"]\n";
+			instructions.append("READC ["+temp+"]\n");
 			//rightTextArea.setText(instructions);
 			mem.push(temp);
 			// the character is consumed
 			inputLine = inputLine.substring(1);
+			updateTables(mem.getSP());
 			break;
 		case PRINTC: // 42
 			/* print pop() in %c format */
 			temp = mem.pop();
 			if (DEBUG == 1) { System.out.println("PRINTC ["+temp+"]"); }
-			instructions += "PRINTC ["+temp+"]\n";
+			instructions.append("PRINTC ["+temp+"]\n");
 			//rightTextArea.setText(instructions);
 			System.out.print((char)temp);
 			break;
 		case TRON:   // 43
 			/* turn on trace feature */
 			if (DEBUG == 1) { System.out.println("TRON"); }
-			instructions += "TRON\n";
+			instructions.append("TRON\n");
 			//rightTextArea.setText(instructions);
 			TRACE = true;
 			break;
 		case TROFF:  // 44
 			/* turn off trace feature */
 			if (DEBUG == 1) { System.out.println("TROFF"); }
-			instructions += "TROFF\n";
+			instructions.append("TROFF\n");
 			//rightTextArea.setText(instructions);
 			TRACE = false;
 			break;
 		case DUMP:   // 45
 			/* temp=pop(); dump memory from pop() to temp; */
 			if (DEBUG == 1) { System.out.println("DUMP"); }
-			instructions += "DUMP\n";
+			instructions.append("DUMP\n");
 			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			dump(mem.pop(), temp);
@@ -860,12 +880,18 @@ public class SM extends JFrame implements ActionListener {
 			System.err.println("  " + opcode);
 			System.exit(1);
 		}
+		
+		// update SP
+		table.setValueAt(new Integer(mem.getContents(0)), 0, 1);
+		stackTable.setValueAt(new Integer(mem.getContents(0)), -0+16383, 1);
 
+		/*
 		// update values on the stack
 		for (int i = 16383; i >= mem.getSP(); i--) {
 			table.setValueAt(new Integer(mem.getContents(i)), i, 1);
 			stackTable.setValueAt(new Integer(mem.getContents(i)), -i+16383, 1);
 		}
+		*/
 
 		return PC; // return the new PC
 	}
@@ -1054,18 +1080,23 @@ public class SM extends JFrame implements ActionListener {
 		for (int row = 0; row < 16384; row++) {
 			table.setValueAt(new Integer(0), row, 1);
 			stackTable.setValueAt(new Integer(0), row, 1);
-			mem = new Memory(16384);
-			rightTextArea.setText("");
-			outputTextArea.setText("");
-			instructions = "";
-			inputLine = "";
-			file = "";
-			PC = 0;
-			PCLabel.setText("PC: - | SP: - ");
-			mc.redirectOut();
-			table.repaint();
-			stackTable.repaint();
 		}
+		mem = new Memory(16384);
+		rightTextArea.setText("");
+		outputTextArea.setText("");
+		instructions = new StringBuilder("");
+		inputLine = "";
+		file = "";
+		PC = 0;	
+		PCLabel.setText("PC: - | SP: - ");
+		mc.redirectOut();
+		table.repaint();
+		stackTable.repaint();
+	}
+	
+	public void updateTables(int addr) {
+		table.setValueAt(new Integer(mem.getContents(addr)), addr, 1);
+		stackTable.setValueAt(new Integer(mem.getContents(addr)), -addr+16383, 1);
 	}
 	
 	public static void main(String[] args) {

@@ -51,6 +51,7 @@ public class SM extends JFrame implements ActionListener {
 	public boolean oldStyle;  // support legacy opcode numbers
 	public int DEBUG = 0;
 	public int PC = 0;
+	public long time;
 
 	private static JTable table;
 	private static JTextArea outputTextArea;
@@ -78,13 +79,9 @@ public class SM extends JFrame implements ActionListener {
 	private JRadioButtonMenuItem stepRadioButton;
 	private JButton runButton;
 	private JLabel PCLabel;
-
 	private JButton clearButton;
-
 	private JButton singleStepButton;
-
 	private JMenuItem exitMenuItem;
-
 	private JMenuItem aboutMenuItem;
 
 	public SM() {
@@ -258,6 +255,8 @@ public class SM extends JFrame implements ActionListener {
 				PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
 				table.repaint();
 				stackTable.repaint();
+				scrollPane.getVerticalScrollBar().setValue((int)((PC-16)/0.0625));
+				sPane.getVerticalScrollBar().setValue(1000000);
 			} catch (Exception e) { }
 		
 		rightTextArea.setText(instructions.toString());
@@ -267,13 +266,22 @@ public class SM extends JFrame implements ActionListener {
 		while (true) {
 			try {
 				PC = executeOpcode(PC);
+				table.repaint();
+				stackTable.repaint();
+				scrollPane.getVerticalScrollBar().setValue((int)((PC-16)/0.0625));
+				
+				System.out.println("Hello");
 				//PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
 			} catch (Exception e) {
 				break;
 			}
+			/*
+			try {
+				Thread.sleep(10);
+			} catch(Exception e) {
+			}
+			*/
 		}
-		table.repaint();
-		stackTable.repaint();
 		rightTextArea.setText(instructions.toString());
 	}
 
@@ -885,13 +893,11 @@ public class SM extends JFrame implements ActionListener {
 		table.setValueAt(new Integer(mem.getContents(0)), 0, 1);
 		stackTable.setValueAt(new Integer(mem.getContents(0)), -0+16383, 1);
 
-		/*
 		// update values on the stack
 		for (int i = 16383; i >= mem.getSP(); i--) {
 			table.setValueAt(new Integer(mem.getContents(i)), i, 1);
 			stackTable.setValueAt(new Integer(mem.getContents(i)), -i+16383, 1);
 		}
-		*/
 
 		return PC; // return the new PC
 	}

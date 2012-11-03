@@ -1,3 +1,12 @@
+/**
+ * @author Edward M Banner
+ * 
+ * This SM class defines *the* Stack Machine.  The Stack Machine is an architecture
+ * implemented in software.  A stack lives at high memory and grows down, while
+ * data and opcodes live at low memory and grow up.  In all, the Stack Machine has
+ * 16K memory.
+ */
+
 package gui;
 
 import javax.swing.JFrame;
@@ -40,7 +49,12 @@ import cli.Header;
 import cli.Memory;
 import cli.Read;
 
-
+/**
+ * Creating a new instance of SM initializes the GUI.
+ * 
+ * @author edward
+ *
+ */
 public class SM extends JFrame implements ActionListener {
 	
 	public static SM gui;
@@ -53,6 +67,7 @@ public class SM extends JFrame implements ActionListener {
 	public int PC = 0;
 	public long time;
 
+	// swing stuff
 	private static JTable table;
 	private static JTextArea outputTextArea;
 	private static JTextArea rightTextArea;
@@ -84,14 +99,21 @@ public class SM extends JFrame implements ActionListener {
 	private JMenuItem exitMenuItem;
 	private JMenuItem aboutMenuItem;
 
+	
+	/**
+	 * Initialize the Stack Machine.
+	 */
 	public SM() {
-		mem = new Memory(16384);
-		inputLine = "";
-		instructions = new StringBuilder("");
+		mem = new Memory(16384); // SM has 16384 words of memory
+		inputLine = "";  // string that ``acts" as STDIN
+		instructions = new StringBuilder("");  // debugging instructions
 		digit = Pattern.compile("^[-+]?\\d+");
-		file = "";
+		file = "";  // SXX file the user selects
 	}
 
+	/**
+	 * Sticks all of the GUI pieces together and redirects STDOUT.
+	 */
 	public void sitAndWait() {	
 
 		// GUI stuff
@@ -100,70 +122,87 @@ public class SM extends JFrame implements ActionListener {
 		getContentPane().setLayout(new BorderLayout());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
+		// new menu bar to hold the ``File", ``Simulation", and ``Help" menus
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
+		// ``file" encompasses selecting an SXX file and closing the SM
 		fileMenu = new JMenu("File");
 		menuBar.add(fileMenu);
 
+		// allows user to load an SXX file
 		loadFileMenuItem = new JMenuItem("Load File");
 		loadFileMenuItem.setName("Load File");
 		fileMenu.add(loadFileMenuItem);
 		loadFileMenuItem.addActionListener(this);
 		
+		// allows the user to exit the SM
 		exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setName("Exit");
 		fileMenu.add(exitMenuItem);
 		exitMenuItem.addActionListener(this);
 
+		// ``simulator" deals with selecting the execution method
 		simulatorMenu = new JMenu("Simulator");
 		menuBar.add(simulatorMenu);
 		
+		// how fast you want your SXX program to execute
 		speedMenu = new JMenu("Speed");
 		simulatorMenu.add(speedMenu);
 		
+		// full speed
 		fullSpeedRadioButton = new JRadioButtonMenuItem("Full Speed");
 		fullSpeedRadioButton.setName("Full Speed");
 		speedMenu.add(fullSpeedRadioButton);
 		fullSpeedRadioButton.addActionListener(this);
 		
+		// step-by-step
 		stepRadioButton = new JRadioButtonMenuItem("Step-by-Step");
 		stepRadioButton.setName("Step-by-Step");
 		speedMenu.add(stepRadioButton);
 		fullSpeedRadioButton.addActionListener(this);
 
+		// ``help" deals with a little bit of documentation
 		helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
 		
+		// a little snippet about the SM
 		aboutMenuItem = new JMenuItem("About");
 		aboutMenuItem.setName("About");
 		helpMenu.add(aboutMenuItem);
 		aboutMenuItem.addActionListener(this);
 		
+		// right align everything inserted into the menu bar after this line
 		menuBar.add(Box.createHorizontalGlue());
 		
+		// set the PC and SP labels in the upper right hand corner of the SM
 		PCLabel = new JLabel();
 		PCLabel.setText("PC: - | SP: - ");
 		menuBar.add(PCLabel);
 		
+		// nice removable toolbar
 		JToolBar toolBar = new JToolBar();
 		getContentPane().add(toolBar, BorderLayout.NORTH);
 		
+		// run the SXX program on the SM
 		runButton = new JButton("Run");
 		runButton.setName("Run");
 		runButton.addActionListener(this);
 		toolBar.add(runButton);
 		
+		// button to single step through an SXX program
 		singleStepButton = new JButton("Single Step");
 		singleStepButton.setName("Single Step");
 		toolBar.add(singleStepButton);
 		singleStepButton.addActionListener(this);	
 		
+		// button to reset both tables
 		clearButton = new JButton("Clear");
 		clearButton.setName("Clear");
 		clearButton.addActionListener(this);
 		toolBar.add(clearButton);
 
+		// populate the PC table
 		String columnNames[] = { "Address", "Contents" };
 		Object[][] data = new Object[16384][2];
 		for (int row = 0; row < 16384; row++) {
@@ -171,9 +210,10 @@ public class SM extends JFrame implements ActionListener {
 			data[row][1] = new Integer(0);
 		}
 
+		// create the PC table
 		DefaultTableModel myModel = new DefaultTableModel(data, columnNames);
 		table = new JTable(myModel);
-		//table = new JTable(data, columnNames);
+		// set the renderer to the custom rendered defined by the `MyMemoryTableCellRender' class
 		table.setDefaultRenderer(Object.class, new MyMemoryTableCellRenderer(this));
 		table.setPreferredScrollableViewportSize(new Dimension(160, 70));
 		table.setFillsViewportHeight(true);
@@ -194,6 +234,7 @@ public class SM extends JFrame implements ActionListener {
 		northPanel.setLayout(new BorderLayout());
 		eastPanel.add(northPanel);
 		
+		// populate the stack table
 		String cNames[] = { "Address", "Contents" };
 		Object[][] d = new Object[16384][2];
 		for (int row = 0; row < 16384; row++) {
@@ -201,17 +242,19 @@ public class SM extends JFrame implements ActionListener {
 			d[row][1] = new Integer(0);
 		}
 		
+		// create the stack table
 		DefaultTableModel myStackModel = new DefaultTableModel(d, cNames);
 		stackTable = new JTable(myStackModel);
-		//stackTable = new JTable(d, cNames);
+		// set the `MyStackTableCellRenderer' we defined as the custom renderer for this table
 		stackTable.setDefaultRenderer(Object.class, new MyStackTableCellRenderer(this));
 		stackTable.setPreferredScrollableViewportSize(new Dimension(150, 70));
 		stackTable.setFillsViewportHeight(true);
-		//Create the scroll pane and add the table to it.
+		// Create the scroll pane and add the table to it.
 		stackScrollPane = new JScrollPane(stackTable);
-		//Add the scroll pane to this panel.
+		// Add the scroll pane to this panel.
 		northPanel.add(stackScrollPane, BorderLayout.WEST);
 		
+		// create the area to write the SAX instructions to
 		rightTextArea = new JTextArea();
 		instrScrollPane = new JScrollPane(rightTextArea);
 		northPanel.add(instrScrollPane, BorderLayout.CENTER);
@@ -226,18 +269,23 @@ public class SM extends JFrame implements ActionListener {
 
 		//Add the scroll pane to this panel.
 		southPanel.add(sPane, BorderLayout.CENTER);
+		
+		// redirect STDOUT to the `outputTextArea' area
 		mc = new MessageConsole(outputTextArea);
 		mc.redirectOut();
 		
+		// let's make it so we can see the SM!
 		setVisible(true);
 	}
 
+	/**
+	 * Initializes the data and opcode segment of the SM.
+	 * 
+	 * @param file  the SXX input file
+	 */
 	public void run(String file) {
-		//super();
-
-		// base address starts somewhere between 15 and 1000 exclusive
-		//int baseAddr = new Random().nextInt(984) + 16;
-		int baseAddr = 16;
+		// start the PC at a random spot between 16 and 999
+		int baseAddr = new Random().nextInt(984) + 16;
 		if (DEBUG == 1) {  System.out.println("Base address: " + baseAddr); }
 
 		// insert opcodes and data into the stack machine and perform
@@ -246,32 +294,44 @@ public class SM extends JFrame implements ActionListener {
 		if (DEBUG == 1) { System.out.println("Entry point: " + entryPoint); }
 		
 		PC = entryPoint;
+		// update the PC and SP label
 		PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
 	}
 	
+	/**
+	 * Run the instruction currently being pointed to by PC.  Useful for `step-by-step'
+	 * mode.
+	 */
 	public void runASingleInstruction() {
 			try {
+				// run an instruction
 				PC = executeOpcode(PC);
+				// update the SP & PC label
 				PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
+				// update the tables and scroll them by the magic value
 				table.repaint();
 				stackTable.repaint();
 				scrollPane.getVerticalScrollBar().setValue((int)((PC-16)/0.0625));
-				sPane.getVerticalScrollBar().setValue(1000000);
 			} catch (Exception e) { }
-		
-		rightTextArea.setText(instructions.toString());
+
+			// print the SAX code for this instruction
+			rightTextArea.setText(instructions.toString());
 	}
-	
+
+	/**
+	 * Runs instructions loaded into the SM until a HALT opcode is reached or
+	 * and error occurs.
+	 */
 	public void runALLTheInstructions() {
 		while (true) {
 			try {
+				// execute a single opcode
 				PC = executeOpcode(PC);
+				// repaint the tables and scroll them by the magic number
 				table.repaint();
 				stackTable.repaint();
 				scrollPane.getVerticalScrollBar().setValue((int)((PC-16)/0.0625));
-				
-				System.out.println("Hello");
-				//PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
+				PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
 			} catch (Exception e) {
 				break;
 			}
@@ -282,6 +342,7 @@ public class SM extends JFrame implements ActionListener {
 			}
 			*/
 		}
+		// print the SAX instruction
 		rightTextArea.setText(instructions.toString());
 	}
 
@@ -291,7 +352,8 @@ public class SM extends JFrame implements ActionListener {
 	 *
 	 * @param baseAddr address where the first opcode is inserted
 	 * @param file     SXX executable
-	 *16383
+	 *
+	 * @return returns the entry point
 	 */
 	public int initializeMemory(int baseAddr, String file) {
 
@@ -419,6 +481,7 @@ public class SM extends JFrame implements ActionListener {
 	 *
 	 * @param PC the program counter
 	 *
+	 * @return  the new PC
 	 */
 	public int executeOpcode(int PC) throws HaltException {
 		int opcode = mem.getContents(PC);
@@ -921,7 +984,7 @@ public class SM extends JFrame implements ActionListener {
 	/**
 	 * Returns true if opcode requires a parameter.
 	 *
-	 * @ param opcode the opcode
+	 * @param opcode the opcode
 	 *
 	 */
 	public boolean opcodeRequiresParameter(int opcode) {
@@ -1037,17 +1100,25 @@ public class SM extends JFrame implements ActionListener {
 			JMenuItem item = (JMenuItem)e.getSource();
 			String name = item.getName();
 			if (name.equals("Load File")) {
+				// fire up a JFileChooser and let the user pick a SXX file
 				JFileChooser fc = new JFileChooser();
+				// spawn the JFileChooser
 				int returnVal = fc.showOpenDialog(null);
 				
+				// make sure it was a valid file
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					// do a massive reset of everything
 					clearALLTheThings();
 					file = fc.getSelectedFile().getAbsolutePath();
+					// set up the SM
 					run(file);
 				}
 			} else if (name.equals("Exit")) {
+				// we're done
 				System.exit(0);
 			} else if (name.equals("About")) {
+				// create a runnable so we can spawn a dialog box representing the
+				// rules in HTML
 				Runnable r = new Runnable() {
 					public void run() {
 						String pt1 = "<html><body width='";
@@ -1069,11 +1140,12 @@ public class SM extends JFrame implements ActionListener {
 			String name = button.getName();
 			
 			if (name.equals("Single Step") && ! file.equals("")) {
+				// just run one instruction
 				runASingleInstruction();
 			} else if (name.equals("Run") && ! file.equals("")) {
 				if (stepRadioButton.isSelected()) {
 					runASingleInstruction();
-				} else {
+				} else {  // run the whole darn program
 					runALLTheInstructions();
 				}
 			} else if (name.equals("Clear")) {
@@ -1082,29 +1154,48 @@ public class SM extends JFrame implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Massive reset for most of the variables that change along with an executing
+	 * SXX program.
+	 */
 	public void clearALLTheThings() {
 		for (int row = 0; row < 16384; row++) {
+			// reset the tables
 			table.setValueAt(new Integer(0), row, 1);
 			stackTable.setValueAt(new Integer(0), row, 1);
 		}
+		// clear out the SM's memory
 		mem = new Memory(16384);
+		// clear out the SAX instructions
 		rightTextArea.setText("");
+		// clear out STDOUT
 		outputTextArea.setText("");
 		instructions = new StringBuilder("");
 		inputLine = "";
 		file = "";
 		PC = 0;	
 		PCLabel.setText("PC: - | SP: - ");
+		// redirect standard output again
 		mc.redirectOut();
+		// repaint the tables
 		table.repaint();
 		stackTable.repaint();
 	}
 	
+	/**
+	 * Updates the field of each table associated with `addr'.
+	 * 
+	 * @param addr  the entry that needs to be updated
+	 */
 	public void updateTables(int addr) {
 		table.setValueAt(new Integer(mem.getContents(addr)), addr, 1);
 		stackTable.setValueAt(new Integer(mem.getContents(addr)), -addr+16383, 1);
 	}
 	
+	/**
+	 * Create a new SM and go.
+	 * 
+	 */
 	public static void main(String[] args) {
 		new SM().sitAndWait();
 	}

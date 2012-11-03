@@ -35,8 +35,7 @@ public class StackMachine {
      */
     public void run(String file) throws IOException {
         // base address starts somewhere between 15 and 1000 exclusive
-        int baseAddr = 16;
-        //int baseAddr = new Random().nextInt(984) + 16;
+        int baseAddr = new Random().nextInt(984) + 16;
         if (DEBUG == 1) {  System.out.println("Base address: " + baseAddr); }
 
         // insert opcodes and data into the stack machine and perform

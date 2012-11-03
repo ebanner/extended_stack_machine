@@ -6,16 +6,18 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
-/*
- *  Create a simple console to display text messages.
+/**	
+ * @author Rob Camick 
+ * 
+ * Create a simple console to display text messages.
  *
- *  Messages can be directed here from different sources. Each source can
- *  have its messages displayed in a different color.
+ * Messages can be directed here from different sources. Each source can
+ * have its messages displayed in a different color.
  *
- *  Messages can either be appended to the console or inserted as the first
- *  line of the console
+ * Messages can either be appended to the console or inserted as the first
+ * line of the console
  *
- *  You can limit the number of lines to hold in the Document.
+ * You can limit the number of lines to hold in the Document.
  */
 public class MessageConsole
 {

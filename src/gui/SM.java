@@ -353,7 +353,7 @@ public class SM extends JFrame implements ActionListener {
 	 * @param baseAddr address where the first opcode is inserted
 	 * @param file     SXX executable
 	 *
-	 * @return returns the entry point
+	 * @return returns  the entry point into the SXX program
 	 */
 	public int initializeMemory(int baseAddr, String file) {
 
@@ -545,16 +545,13 @@ public class SM extends JFrame implements ActionListener {
 		switch(opcode) {  // find out the opcode and execute it
 		case BKPT:   // 0
 			/* unconditionally enter the sxx debugger */
-			System.err.println("BKPT not implemented");
 			instructions.append("BKPT not implemented\n");
-			//rightTextArea.setText(instructions);
 			System.exit(1);
 			break;
 		case PUSH:   // 1
 			/* push(*addr); */
 			if (DEBUG == 1) { System.out.println("PUSH " + addr); }
 			instructions.append("PUSH " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(addr));
 			updateTables(mem.getSP());
 			break;
@@ -562,7 +559,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push(value); */
 			if (DEBUG == 1) { System.out.println("PUSHV " + value); }
 			instructions.append("PUSHV " + value + "\n");
-			//rightTextArea.setText(instructions);
 			mem.push(value);
 			updateTables(mem.getSP());
 			break;
@@ -570,7 +566,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push(*pop()); */
 			if (DEBUG == 1) { System.out.println("PUSHS"); }
 			instructions.append("PUSHS\n");
-			//rightTextArea.setText(instructions);
 			num = mem.pop();
 			mem.push(mem.getContents(num));
 			updateTables(mem.getSP());
@@ -579,7 +574,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push(*(pop()+addr)); */
 			if (DEBUG == 1) { System.out.println("PUSHX " + addr); }
 			instructions.append("PUSHX\n");
-			//rightTextArea.setText(instructions);
 			num = mem.pop()+addr;
 			mem.push(mem.getContents(num));
 			updateTables(mem.getSP());
@@ -588,7 +582,6 @@ public class SM extends JFrame implements ActionListener {
 			/* *addr=pop(); */
 			if (DEBUG == 1) { System.out.println("POP " + addr); }
 			instructions.append("POP " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.putContents(addr, temp);
 			updateTables(addr);
@@ -597,7 +590,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); *pop()=temp; */
 			if (DEBUG == 1) { System.out.println("POPS"); }
 			instructions.append("POPS\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			num = mem.pop();
 			mem.putContents(num, temp);
@@ -607,7 +599,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); *(pop()+addr)=temp; */
 			if (DEBUG == 1) { System.out.println("POPX " + addr); }
 			instructions.append("POPX " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			num = mem.pop()+addr;
 			mem.putContents(num, temp);
@@ -617,7 +608,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push(*SP); */
 			if (DEBUG == 1) { System.out.println("DUPL"); }
 			instructions.append("DUPL\n");
-			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(mem.getSP()));
 			updateTables(mem.getSP());
 			break;
@@ -625,7 +615,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
 			if (DEBUG == 1) { System.out.println("SWAP"); }
 			instructions.append("SWAP\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.getContents(mem.getSP());
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+1));
 			updateTables(mem.getSP());
@@ -636,7 +625,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push(*(SP+1)); */
 			if (DEBUG == 1) { System.out.println("OVER"); }
 			instructions.append("OVER\n");
-			//rightTextArea.setText(instructions);
 			mem.push(mem.getContents(mem.getSP()+1));
 			updateTables(mem.getSP());
 			break;
@@ -644,7 +632,6 @@ public class SM extends JFrame implements ActionListener {
 			/* SP++; */
 			if (DEBUG == 1) { System.out.println("DROP"); }
 			instructions.append("DROP\n");
-			//rightTextArea.setText(instructions);
 			mem.setSP(mem.getSP()+1);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
 			stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
@@ -653,7 +640,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
 			if (DEBUG == 1) { System.out.println("ROT"); }
 			instructions.append("ROT\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.getContents(mem.getSP());
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+2));
 			updateTables(mem.getSP());
@@ -666,7 +652,6 @@ public class SM extends JFrame implements ActionListener {
 			/* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTLT"); }
 			instructions.append("TSTLT\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp < 0) ? 1 : 0 );
 			updateTables(mem.getSP());
@@ -675,7 +660,6 @@ public class SM extends JFrame implements ActionListener {
 			/* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTLE"); }
 			instructions.append("TSTLE\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp <= 0) ? 1 : 0 );
 			updateTables(mem.getSP());
@@ -683,7 +667,6 @@ public class SM extends JFrame implements ActionListener {
 		case TSTGT:  // 15
 			/* temp=pop(); push((temp>0)?1:0); */
 			instructions.append("TSTGT\n");
-			//rightTextArea.setText(instructions);
 			if (DEBUG == 1) { System.out.println("TSTGT"); }
 			temp = mem.pop();
 			mem.push( (temp > 0) ? 1 : 0 );
@@ -693,7 +676,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push((temp>=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTGE"); }
 			instructions.append("TSTGE\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp >= 0) ? 1 : 0 );
 			updateTables(mem.getSP());
@@ -702,7 +684,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push((temp==0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTEQ"); }
 			instructions.append("TSTEQ\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp == 0) ? 1 : 0);
 			updateTables(mem.getSP());
@@ -711,7 +692,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push((temp!=0)?1:0); */
 			if (DEBUG == 1) { System.out.println("TSTNE"); }
 			instructions.append("TSTNE\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (temp != 0) ? 1 : 0 );
 			updateTables(mem.getSP());
@@ -720,7 +700,6 @@ public class SM extends JFrame implements ActionListener {
 			/* if (pop()!=0) PC=addr; */
 			if (DEBUG == 1) { System.out.println("BNE " + addr); }
 			instructions.append("BNE " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			if (mem.pop() != 0) {
 				PC = addr;
 			}
@@ -729,7 +708,6 @@ public class SM extends JFrame implements ActionListener {
 			/* if (pop()==0) PC=addr; */
 			if (DEBUG == 1) { System.out.println("BEQ " + addr); }
 			instructions.append("BEQ " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			if (mem.pop() == 0) {
 				PC = addr;
 			}
@@ -738,14 +716,12 @@ public class SM extends JFrame implements ActionListener {
 			/* PC=addr; */
 			if (DEBUG == 1) { System.out.println("BR " + addr); }
 			instructions.append("BR " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			PC = addr;
 			break;
 		case CALL:   // 22
 			/* push(PC); PC=addr; */
 			if (DEBUG == 1) { System.out.println("CALL " + addr); }
 			instructions.append("CALL " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			mem.push(PC);
 			PC = addr;
 			updateTables(mem.getSP());
@@ -754,7 +730,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push(PC); PC=temp; */
 			if (DEBUG == 1) { System.out.println("CALLS"); }
 			instructions.append("CALLS\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(PC);
 			PC = temp;
@@ -764,14 +739,12 @@ public class SM extends JFrame implements ActionListener {
 			/* PC=pop(); */
 			if (DEBUG == 1) { System.out.println("RETURN"); }
 			instructions.append("RETURN\n");
-			//rightTextArea.setText(instructions);
 			PC = mem.pop();
 			break;
 		case RETN:   // 25
 			/* temp=pop(); SP += value; PC=temp; */
 			if (DEBUG == 1) { System.out.println("RETN " + value); }
 			instructions.append("RETURN " + value + "\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			//if (DEBUG == 1) { System.out.println("RETN:temp = " + temp); }
 			mem.setSP(mem.getSP()+value);
@@ -783,14 +756,12 @@ public class SM extends JFrame implements ActionListener {
 			/* halt program execution */
 			if (DEBUG == 1) { System.out.println("HALT"); }
 			instructions.append("HALT\n");
-			//rightTextArea.setText(instructions);
 			throw new HaltException();
 			//break;
 		case ADD:    // 27
 			/* temp=pop(); push( pop() + temp ); */
 			if (DEBUG == 1) { System.out.println("ADD"); }
 			instructions.append("ADD\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop()+temp);
 			updateTables(mem.getSP());
@@ -799,7 +770,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push( pop() - temp ); */
 			if (DEBUG == 1) { System.out.println("SUB"); }
 			instructions.append("SUB\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop()-temp);
 			updateTables(mem.getSP());
@@ -808,7 +778,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push( pop() * temp ); */
 			if (DEBUG == 1) { System.out.println("MUL"); }
 			instructions.append("MUL\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push(mem.pop() * temp);
 			updateTables(mem.getSP());
@@ -817,7 +786,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push( pop() / temp ); */
 			if (DEBUG == 1) { System.out.println("DIV"); }
 			instructions.append("DIV\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			try {
 				mem.push(mem.pop() / temp);
@@ -830,7 +798,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push( pop() % temp ); */
 			if (DEBUG == 1) { System.out.println("DIV"); }
 			instructions.append("MOD\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			try {
 				mem.push(mem.pop() % temp);
@@ -843,7 +810,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push( pop() || temp ); */
 			if (DEBUG == 1) { System.out.println("OR"); }
 			instructions.append("OR\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 || temp != 0) ? 1 : 0 );
 			updateTables(mem.getSP());
@@ -852,7 +818,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push( pop() && temp ); */
 			if (DEBUG == 1) { System.out.println("AND"); }
 			instructions.append("AND\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 && temp != 0) ? 1 : 0 );
 			updateTables(mem.getSP());
@@ -861,7 +826,6 @@ public class SM extends JFrame implements ActionListener {
 			/* temp=pop(); push( pop() xor temp ); [see below] */
 			if (DEBUG == 1) { System.out.println("XOR"); }
 			instructions.append("XOR\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
 			updateTables(mem.getSP());
@@ -870,7 +834,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push( !pop() ); */
 			if (DEBUG == 1) { System.out.println("NOT"); }
 			instructions.append("NOT\n");
-			//rightTextArea.setText(instructions);
 			mem.push( !(mem.pop() != 0) ? 1 : 0 );
 			updateTables(mem.getSP());
 			break;
@@ -878,7 +841,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push( -pop() ); */
 			if (DEBUG == 1) { System.out.println("NEG"); }
 			instructions.append("NEG\n");
-			//rightTextArea.setText(instructions);
 			mem.push( (-1)*mem.pop());
 			updateTables(mem.getSP());
 			break;
@@ -886,7 +848,6 @@ public class SM extends JFrame implements ActionListener {
 			/* push( pop()+addr ); */
 			if (DEBUG == 1) { System.out.println("ADDX " + addr); }
 			instructions.append("ADDX " + addr + "\n");
-			//rightTextArea.setText(instructions);
 			mem.push(mem.pop() + addr);
 			updateTables(mem.getSP());
 			break;
@@ -894,7 +855,6 @@ public class SM extends JFrame implements ActionListener {
 			/* SP += value; */
 			if (DEBUG == 1) { System.out.println("ADDSP " + value); }
 			instructions.append("ADDSP " + value + "\n");
-			//rightTextArea.setText(instructions);
 			mem.setSP(mem.getSP()+value);
 			table.setValueAt(new Integer(mem.getSP()), 0, 1);
 			stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
@@ -920,7 +880,6 @@ public class SM extends JFrame implements ActionListener {
 			temp = Integer.parseInt(digits);
 			if (DEBUG == 1) { System.out.println("READ ["+temp+"]"); }
 			instructions.append("READ ["+temp+"]\n");
-			//rightTextArea.setText(instructions);
 			inputLine = inputLine.replaceAll("^[+-]?\\d+", "");
 			mem.push(temp);
 			updateTables(mem.getSP());
@@ -930,7 +889,6 @@ public class SM extends JFrame implements ActionListener {
 			temp = mem.pop();
 			if (DEBUG == 1) { System.out.println("PRINT ["+temp+"]"); }
 			instructions.append("PRINT ["+temp+"]\n");
-			//rightTextArea.setText(instructions);
 			System.out.print(temp);
 			break;
 		case READC:  // 41
@@ -951,7 +909,6 @@ public class SM extends JFrame implements ActionListener {
 			temp = Read.READC(new Scanner(inputLine));
 			if (DEBUG == 1) { System.out.println("READC ["+temp+"]"); }
 			instructions.append("READC ["+temp+"]\n");
-			//rightTextArea.setText(instructions);
 			mem.push(temp);
 			// the character is consumed
 			inputLine = inputLine.substring(1);
@@ -962,28 +919,24 @@ public class SM extends JFrame implements ActionListener {
 			temp = mem.pop();
 			if (DEBUG == 1) { System.out.println("PRINTC ["+temp+"]"); }
 			instructions.append("PRINTC ["+temp+"]\n");
-			//rightTextArea.setText(instructions);
 			System.out.print((char)temp);
 			break;
 		case TRON:   // 43
 			/* turn on trace feature */
 			if (DEBUG == 1) { System.out.println("TRON"); }
 			instructions.append("TRON\n");
-			//rightTextArea.setText(instructions);
 			TRACE = true;
 			break;
 		case TROFF:  // 44
 			/* turn off trace feature */
 			if (DEBUG == 1) { System.out.println("TROFF"); }
 			instructions.append("TROFF\n");
-			//rightTextArea.setText(instructions);
 			TRACE = false;
 			break;
 		case DUMP:   // 45
 			/* temp=pop(); dump memory from pop() to temp; */
 			if (DEBUG == 1) { System.out.println("DUMP"); }
 			instructions.append("DUMP\n");
-			//rightTextArea.setText(instructions);
 			temp = mem.pop();
 			dump(mem.pop(), temp);
 			break;

@@ -65,7 +65,7 @@ public class SM extends JFrame implements ActionListener {
 	public boolean oldStyle;  // support legacy opcode numbers
 	public int DEBUG = 0;
 	public int PC = 0;
-	public long time;
+	public static Scanner sc;  // used to read the SXX file
 
 	// swing stuff
 	private static JTable table;
@@ -358,33 +358,64 @@ public class SM extends JFrame implements ActionListener {
 	public int initializeMemory(int baseAddr, String file) {
 
 		int nextFreeAddr = baseAddr;  // keep the base address around
-		Scanner sc = null;
+		sc = null;
 		try {  // open up a new scanner on the source file
 			sc = new Scanner(new BufferedReader(new FileReader(file)));
 		} catch (Exception e) {
 			errorAndExit("ERROR: " + e.getMessage());
 		}
 
-		// ############## BEGIN PARSE HEADER ##################
-		// a Header object's purpose is to parse the header of the SXX
-		// program and hold useful information
-		Header header = new Header(sc); 
-		// parse the header and give us back the scanner where the header ends
-		sc = header.parseHeader();
-		// the header will tell us if we're using old style opcode numbering
-		oldStyle = header.oldStyle;
+		/* Determine if the SXX program has a syntactically correct header, 
+		 * determine the length of the program, and will advance `sc' will point
+		 * to the opcode/data section. */
+		Header header = parseHeaderSection(baseAddr);
 
-		if (0 > header.length || // make sure the length is in range
-				header.length > mem.memorySize-baseAddr) {
-			System.err.println("Illegal length: Out of range");
-			System.err.println("  " + header.length);
-			System.exit(1);
+		/* Go through all of the opcodes in the SXX program and insert them
+		 * into low memory.  When we return from this method, `sc' will point
+		 * to the relocation section */
+		processOpcodeSection(header, nextFreeAddr);
+		
+		/* Parse the relocatable section and perform the relocation process. */
+		processRelocatableSection(baseAddr);
+
+		if (sc != null)  // close the scanner
+			sc.close();
+		
+		return baseAddr + header.entry;  // actual entry point into memory
+	}
+
+	/**
+	 * Parse the relocateable section and perform the relocation process.
+	 * 
+	 * @param baseAddr  the memory location in which to start loading opcodes
+	 */
+	private void processRelocatableSection(int baseAddr) {
+		String relocation = null;
+		
+		while (sc.hasNextLine()) {
+			// get the next opcode
+			relocation = sc.nextLine().trim();
+
+			if (isCommentOrBlankLine(relocation)) {
+				continue;
+			} else if (relocation.charAt(0) == '%') {
+				break;  // we're done reading the SXX program
+			} else {
+				insertRelocation(baseAddr, relocation);
+			}
 		}
-		if (DEBUG == 1) { System.out.println("Length: " + header.length); }
-		// ################ END PARSE HEADER #################
+	}
 
-		// ############ BEGIN INSERTING OPCODES ##############
+	/**
+	 * Parses the SXX program for opcodes and inserts them starting at low
+	 * memory.
+	 * 
+	 * @param header  the header of the SXX program
+	 * @param nextFreeAddr  the base address of the SXX program
+	 */
+	private void processOpcodeSection(Header header, int nextFreeAddr) {
 		String opcode = null;
+		
 		// keep track of how many words have been inserted into memory
 		int words = 0; 
 		int currFreeAddr;
@@ -409,27 +440,37 @@ public class SM extends JFrame implements ActionListener {
 				words += nextFreeAddr - currFreeAddr;
 			}
 		} 
-		// ############### END INSERTING OPCODES ################
+	}
 
-		// ############# BEGIN RELOCATION PROCESS ###############
-		while (sc.hasNextLine()) {  
-			opcode = sc.nextLine().trim();
+	/**
+	 * Parses the header of a SXX program.  A result of this parse will be that
+	 * we will know if the SXX program is `oldstyle' or not.  We will also
+	 * determine the length of the program.
+	 * 
+	 * @param sc  a scanner that points to the first line of the SXX program
+	 * 
+	 * @return  a scanner that points to the next location after the header
+	 */
+	private Header parseHeaderSection(int baseAddr) {
+		
+		/* A Header object's purpose is to parse the header of the SXX 
+		 * program and hold useful information. */
+		Header header = new Header(sc); 
+		// parse the header and give us back the scanner where the header ends
+		sc = header.parseHeader();
+		// the header will tell us if we're using old style opcode numbering
+		oldStyle = header.oldStyle;
 
-			if (isCommentOrBlankLine(opcode)) {
-				continue;
-			} else if (opcode.charAt(0) == '%') {
-				break;  // we're done reading the SXX program
-			} else {
-				insertRelocation(baseAddr, opcode);
-			}
-		} // ############## END RELOCATION PROCESS ################
-
-		try { }
-		finally {  // close the scanner
-			if (sc != null)
-				sc.close();
+		if (0 > header.length || // make sure the length is in range
+				header.length > mem.memorySize-baseAddr) {
+			System.err.println("Illegal length: Out of range");
+			System.err.println("  " + header.length);
+			System.exit(1);
 		}
-		return baseAddr + header.entry;  // actual entry point into memory
+		if (DEBUG == 1) { System.out.println("Length: " + header.length); }
+
+		// return the scanner so we can parse the rest of the SXX program
+		return header;
 	}
 
 	public int insertOpcode(int nextFreeAddr, String instr) {

@@ -68,7 +68,7 @@ public class SM extends JFrame implements ActionListener {
 	public static Scanner sc;  // used to read the SXX file
 
 	// swing stuff
-	private static JTable table;
+	public  static JTable table;
 	private static JTextArea outputTextArea;
 	private static JTextArea rightTextArea;
 	private static JScrollPane scrollPane;
@@ -84,7 +84,7 @@ public class SM extends JFrame implements ActionListener {
 	private static String inputLine;
 	private static Pattern digit;
 	private static Matcher m;
-	private static JTable stackTable;
+	public  static JTable stackTable;
 	private JScrollPane stackScrollPane;
 	private JScrollPane instrScrollPane;
 	private StringBuilder instructions;
@@ -298,6 +298,7 @@ public class SM extends JFrame implements ActionListener {
 		PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
 	}
 	
+	/*
 	/**
 	 * Run the instruction currently being pointed to by PC.  Useful for `step-by-step'
 	 * mode.
@@ -335,12 +336,6 @@ public class SM extends JFrame implements ActionListener {
 			} catch (Exception e) {
 				break;
 			}
-			/*
-			try {
-				Thread.sleep(10);
-			} catch(Exception e) {
-			}
-			*/
 		}
 		// print the SAX instruction
 		rightTextArea.setText(instructions.toString());

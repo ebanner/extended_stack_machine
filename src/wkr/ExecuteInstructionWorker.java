@@ -7,50 +7,74 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import gui.HaltException;
+import gui.SM;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import cli.Memory;
-import static gui.SM.table;
-import static gui.SM.stackTable;
 import cli.Read;
 
-public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
+public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 	
+	private SM sm;
 	private Memory mem;
-	private int PC;
+	public static int PC;
 	boolean oldStyle;
 	private StringBuilder instructions;
 	private String inputLine;
 	private UpdateTableRunnable utr;
+	private UpdateSPRunnable uspr;
+	private UpdateRegistersRunnable urr;
 	private final int DEBUG;
 	private static Pattern digit;
 	private static Matcher m;
 	private boolean TRACE;
+	private boolean foo = false;
 	
-	public ExecuteInstructionWorker(Memory mem, int PC, boolean oldStyle) {
-		this.mem = mem;
-		this.PC = PC;
-		this.oldStyle = oldStyle;
+	public ExecuteInstructionWorker(SM sm) {
+		this.sm = sm;
+		this.mem = sm.mem;
+		this.PC = sm.PC;
 		this.instructions = new StringBuilder("");
 		this.inputLine = "";
-		utr = new UpdateTableRunnable(this.mem);
+		utr = new UpdateTableRunnable(sm);
+		uspr = new UpdateSPRunnable(sm);
+		urr = new UpdateRegistersRunnable(sm);
 		this.DEBUG = 0;
+		digit = Pattern.compile("^[-+]?\\d+");
 	}
 
 	@Override
-	protected Integer doInBackground() throws Exception {	
+	protected Void doInBackground() {
+
+		while (true) {
+			// keep executing the instructions
+			while (sm.keepExecuting) {
+				try {
+					executeInstruction();
+				} catch (HaltException e) {  // we're done
+					return null;
+				}
+				try {  // sleep for the amount of time specified by the slider
+					Thread.sleep(sm.speed);
+				} catch (Exception e) { }
+			}
+			try { // cut down on CPU usage
+				Thread.sleep(50);
+			} catch (Exception e) { }
+		}
+	}
+	
+	public void executeInstruction() throws HaltException {
 		/**
 		 * Execute the opcode pointed at by PC.
 		 *
-		 * @param PC the program counter
-		 *
-		 * @return  the new PC
+		 * @param PC  the program counter
 		 */
 		int opcode = mem.getContents(PC);
 		PC++;  // increment PC immediately
-		if (oldStyle == true && opcode > 22) {
+		if (sm.oldStyle == true && opcode > 22) {
 			opcode++; // support legacy opcode numbering convention
 		}
 
@@ -64,7 +88,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			addr = value = mem.getContents(PC);
 			PC++;  // increment PC again
 		}
-
+	
 		switch(opcode) {  // find out the opcode and execute it
 		case BKPT:   // 0
 			/* unconditionally enter the sxx debugger */
@@ -78,7 +102,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.getContents(addr));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case PUSHV:  // 2
@@ -88,7 +112,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(value);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case PUSHS:  // 3
@@ -99,7 +123,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.getContents(num));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case PUSHX:  // 4
@@ -110,7 +134,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.getContents(num));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case POP:    // 5
@@ -121,7 +145,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.putContents(addr, temp);
 			// update tables
 			utr.setVal(addr);
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(addr);
 			break;
 		case POPS:   // 6
@@ -133,7 +157,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.putContents(num, temp);
 			// update tables
 			utr.setVal(num);
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(num);
 			break;
 		case POPX:   // 7
@@ -145,7 +169,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.putContents(num, temp);
 			// update tables
 			utr.setVal(num);
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(num);
 			break;
 		case DUPL:   // 8
@@ -155,7 +179,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.getContents(mem.getSP()));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case SWAP:   // 9
@@ -166,12 +190,12 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+1));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			mem.putContents(mem.getSP()+1, temp);
 			// update tables
 			utr.setVal(mem.getSP()+1);
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP()+1);
 			break;
 		case OVER:   // 10
@@ -181,7 +205,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.getContents(mem.getSP()+1));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case DROP:   // 11
@@ -200,17 +224,17 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+2));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			mem.putContents(mem.getSP()+2, mem.getContents(mem.getSP()+1));
 			// update tables
 			utr.setVal(mem.getSP()+2);
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP()+2);
 			mem.putContents(mem.getSP()+1, temp);
 			// update tables
 			utr.setVal(mem.getSP()+1);
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP()+1);
 			break;
 		case TSTLT:  // 13
@@ -221,7 +245,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (temp < 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case TSTLE:  // 14
@@ -232,7 +256,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (temp <= 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case TSTGT:  // 15
@@ -243,7 +267,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (temp > 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case TSTGE:  // 16
@@ -254,7 +278,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (temp >= 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case TSTEQ:  // 17
@@ -265,7 +289,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (temp == 0) ? 1 : 0);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case TSTNE:  // 18
@@ -276,7 +300,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case BNE:    // 19
@@ -309,7 +333,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			PC = addr;
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case CALLS:  // 23
@@ -321,7 +345,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			PC = temp;
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case RETURN: // 24
@@ -355,7 +379,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.pop()+temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case SUB:    // 28
@@ -366,7 +390,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.pop()-temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case MUL:    // 29
@@ -377,7 +401,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.pop() * temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case DIV:    // 30
@@ -392,7 +416,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			}
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case MOD:    // 31
@@ -407,7 +431,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			}
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case OR:     // 32
@@ -418,7 +442,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (mem.pop() != 0 || temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case AND:    // 33
@@ -429,7 +453,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (mem.pop() != 0 && temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case XOR:    // 34
@@ -440,7 +464,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case NOT:    // 35
@@ -450,7 +474,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( !(mem.pop() != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case NEG:    // 36
@@ -460,7 +484,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push( (-1)*mem.pop());
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case ADDX:   // 37
@@ -470,7 +494,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(mem.pop() + addr);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case ADDSP:  // 38
@@ -482,6 +506,9 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			//stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
 			break;
 		case READ:   // 39
+			// beware of the hackiness that lies here
+			
+			// clear out leading whitespace
 			inputLine = inputLine.replaceAll("^\\s*", "");
 			while (inputLine.equals("")) {
 				inputLine = JOptionPane.showInputDialog(null, "SXX");
@@ -506,7 +533,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			mem.push(temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case PRINT:  // 40
@@ -539,7 +566,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			inputLine = inputLine.substring(1);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeAndWait(utr);
+			EventQueue.invokeLater(utr);
 			//updateTables(mem.getSP());
 			break;
 		case PRINTC: // 42
@@ -573,33 +600,13 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 			System.err.println("  " + opcode);
 			System.exit(1);
 		}
-
-		/*
-		// update SP
-		table.setValueAt(new Integer(mem.getSP()), 0, 1);
-		stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
-
-		// update values on the stack
-		for (int i = 16383; i >= mem.getSP(); i--) {
-			table.setValueAt(new Integer(mem.getContents(i)), i, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(i)), -i+16383, 1);
-		}
-		 */
-
-		return PC; // return the new PC
-	}
-
-	@Override
-	protected void done() {
-		// update SP
-		table.setValueAt(new Integer(mem.getSP()), 0, 1);
-		stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
-
-		// update values on the stack
-		for (int i = 16383; i >= mem.getSP(); i--) {
-			table.setValueAt(new Integer(mem.getContents(i)), i, 1);
-			stackTable.setValueAt(new Integer(mem.getContents(i)), -i+16383, 1);
-		}
+		
+		// update more table entries and the SP/PC label
+		uspr.setPC(PC);
+		EventQueue.invokeLater(uspr);
+		
+		// update registers on the right
+		EventQueue.invokeLater(urr);
 	}
 
 	/**
@@ -609,8 +616,8 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 	 *
 	 */
 	public boolean opcodeRequiresParameter(int opcode) {
-		// informs the caller whether the current opcode needs to look at the
-		// next location in memory for an argument to the instruction
+		/* Informs the caller whether the current opcode needs to look at the
+		 * next location in memory for an argument to the instruction. */
 		boolean requiresParameter;
 
 		switch (opcode) {
@@ -708,6 +715,5 @@ public class ExecuteInstructionWorker extends SwingWorker<Integer, Void> {
 	public static final int TRON   =  43;
 	public static final int TROFF  =  44;
 	public static final int DUMP   =  45;
-
-
+	
 }

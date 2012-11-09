@@ -1,16 +1,14 @@
 package wkr;
 
-import static gui.SM.table;
-import static gui.SM.stackTable;
-import cli.Memory;
+import gui.SM;
 
 public class UpdateTableRunnable implements Runnable {
 	
-	private Memory mem;
+	private SM sm;
 	private int val;
 
-	public UpdateTableRunnable(Memory mem) {
-		this.mem = mem;
+	public UpdateTableRunnable(SM sm) {
+		this.sm = sm;
 	}
 	
 	public void setVal(int val) {
@@ -24,8 +22,8 @@ public class UpdateTableRunnable implements Runnable {
 	 */
 	@Override
 	public void run() {
-		table.setValueAt(new Integer(mem.getContents(val)), val, 1);
-		stackTable.setValueAt(new Integer(mem.getContents(val)), -val+16383, 1);
+		sm.table.setValueAt(new Integer(sm.mem.getContents(this.val)), this.val, 1);
+		sm.stackTable.setValueAt(new Integer(sm.mem.getContents(this.val)), -this.val+16383, 1);
 	}
 	
 }

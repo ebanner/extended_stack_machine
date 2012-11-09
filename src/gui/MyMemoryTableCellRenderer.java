@@ -5,11 +5,14 @@
 package gui;
 
 import java.awt.Color;
+
 import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import static wkr.ExecuteInstructionWorker.PC;
 
 public class MyMemoryTableCellRenderer extends DefaultTableCellRenderer {
 	
@@ -39,7 +42,7 @@ public class MyMemoryTableCellRenderer extends DefaultTableCellRenderer {
 			boolean isSelected, boolean hasFocus, int row, int col) {
 		
 		setFont(new Font("Dialog", Font.PLAIN, 12)); 
-		if (col == 0 && (Integer)value == gui.PC) {
+		if (col == 0 && (Integer)value == PC) {
 			// set the backgound if the contents of the box is equal to the PC
 			setBackground(Color.YELLOW);
 			setValue(value);

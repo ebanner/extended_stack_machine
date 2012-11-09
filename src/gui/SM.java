@@ -76,6 +76,8 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 	public boolean keepExecuting;
 	private ExecuteInstructionWorker eiw;
 	public int speed;
+	private boolean firstWorker = true;
+	private boolean firstExecution = true;
 
 	// swing stuff
 	public  JTable table;
@@ -315,9 +317,15 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 		PC = entryPoint;
 		// update the PC and SP label
 		PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
-	
-		// create a new worker to do all of the heavy lifting
-		eiw = new ExecuteInstructionWorker(this);
+		
+		if (firstWorker) {
+			// create a new worker to do all of the heavy lifting
+			eiw = new ExecuteInstructionWorker(this);
+			
+			// never create this swing worker again
+			firstWorker = false;
+		} else  // don't create a new swing worker.  just reset its fields
+			eiw.reset(this);
 	}
 
 	/**
@@ -557,7 +565,10 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 					//runASingleInstruction();
 				} else {  // run the whole darn program
 					keepExecuting = true;
-					eiw.execute();
+					if (firstExecution) {
+						eiw.execute();  // only call execute once
+						firstExecution = false;
+					}
 				}
 			} else if (name.equals("Clear")) {
 				clearALLTheThings();

@@ -44,6 +44,18 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 		this.DEBUG = 0;
 		digit = Pattern.compile("^[-+]?\\d+");
 	}
+	
+	// for when we load in a new file in the GUI
+	public void reset(SM sm) {
+		this.sm = sm;
+		this.mem = sm.mem;
+		this.PC = sm.PC;
+		this.instructions = new StringBuilder("");
+		this.inputLine = "";
+		utr = new UpdateTableRunnable(sm);
+		uspr = new UpdateSPRunnable(sm);
+		urr = new UpdateRegistersRunnable(sm);
+	}
 
 	@Override
 	protected Void doInBackground() {

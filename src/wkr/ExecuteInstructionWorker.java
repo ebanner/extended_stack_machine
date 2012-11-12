@@ -30,7 +30,6 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 	private static Pattern digit;
 	private static Matcher m;
 	private boolean TRACE;
-	private boolean foo = false;
 	
 	public ExecuteInstructionWorker(SM sm) {
 		this.sm = sm;
@@ -62,9 +61,12 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 
 		while (true) {
 			// keep executing the instructions
-			while (sm.keepExecuting) {
+			while (sm.singleStep || sm.keepExecuting) {
+				/* Only execute if we've hit the ``Run" button or the ``Single
+				 * Step" button. */
 				try {
 					executeInstruction();
+					sm.singleStep = false;  // only execute the instruction once
 				} catch (HaltException e) {  // we're done
 					return null;
 				}
@@ -76,6 +78,18 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 				Thread.sleep(50);
 			} catch (Exception e) { }
 		}
+	}
+	
+	@Override
+	/**
+	 * Updates the table and the stack when execution finishes.
+	 */
+	protected void done() {
+		uspr.setPC(PC);
+		EventQueue.invokeLater(uspr);
+
+		// update registers in the northeast text field
+		EventQueue.invokeLater(urr);
 	}
 	
 	public void executeInstruction() throws HaltException {
@@ -115,7 +129,6 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			// update tables
 			utr.setVal(mem.getSP());
 			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
 			break;
 		case PUSHV:  // 2
 			/* push(value); */
@@ -125,7 +138,6 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			// update tables
 			utr.setVal(mem.getSP());
 			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
 			break;
 		case PUSHS:  // 3
 			/* push(*pop()); */
@@ -135,8 +147,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.getContents(num));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			;;
 			break;
 		case PUSHX:  // 4
 			/* push(*(pop()+addr)); */
@@ -146,8 +157,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.getContents(num));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 1000) { EventQueue.invokeLater(utr); }
 			break;
 		case POP:    // 5
 			/* *addr=pop(); */
@@ -157,8 +167,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.putContents(addr, temp);
 			// update tables
 			utr.setVal(addr);
-			EventQueue.invokeLater(utr);
-			//updateTables(addr);
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case POPS:   // 6
 			/* temp=pop(); *pop()=temp; */
@@ -169,8 +178,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.putContents(num, temp);
 			// update tables
 			utr.setVal(num);
-			EventQueue.invokeLater(utr);
-			//updateTables(num);
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case POPX:   // 7
 			/* temp=pop(); *(pop()+addr)=temp; */
@@ -181,8 +189,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.putContents(num, temp);
 			// update tables
 			utr.setVal(num);
-			EventQueue.invokeLater(utr);
-			//updateTables(num);
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case DUPL:   // 8
 			/* push(*SP); */
@@ -191,8 +198,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.getContents(mem.getSP()));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case SWAP:   // 9
 			/* temp=*SP; *SP=*(SP+1); *(SP+1)=temp; */
@@ -202,13 +208,12 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+1));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			//updateTables(mem.getSP());
 			mem.putContents(mem.getSP()+1, temp);
 			// update tables
 			utr.setVal(mem.getSP()+1);
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP()+1);
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case OVER:   // 10
 			/* push(*(SP+1)); */
@@ -217,16 +222,13 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.getContents(mem.getSP()+1));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case DROP:   // 11
 			/* SP++; */
 			if (DEBUG == 1) { System.out.println("DROP"); }
 			instructions.append("DROP\n");
 			mem.setSP(mem.getSP()+1);
-			//table.setValueAt(new Integer(mem.getSP()), 0, 1);
-			//stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
 			break;
 		case ROT:    // 12
 			/* temp=*SP; *SP=*(SP+2); *(SP+2)=*(SP+1); *(SP+1)=temp; */
@@ -236,18 +238,15 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.putContents(mem.getSP(), mem.getContents(mem.getSP()+2));
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			mem.putContents(mem.getSP()+2, mem.getContents(mem.getSP()+1));
 			// update tables
 			utr.setVal(mem.getSP()+2);
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP()+2);
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			mem.putContents(mem.getSP()+1, temp);
 			// update tables
 			utr.setVal(mem.getSP()+1);
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP()+1);
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case TSTLT:  // 13
 			/* TSTLT       --> temp=pop(); push((temp<0)?1:0); */
@@ -257,8 +256,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (temp < 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case TSTLE:  // 14
 			/* TSTLE       --> temp=pop(); push((temp<=0)?1:0); */
@@ -268,8 +266,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (temp <= 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case TSTGT:  // 15
 			/* temp=pop(); push((temp>0)?1:0); */
@@ -279,8 +276,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (temp > 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case TSTGE:  // 16
 			/* temp=pop(); push((temp>=0)?1:0); */
@@ -290,8 +286,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (temp >= 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case TSTEQ:  // 17
 			/* temp=pop(); push((temp==0)?1:0); */
@@ -301,8 +296,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (temp == 0) ? 1 : 0);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case TSTNE:  // 18
 			/* temp=pop(); push((temp!=0)?1:0); */
@@ -312,8 +306,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case BNE:    // 19
 			/* if (pop()!=0) PC=addr; */
@@ -345,8 +338,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			PC = addr;
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case CALLS:  // 23
 			/* temp=pop(); push(PC); PC=temp; */
@@ -357,8 +349,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			PC = temp;
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case RETURN: // 24
 			/* PC=pop(); */
@@ -373,8 +364,6 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			temp = mem.pop();
 			//if (DEBUG == 1) { System.out.println("RETN:temp = " + temp); }
 			mem.setSP(mem.getSP()+value);
-			//table.setValueAt(new Integer(mem.getSP()), 0, 1);
-			//stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
 			PC = temp;
 			break;
 		case HALT:   // 26
@@ -391,8 +380,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.pop()+temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case SUB:    // 28
 			/* temp=pop(); push( pop() - temp ); */
@@ -402,8 +390,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.pop()-temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case MUL:    // 29
 			/* temp=pop(); push( pop() * temp ); */
@@ -413,8 +400,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.pop() * temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case DIV:    // 30
 			/* temp=pop(); push( pop() / temp ); */
@@ -428,8 +414,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			}
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case MOD:    // 31
 			/* temp=pop(); push( pop() % temp ); */
@@ -443,8 +428,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			}
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case OR:     // 32
 			/* temp=pop(); push( pop() || temp ); */
@@ -454,8 +438,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (mem.pop() != 0 || temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case AND:    // 33
 			/* temp=pop(); push( pop() && temp ); */
@@ -465,8 +448,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (mem.pop() != 0 && temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case XOR:    // 34
 			/* temp=pop(); push( pop() xor temp ); [see below] */
@@ -476,8 +458,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (mem.pop() != 0 ^ temp != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case NOT:    // 35
 			/* push( !pop() ); */
@@ -486,8 +467,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( !(mem.pop() != 0) ? 1 : 0 );
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case NEG:    // 36
 			/* push( -pop() ); */
@@ -496,8 +476,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push( (-1)*mem.pop());
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case ADDX:   // 37
 			/* push( pop()+addr ); */
@@ -506,16 +485,13 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(mem.pop() + addr);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case ADDSP:  // 38
 			/* SP += value; */
 			if (DEBUG == 1) { System.out.println("ADDSP " + value); }
 			instructions.append("ADDSP " + value + "\n");
 			mem.setSP(mem.getSP()+value);
-			//table.setValueAt(new Integer(mem.getSP()), 0, 1);
-			//stackTable.setValueAt(new Integer(mem.getSP()), -0+16383, 1);
 			break;
 		case READ:   // 39
 			// beware of the hackiness that lies here
@@ -545,8 +521,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.push(temp);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case PRINT:  // 40
 			/* print pop() in %d format */
@@ -578,8 +553,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			inputLine = inputLine.substring(1);
 			// update tables
 			utr.setVal(mem.getSP());
-			EventQueue.invokeLater(utr);
-			//updateTables(mem.getSP());
+			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
 			break;
 		case PRINTC: // 42
 			/* print pop() in %c format */
@@ -607,18 +581,21 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			temp = mem.pop();
 			dump(mem.pop(), temp);
 			break;
-		default:
+		default:  // not a valid opcode
 			System.err.println("ERROR: Invalid opcode");
 			System.err.println("  " + opcode);
 			System.exit(1);
 		}
-		
-		// update more table entries and the SP/PC label
-		uspr.setPC(PC);
-		EventQueue.invokeLater(uspr);
-		
-		// update registers on the right
-		EventQueue.invokeLater(urr);
+
+		// only update tables if we are not at the maximum speed
+		if (sm.speed != 0) {
+			// update more table entries and the SP/PC label
+			uspr.setPC(PC);
+			EventQueue.invokeLater(uspr);
+
+			// update registers in the northeast text field
+			EventQueue.invokeLater(urr);
+		}
 	}
 
 	/**
@@ -671,6 +648,11 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			System.out.println(mem.getContents(pop));
 	}
 
+	/**
+	 * Print error message and exit unsuccessfully.
+	 * 
+	 * @param error  the error message that is sent to STDERR
+	 */
 	private void errorAndExit(String error) {
 		System.err.println(error);
 		System.exit(1);

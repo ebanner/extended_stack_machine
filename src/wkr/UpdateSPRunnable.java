@@ -33,8 +33,8 @@ public class UpdateSPRunnable implements Runnable {
 		// repaint the table
 		sm.table.repaint();
 		sm.stackTable.repaint();
-		sm.scrollPane.getVerticalScrollBar().setValue((int)((PC-16)/0.0625));
-		sm.stackScrollPane.getVerticalScrollBar().setValue((int)((sm.mem.getSP()-16383-8)/0.0625));
+		sm.scrollPane.getVerticalScrollBar().setValue((int)((PC-16)*16));
+		sm.stackScrollPane.getVerticalScrollBar().setValue((int)((sm.mem.getSP()-16383-8)*8));
 	}
 
 }

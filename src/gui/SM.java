@@ -74,6 +74,7 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 	public int PC = 0;
 	public Scanner sc;  // used to read the SXX file
 	public boolean keepExecuting;
+	public boolean singleStep;
 	private ExecuteInstructionWorker eiw;
 	public int speed;
 	private boolean firstWorker = true;
@@ -196,15 +197,7 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 		runButton = new JButton("Run");
 		runButton.setName("Run");
 		runButton.addActionListener(this);
-		toolBar.add(runButton);
-		
-		/*
-		// button to single step through an SXX program
-		singleStepButton = new JButton("Single Step");
-		singleStepButton.setName("Single Step");
-		toolBar.add(singleStepButton);
-		singleStepButton.addActionListener(this);	
-		*/
+		toolBar.add(runButton);	
 		
 		// button to reset both tables
 		clearButton = new JButton("Clear");
@@ -216,6 +209,12 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 		pauseButton.setName("Pause");
 		pauseButton.addActionListener(this);
 		toolBar.add(pauseButton);
+		
+		// button to single step through an SXX program
+		singleStepButton = new JButton("Step");
+		singleStepButton.setName("Single Step");
+		toolBar.add(singleStepButton);
+		singleStepButton.addActionListener(this);
 		
 		// add a slider so the user can determine how fast SXX executes
 		slider = new JSlider(JSlider.HORIZONTAL, 0, 1000, 500);
@@ -306,7 +305,8 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 	 */
 	public void run(String file) {
 		// start the PC at a random spot between 16 and 999
-	    int baseAddr = new Random().nextInt(984) + 16;
+	    //int baseAddr = new Random().nextInt(984) + 16;
+		int baseAddr = 16;
 		if (DEBUG == 1) {  System.out.println("Base address: " + baseAddr); }
 
 		// insert opcodes and data into the stack machine and perform
@@ -318,9 +318,10 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 		// update the PC and SP label
 		PCLabel.setText("SP:"+mem.getSP()+" | PC:"+PC + " ");
 		
-		if (firstWorker) {
+		if (firstWorker) {  // only create the thread the first time through
 			// create a new worker to do all of the heavy lifting
 			eiw = new ExecuteInstructionWorker(this);
+			eiw.execute();
 			
 			// never create this swing worker again
 			firstWorker = false;
@@ -559,27 +560,27 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 			
 			if (name.equals("Single Step") && ! file.equals("")) {
 				// just run one instruction
-				//runASingleInstruction();
+				singleStep = true;
 			} else if (name.equals("Run") && ! file.equals("")) {
-				if (stepRadioButton.isSelected()) {
-					//runASingleInstruction();
-				} else {  // run the whole darn program
-					keepExecuting = true;
-					if (firstExecution) {
-						eiw.execute();  // only call execute once
-						firstExecution = false;
-					}
-				}
+				keepExecuting = true;
 			} else if (name.equals("Clear")) {
 				clearALLTheThings();
 			} else if (name.equals("Pause")) {
-				/* If we're executing, stop executing.
-				 * If we're not executing, continue executing. */
-				keepExecuting = ! keepExecuting;
-				if (button.getText().equals("Pause")) {
+				/* Decide whether to flip to ``Pause" button to ``Resume" or
+				 * vice-versa. */
+				if (button.getText().equals("Pause") && keepExecuting) {
+					// button says ``Pause" and we are executing
 					button.setText("Resume");
-				} else {  // button says "Resume"
+					/* If we're executing, stop executing.
+					 * If we're not executing, continue executing. */
+					keepExecuting = ! keepExecuting;
+				} else if (button.getText().equals("Resume") 
+						&& ! keepExecuting) {
+					// button says ``Resume" and we are not executing
 					button.setText("Pause");
+					/* If we're executing, stop executing.
+					 * If we're not executing, continue executing. */
+					keepExecuting = ! keepExecuting;
 				}
 			}
 		}
@@ -631,7 +632,6 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 			// change the speed of execution
 			speed = -s.getValue() + 1000;
 		}
-		
 	}
 
 }

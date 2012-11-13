@@ -1,3 +1,8 @@
+/**
+ * This class defines a Runnable objects that updates values in both tables on
+ * the Event Dispatch Thread.
+ */
+
 package wkr;
 
 import gui.SM;
@@ -22,8 +27,10 @@ public class UpdateTableRunnable implements Runnable {
 	 */
 	@Override
 	public void run() {
-		sm.table.setValueAt(new Integer(sm.mem.getContents(this.val)), this.val, 1);
-		sm.stackTable.setValueAt(new Integer(sm.mem.getContents(this.val)), -this.val+16383, 1);
+		sm.table.setValueAt(new Integer(sm.mem.getContents(this.val)),
+				this.val, 1);
+		sm.stackTable.setValueAt(new Integer(sm.mem.getContents(this.val)),
+				-this.val + 16383, 1);
 	}
 	
 }

@@ -1,3 +1,10 @@
+/**
+ * This class defines an Swing Worker that executes in the background and does
+ * not interfere with the action events that the GUI must catch.  Its main
+ * purpose is to execute instructions on a stack machine that has already been
+ * populated with opcodes and data.
+ */
+
 package wkr;
 
 import java.awt.EventQueue;
@@ -57,6 +64,10 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 	}
 
 	@Override
+	/**
+	 * Run instructions depending on whether the user has clicked the ``Run" or
+	 * ``Single Step" button.
+	 */
 	protected Void doInBackground() {
 
 		while (true) {
@@ -92,6 +103,12 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 		EventQueue.invokeLater(urr);
 	}
 	
+	/**
+	 * Execute a single instruction and update the tables if we're not at the
+	 * maximum speed.
+	 * 
+	 * @throws HaltException  when a halt opcode is reached
+	 */
 	public void executeInstruction() throws HaltException {
 		/**
 		 * Execute the opcode pointed at by PC.
@@ -109,8 +126,8 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 		addr = value = num = 0;
 
 		if (opcodeRequiresParameter(opcode)) {
-			// if it's an instruction that needs an `addr' or `value'
-			// parameter, save that argument
+			/* If it's an instruction that needs an `addr' or `value' parameter,
+			 * save that argument. */
 			addr = value = mem.getContents(PC);
 			PC++;  // increment PC again
 		}
@@ -209,7 +226,6 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			// update tables
 			utr.setVal(mem.getSP());
 			if (sm.speed != 0) { EventQueue.invokeLater(utr); }
-			//updateTables(mem.getSP());
 			mem.putContents(mem.getSP()+1, temp);
 			// update tables
 			utr.setVal(mem.getSP()+1);
@@ -494,7 +510,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 			mem.setSP(mem.getSP()+value);
 			break;
 		case READ:   // 39
-			// beware of the hackiness that lies here
+			/* Beware of the hackiness that lies here. */
 			
 			// clear out leading whitespace
 			inputLine = inputLine.replaceAll("^\\s*", "");
@@ -601,7 +617,7 @@ public class ExecuteInstructionWorker extends SwingWorker<Void, Void> {
 	/**
 	 * Returns true if opcode requires a parameter.
 	 *
-	 * @param opcode the opcode
+	 * @param opcode  the opcode you wish to determine if requres a parameter
 	 *
 	 */
 	public boolean opcodeRequiresParameter(int opcode) {

@@ -1,3 +1,8 @@
+/**
+ * This class defines a Runnable objects that updates values the register values 
+ * on the Event Dispatch Thread.
+ */
+
 package wkr;
 
 import gui.SM;

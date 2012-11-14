@@ -26,7 +26,7 @@ public class UpdateRegistersRunnable implements Runnable {
 	@Override
 	public void run() {
 		// get rid of the old register values
-		s = new StringBuilder("``Registers:\"\n");
+		s = new StringBuilder("");
 		
 		for (int i = 0; i < 17; i++) {
 			sep = (i < 10) ? "  " : "";

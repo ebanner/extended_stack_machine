@@ -205,6 +205,7 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 		clearButton.addActionListener(this);
 		toolBar.add(clearButton);
 		
+		// button to pause and resume execution
 		pauseButton = new JButton("Pause");
 		pauseButton.setName("Pause");
 		pauseButton.addActionListener(this);
@@ -276,8 +277,9 @@ public class SM extends JFrame implements ActionListener, ChangeListener {
 		
 		// create the area to write the SAX instructions to
 		rightTextArea = new JTextArea();
-		instrScrollPane = new JScrollPane(rightTextArea);
-		northPanel.add(instrScrollPane, BorderLayout.CENTER);
+		//instrScrollPane = new JScrollPane(rightTextArea);
+		//northPanel.add(instrScrollPane, BorderLayout.CENTER);
+		northPanel.add(rightTextArea, BorderLayout.CENTER);
 
 		// southeast panel
 		southPanel = new JPanel();

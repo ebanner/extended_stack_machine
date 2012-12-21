@@ -1,9 +1,5 @@
 This project entails me, Edward Banner, porting a stack-based machine emulator
 written by Timothy V. Fossum from C++ to Java and building a GUI front end that
-will allow the user to visually interact with a program during execution.  This
-is my first experience ``porting" software, so this will most likely be an
-entire rewrite due to my inexperience.  That being said, I will employ Dr.
-Fossum's techniques in my code where necessary.
 
 
 Edward

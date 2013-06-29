@@ -27,7 +27,7 @@ When a program is finished executing and you want to run another program, you
 must kill the entire XSM program and start it over. This issue does not look
 like it will be fixed in the foreseeable future.
 
-eXtended Stack Machine in Action
+Screenshots
 ================================
 
 ![XSM in action](https://raw.github.com/ebanner/extended_stack_machine/master/img/xsm.png "Screenshot")
@@ -41,4 +41,5 @@ Machine. If not for him, such a creation would not exist.
 Authors
 =======
 Edward Banner
+
 Dr. Fossum

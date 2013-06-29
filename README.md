@@ -16,8 +16,8 @@ Traverse into the `jar` directory and execute the following command:
 
     $ java -jar SM.jar
 
-You can then load one of the prewritten programs in the `test` directory. The
-eXtended Stack Machine will recognize **.sxx** programs only.
+You can then load one of the prewritten programs in the `test/`. The eXtended
+Stack Machine will recognize **.sxx** programs only.
 
 Known Bugs
 ==========

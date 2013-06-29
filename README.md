@@ -6,9 +6,9 @@ V. Fossum for educational purposes. For more information about the eXtended
 Stack Machine, visit Dr. Fossum's man page in the doc/ directory of this
 project.
 
-Provided here is a working implemention of the eXtended Stack Machine with a GUI
-front end built with the Java Swing library to provide students with the ability
-to step through and examine a running program.
+Provided here is an implemention of the eXtended Stack Machine with a GUI front
+end built with the Java Swing widget toolkit. Such a front end provides students
+with the ability to step through and examine a running program.
 
 Running a Program
 =================

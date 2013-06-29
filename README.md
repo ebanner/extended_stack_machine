@@ -10,4 +10,4 @@ Provided here is a working implemention of the eXtended Stack Machine with a GUI
 front end built with the Java Swing library to provide students with the ability
 to step through and examine a running program.
 
-![XSM in action](https://github.com/ebanner/extended_stack_machine/blob/master/img/xsm.png "Screenshot")
+![XSM in action](https://raw.github.com/ebanner/extended_stack_machine/blob/master/img/xsm.png "Screenshot")

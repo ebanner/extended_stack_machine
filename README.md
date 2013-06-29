@@ -2,9 +2,8 @@ eXtended Stack Machine
 ======================
 
 The eXtended Stack Machine is a simplified CPU architecture created by Timothy
-V. Fossum for educational purposes. For more information about the eXtended
-Stack Machine, visit Dr. Fossum's man page in the doc/ directory of this
-project.
+V. Fossum for educational purposes. For details about the eXtended Stack
+Machine, visit Dr. Fossum's man page in the doc/ directory of this project.
 
 Provided here is an implemention of the eXtended Stack Machine with a GUI front
 end built with the Java Swing widget toolkit. Such a front end provides students

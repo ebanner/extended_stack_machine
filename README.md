@@ -3,7 +3,7 @@ eXtended Stack Machine
 
 The eXtended Stack Machine is a simplified CPU architecture created by Timothy
 V. Fossum for educational purposes. For details about the eXtended Stack
-Machine, visit Dr. Fossum's man page in the doc/ directory of this project.
+Machine, visit Dr. Fossum's man page in the `doc/`.
 
 Provided here is an implemention of the eXtended Stack Machine with a GUI front
 end built with the Java Swing widget toolkit. Such a front end provides students
@@ -12,12 +12,12 @@ with the ability to step through and examine a running program.
 Running a Program
 =================
 
-Traverse into the `jar` directory and execute the following command:
+Traverse into `jar/` and execute the following command:
 
     $ java -jar SM.jar
 
-You can then load one of the prewritten programs in the `test/`. The eXtended
-Stack Machine will recognize **.sxx** programs only.
+You can then load one of the prewritten programs in `test/`. The eXtended Stack
+Machine will recognize **.sxx** programs only.
 
 Known Bugs
 ==========
